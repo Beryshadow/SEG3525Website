@@ -35,3 +35,11 @@ Les différentes sections sont séparées par des titres qui utilisent ma couleu
 
 **L'absence d'images (Choix délibéré)**
 Vous remarquerez qu'il n'y a pas d'images dans les pages dédiées aux études de cas. Je tiens à préciser que c'est un choix de design 100% intentionnel et absolument pas un manque d'effort de ma part. Je voulais maintenir cette esthétique très clean et minimaliste, où la structure de la page et la typographie suffisent à communiquer l'information sans surcharger l'interface visuellement.
+
+## 5. Utilisation d'outils externes et d'IA
+
+J'ai utilisé Google de manière approfondie pour trouver des solutions à certains défis techniques rencontrés en cours de développement. Par conséquent, les résultats de recherche m'ont parfois fourni des extraits de code (*code snippets*) que j'ai adaptés et intégrés pour résoudre ces blocages. Il y a donc une partie de la logique de mon code qui s'inspire ou provient de ressources en ligne.
+
+Cependant, je tiens à souligner que toutes les décisions relatives au design, à l'esthétique générale et à la disposition (*layout*) du site sont entièrement les miennes.
+
+Ce rapport a aussi été corrigé avec Grammarly.
