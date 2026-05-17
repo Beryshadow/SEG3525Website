@@ -1,0 +1,215 @@
+/* 
+ * I got the neumorphism shadow values generated via neumorphism.io
+ */
+
+:root {
+
+  --grad-angle: 145deg;
+  --shadow-x: 12px;
+  --shadow-y: 12px;
+  --light-x: -8px;
+  --light-y: -8px;
+
+  --bg-main: #182429;
+  --accent: #2074A4;
+  --text-main: #BFBDB6;
+  --text-muted: #738290;
+  --shadow-d: rgba(0, 0, 0, 0.5);
+  --shadow-d-strong: rgba(0, 0, 0, 0.7);
+  --shadow-l: rgba(255, 255, 255, 0.06);
+
+  --shadow-l: color-mix(in srgb, var(--bg-main) 95%, white);
+  --shadow-l: rgba(255, 255, 255, 0.05);
+  --border-d: rgba(0, 0, 0, 0.4);
+  --grad-l: rgba(255, 255, 255, 0.02);
+  --grad-d: rgba(0, 0, 0, 0.07);
+}
+
+.neu-image {
+  box-shadow: 18px 18px 30px var(--shadow-d),
+    -12px -12px 30px var(--shadow-l) !important;
+}
+
+.neu-image::before {
+  box-shadow: none !important;
+}
+
+.light-mode {
+
+  --bg-main: #e0e5ec;
+  --accent: #1d6a96;
+  --text-main: #4a5568;
+  --text-muted: #718096;
+  --shadow-d: rgba(163, 177, 198, 0.6);
+  --shadow-d-strong: rgba(163, 177, 198, 0.8);
+  --shadow-l: rgba(255, 255, 255, 0.8);
+  --border-l: rgba(255, 255, 255, 0.5);
+  --border-d: rgba(163, 177, 198, 0.3);
+  --grad-l: rgba(255, 255, 255, 0.4);
+  --grad-d: rgba(163, 177, 198, 0.1);
+}
+
+html[lang="en"] .lang-fr {
+  display: none !important;
+}
+
+html[lang="fr"] .lang-en {
+  display: none !important;
+}
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin-bottom: 1rem;
+  font-weight: 700;
+  color: var(--accent);
+  transition: color 0.5s ease;
+}
+
+p {
+  margin-bottom: 1rem;
+  line-height: 1.6;
+  color: var(--text-main);
+}
+
+a {
+  text-decoration: none !important;
+}
+
+.neu-panel {
+  border-radius: 2rem;
+  background-color: var(--bg-main);
+  background-image: linear-gradient(var(--grad-angle), var(--grad-l), var(--grad-d));
+  box-shadow: var(--shadow-x) var(--shadow-y) 24px var(--shadow-d),
+    var(--light-x) var(--light-y) 24px var(--shadow-l);
+  transition: background-color 0.5s ease, box-shadow 0.5s ease, border-color 0.5s ease;
+}
+
+.neu-pressed {
+  border-radius: 1.5rem;
+  background-color: var(--bg-main);
+  box-shadow: inset calc(var(--shadow-x) * 0.8) calc(var(--shadow-y) * 0.8) 20px var(--shadow-d),
+    inset calc(var(--light-x) * 0.8) calc(var(--light-y) * 0.8) 20px var(--shadow-l);
+  transition: background-color 0.5s ease, box-shadow 0.5s ease, border-color 0.5s ease;
+}
+
+.neu-btn {
+  position: relative;
+  border-radius: 1.25rem;
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), color 0.4s ease, border-color 0.5s ease;
+  color: var(--text-main);
+  background: transparent;
+  z-index: 1;
+}
+
+.neu-btn>* {
+  position: relative;
+  z-index: 2;
+}
+
+.neu-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  z-index: -1;
+  background-color: var(--bg-main);
+  background-image: linear-gradient(var(--grad-angle), var(--grad-l), var(--grad-d));
+  box-shadow: calc(var(--shadow-x) * 0.6) calc(var(--shadow-y) * 0.6) 14px var(--shadow-d),
+    calc(var(--light-x) * 0.6) calc(var(--light-y) * 0.6) 14px var(--shadow-l);
+  transition: opacity 0.5s ease, background-color 0.5s ease, box-shadow 0.5s ease;
+}
+
+.neu-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  z-index: -1;
+  opacity: 0;
+  background-color: var(--bg-main);
+  box-shadow: inset calc(var(--shadow-x) * 0.4) calc(var(--shadow-y) * 0.4) 10px var(--shadow-d),
+    inset calc(var(--light-x) * 0.4) calc(var(--light-y) * 0.4) 10px var(--shadow-l);
+  transition: opacity 0.5s ease, background-color 0.5s ease, box-shadow 0.5s ease;
+}
+
+.neu-btn:hover,
+.neu-btn.active {
+  color: color-mix(in srgb, var(--accent), var(--bg-main) 30%);
+  transform: translateY(2px) scale(0.98);
+}
+
+.neu-btn:hover::before,
+.neu-btn.active::before {
+  opacity: 0;
+}
+
+.neu-btn:hover::after,
+.neu-btn.active::after {
+  opacity: 1;
+}
+
+.neu-card {
+  position: relative;
+  border-radius: 2rem;
+  background: transparent;
+  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.5s ease;
+  z-index: 1;
+}
+
+.neu-card>* {
+  position: relative;
+  z-index: 2;
+}
+
+.neu-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  z-index: -1;
+  background-color: var(--bg-main);
+  background-image: linear-gradient(var(--grad-angle), var(--grad-l), var(--grad-d));
+  box-shadow: var(--shadow-x) var(--shadow-y) 24px var(--shadow-d),
+    var(--light-x) var(--light-y) 24px var(--shadow-l);
+  transition: opacity 0.5s ease, background-color 0.5s ease, box-shadow 0.5s ease;
+}
+
+.neu-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  z-index: -1;
+  opacity: 0;
+  background-color: var(--bg-main);
+  background-image: linear-gradient(var(--grad-angle), var(--grad-l), var(--grad-d));
+  box-shadow: calc(var(--shadow-x) * 1.8) calc(var(--shadow-y) * 1.8) 40px var(--shadow-d-strong),
+    calc(var(--light-x) * 1.8) calc(var(--light-y) * 1.8) 40px var(--shadow-l);
+  transition: opacity 0.5s ease, background-color 0.5s ease, box-shadow 0.5s ease;
+}
+
+.neu-card:hover {
+  transform: translateY(-8px) scale(1.02);
+}
+
+.neu-card:hover::before {
+  opacity: 0;
+}
+
+.neu-card:hover::after {
+  opacity: 1;
+}
+
+.collapse.show {
+  visibility: visible !important;
+}
