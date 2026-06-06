@@ -1,0 +1,30 @@
+[language-server.lsp-ai]
+command = 'lsp-ai'
+
+[language-server.lsp-ai.config.memory]
+file_store = {}
+
+[language-server.lsp-ai.config.models.model1]
+type = 'ollama'
+generate_endpoint = 'http://localhost:11434/api/generate'
+chat_endpoint = 'http://localhost:11434/api/chat'
+model = 'qwen2.5-coder:7b-base'
+
+[language-server.lsp-ai.config.completion]
+model = 'model1'
+
+[language-server.lsp-ai.config.completion.parameters]
+max_tokens = 30
+max_context = 300
+
+[language-server.lsp-ai.config.completion.parameters.options]
+num_predict = 30
+temperature = 0.1
+
+[[language-server.lsp-ai.config.completion.chat_messages]]
+role = 'system'
+content = 'You are an expert AI programming assistant. You must ONLY output the raw code that perfectly completes the current line or block. Keep your completions short, concise, and highly relevant. Do NOT write large code blocks unless necessary. Do NOT wrap the code in markdown blocks. Do NOT include any explanations.'
+
+[[language-server.lsp-ai.config.completion.chat_messages]]
+role = 'user'
+content = '{CODE}'

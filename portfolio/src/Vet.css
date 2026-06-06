@@ -1,0 +1,145 @@
+.vet-route {
+  --accent: #6fb58e;
+}
+
+.vet-route.light-mode {
+  --accent: #1a6f54;
+}
+
+.animate-fade-in {
+  animation: fadeInSlide 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  backface-visibility: hidden;
+}
+
+.form-row-track {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.slide-item {
+  transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+  flex: 0 0 50%;
+}
+
+.slide-item.centered {
+  margin-left: 25%;
+  margin-right: 25%;
+}
+
+.email-slide-container {
+  transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+  overflow: hidden;
+  max-width: 0;
+  opacity: 0;
+  flex: 0 0 0;
+  min-width: 0;
+}
+
+.email-slide-container.is-active {
+  max-width: 50%;
+  flex: 0 0 50%;
+  opacity: 1;
+  padding-left: 1.5rem;
+}
+
+.email-inner-wrapper {
+  width: 100%;
+  min-width: 250px;
+}
+
+.neu-checkbox {
+  position: absolute;
+  opacity: 0;
+  width: 1.75rem;
+  height: 1.75rem;
+  cursor: pointer;
+  z-index: 5;
+  margin: 0;
+}
+
+.neu-checkbox-frame {
+  display: block;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 0.5rem;
+  background-color: var(--bg-main);
+  position: relative;
+  z-index: 1;
+  box-shadow: inset calc(var(--shadow-x) * 0.4) calc(var(--shadow-y) * 0.4) 8px var(--shadow-d),
+    inset calc(var(--light-x) * 0.4) calc(var(--light-y) * 0.4) 8px var(--shadow-l);
+  transition: background-color 0.4s ease, box-shadow 0.4s ease, transform 0.2s ease;
+}
+
+.neu-checkbox:active+.neu-checkbox-frame {
+  transform: scale(0.92);
+}
+
+.neu-checkbox:checked+.neu-checkbox-frame {
+  background-color: var(--accent);
+  box-shadow: calc(var(--shadow-x) * 0.3) calc(var(--shadow-y) * 0.3) 8px var(--shadow-d),
+    calc(var(--light-x) * 0.3) calc(var(--light-y) * 0.3) 8px var(--shadow-l),
+    0 0 12px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+.neu-checkbox-frame::after {
+  content: '';
+  position: absolute;
+  top: 45%;
+  left: 50%;
+  width: 0.35rem;
+  height: 0.65rem;
+  border: solid #ffffff;
+  border-width: 0 2.5px 2.5px 0;
+  transform: translate(-50%, -50%) rotate(45deg) scale(0);
+  opacity: 0;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease;
+}
+
+.neu-checkbox:checked+.neu-checkbox-frame::after {
+  opacity: 1;
+  transform: translate(-50%, -50%) rotate(45deg) scale(1.1);
+}
+
+@keyframes fadeInSlide {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 767px) {
+
+  /* Stack the row elements vertically */
+  .form-row-track {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  /* Force full width on mobile */
+  .slide-item,
+  .email-slide-container.is-active,
+  .email-slide-container {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+
+  /* Ensure the checkbox stays centered or full-width on mobile */
+  .slide-item.centered {
+    margin: 0 !important;
+  }
+
+  /* Reset padding on mobile for better alignment */
+  .email-slide-container.is-active {
+    padding-left: 0 !important;
+  }
+}
