@@ -4,7 +4,7 @@ import '../Vet.css';
 import { useSharedLogic } from '../shared';
 import { useNavigate } from 'react-router-dom';
 import SVG from 'react-inlinesvg';
-import { TRANSLATIONS, SERVICES_DATA, TEAM_DATA, USER_DATA, CATEGORIES } from '../vetData';
+import { TRANSLATIONS, SERVICES_DATA, TEAM_DATA, USER_DATA, CATEGORIES } from '../data/vetData';
 
 export default function VetPortal() {
   const [cart, setCart] = useState([]);
@@ -87,12 +87,12 @@ export default function VetPortal() {
   const handleAddToCart = (service) => {
     const chosenDate = selectedDates[service.id];
     const chosenTime = selectedTimes[service.id];
-    
+
     if (!chosenDate) {
       showToast(TRANSLATIONS[currentLangKey].alertDate);
       return;
     }
-    
+
     const cartItemId = `${service.id}-${Date.now()}`;
     const item = {
       ...service,
@@ -100,7 +100,7 @@ export default function VetPortal() {
       selectedDate: chosenDate,
       selectedTime: chosenTime
     };
-    
+
     setCart(prev => [...prev, item]);
   };
 
@@ -126,6 +126,14 @@ export default function VetPortal() {
   const filteredServices = activeFilter === 'All'
     ? SERVICES_DATA
     : SERVICES_DATA.filter(srv => srv.tags.includes(activeFilter));
+
+  const navItems = [
+    { id: 'about', icon: 'fa-clinic-medical', label: t.navClinic },
+    { id: 'team', icon: 'fa-users-cog', label: t.navTeam },
+    { id: 'services', icon: 'fa-hand-holding-heart', label: t.navServices },
+    { id: 'booking', icon: 'fa-calendar-check', label: t.navBooking },
+    { id: 'contact', icon: 'fa-phone', label: t.navContact }
+  ];
 
   return (
     <div className={`${theme === 'light' ? 'light-mode' : ''} vet-route`}>
@@ -197,13 +205,7 @@ export default function VetPortal() {
             <div ref={menuRef} className="mt-2 w-full d-lg-none">
               <div className="neu-pressed p-4 w-full">
                 <ul className="navbar-nav gap-3">
-                  {[
-                    { id: 'about', icon: 'fa-clinic-medical', label: t.navClinic },
-                    { id: 'team', icon: 'fa-users-cog', label: t.navTeam },
-                    { id: 'services', icon: 'fa-hand-holding-heart', label: t.navServices },
-                    { id: 'booking', icon: 'fa-calendar-check', label: t.navBooking },
-                    { id: 'contact', icon: 'fa-phone', label: t.navContact }
-                  ].map((item) => (
+                  {navItems.map((item) => (
                     <li key={item.id} className="nav-item">
                       <a
                         href={`#${item.id}`}
@@ -242,54 +244,21 @@ export default function VetPortal() {
                 </div>
 
                 <nav className="flex flex-col gap-4">
-                  <button
-                    type="button"
-                    onClick={() => handleScrollToSection('about')}
-                    className={`neu-btn p-4 flex items-center gap-4 text-base font-bold text-left w-full ${activeSection === 'about' ? 'active' : ''}`}
-                  >
-                    <i className="fas fa-clinic-medical w-5 text-accent"></i>
-                    <span>{t.navClinic}</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleScrollToSection('team')}
-                    className={`neu-btn p-4 flex items-center gap-4 text-base font-bold text-left w-full ${activeSection === 'team' ? 'active' : ''}`}
-                  >
-                    <i className="fas fa-users-cog w-5 text-accent"></i>
-                    <span>{t.navTeam}</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleScrollToSection('services')}
-                    className={`neu-btn p-4 flex items-center gap-4 text-base font-bold text-left w-full ${activeSection === 'services' ? 'active' : ''}`}
-                  >
-                    <i className="fas fa-hand-holding-heart w-5 text-accent"></i>
-                    <span>{t.navServices}</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleScrollToSection('booking')}
-                    className={`neu-btn p-4 flex items-center gap-4 text-base font-bold text-left w-full ${activeSection === 'booking' ? 'active' : ''}`}
-                  >
-                    <i className="fas fa-calendar-check w-5 text-accent"></i>
-                    <span>{t.navBooking}</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleScrollToSection('contact')}
-                    className={`neu-btn p-4 flex items-center gap-4 text-base font-bold text-left w-full ${activeSection === 'contact' ? 'active' : ''}`}
-                  >
-                    <i className="fas fa-phone w-5 text-accent"></i>
-                    <span>{t.navContact}</span>
-                  </button>
+                  {navItems.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => handleScrollToSection(item.id)}
+                      className={`neu-btn p-4 flex items-center gap-4 text-base font-bold text-left w-full ${activeSection === item.id ? 'active' : ''}`}
+                    >
+                      <i className={`fas ${item.icon} w-5 text-accent`}></i>
+                      <span>{item.label}</span>
+                    </button>
+                  ))}
                 </nav>
+
               </div>
             </div>
-            
             <div className="col-lg-9 pt-6">
               <section id="about" className="flex flex-col justify-center py-12 lg:py-20">
                 <div className="neu-panel p-8 lg:p-12">

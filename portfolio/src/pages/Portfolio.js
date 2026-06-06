@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useSharedLogic } from '../shared';
-import { TRANSLATIONS } from '../portfolioData';
+import { TRANSLATIONS } from '../data/portfolioData';
 import '../App.css';
 import '../Vet.css';
 
@@ -13,6 +12,13 @@ export default function Portfolio() {
   } = useSharedLogic(['hero', 'about', 'method', 'projects']);
 
   const t = TRANSLATIONS[lang];
+
+  const navItems = [
+    { id: 'hero', icon: 'fa-home', label: t.navHome },
+    { id: 'about', icon: 'fa-user', label: t.navAbout },
+    { id: 'method', icon: 'fa-flask', label: t.navMethod },
+    { id: 'projects', icon: 'fa-folder-tree', label: t.navProjects }
+  ];
 
   return (
     <div className="font-sans antialiased overflow-clip">
@@ -50,9 +56,20 @@ export default function Portfolio() {
           <div ref={menuRef} className="mt-2 w-full px-2">
             <div className="neu-pressed p-4 w-full">
               <ul className="navbar-nav gap-3">
-                <li><button className="nav-link-btn" onClick={() => handleScrollToSection('about')}>About</button></li>
-                <li><button className="nav-link-btn" onClick={() => handleScrollToSection('method')}>Method</button></li>
-                <li><button className="nav-link-btn" onClick={() => handleScrollToSection('projects')}>Projects</button></li>
+                {navItems.map((item) => (
+                  <li key={item.id}>
+                    <button
+                      className="nav-link-btn d-flex align-items-center gap-3 w-100 text-left"
+                      onClick={() => {
+                        handleScrollToSection(item.id);
+                        closeMobileMenu();
+                      }}
+                    >
+                      <i className={`fas ${item.icon} w-5 text-center text-accent`}></i>
+                      <span>{item.label}</span>
+                    </button>
+                  </li>
+                ))}
               </ul>
             </div>
           </div>
@@ -71,41 +88,17 @@ export default function Portfolio() {
               </div>
 
               <nav className="flex flex-col gap-4" id="left-nav">
-                <button
-                  type="button"
-                  onClick={() => handleScrollToSection('hero')}
-                  className={`neu-btn p-4 flex items-center gap-4 text-sm font-bold nav-item text-left w-full ${activeSection === 'hero' ? 'active' : ''}`}
-                >
-                  <i className="fas fa-home w-5 text-center"></i>
-                  <span>{t.navHome}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleScrollToSection('about')}
-                  className={`neu-btn p-4 flex items-center gap-4 text-sm font-bold nav-item text-left w-full ${activeSection === 'about' ? 'active' : ''}`}
-                >
-                  <i className="fas fa-user w-5 text-center"></i>
-                  <span>{t.navAbout}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleScrollToSection('method')}
-                  className={`neu-btn p-4 flex items-center gap-4 text-sm font-bold nav-item text-left w-full ${activeSection === 'method' ? 'active' : ''}`}
-                >
-                  <i className="fas fa-flask w-5 text-center"></i>
-                  <span>{t.navMethod}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleScrollToSection('projects')}
-                  className={`neu-btn p-4 flex items-center gap-4 text-sm font-bold nav-item text-left w-full ${activeSection === 'projects' ? 'active' : ''}`}
-                >
-                  <i className="fas fa-folder-tree w-5 text-center"></i>
-                  <span>{t.navProjects}</span>
-                </button>
+                {navItems.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => handleScrollToSection(item.id)}
+                    className={`neu-btn p-4 flex items-center gap-4 text-sm font-bold nav-item text-left w-full ${activeSection === item.id ? 'active' : ''}`}
+                  >
+                    <i className={`fas ${item.icon} w-5 text-center`}></i>
+                    <span>{item.label}</span>
+                  </button>
+                ))}
               </nav>
             </div>
           </div>
