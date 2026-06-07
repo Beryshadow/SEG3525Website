@@ -158,7 +158,7 @@ export default function VetPortal() {
 
             <span className="d-none d-lg-block font-bold uppercase tracking-widest text-accent text-sm truncate">|</span>
 
-            <span className="d-lg-none align-items-center justify-content-center text-2xl lg:text-6xl font-black leading-none">
+            <span className="d-none d-sm-flex d-lg-none align-items-center justify-content-center text-2xl lg:text-6xl font-black leading-none">
               {t.heroTitle}
             </span>
 
