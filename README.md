@@ -1,12 +1,14 @@
-## Nom de l’entreprise offrant le service
+# Présentation du Devoir 2
+
+## 2. Nom de l’entreprise offrant le service
 
 uOPets
 
-## Type de service
+## 2. Type de service
 
 Vétérinaire
 
-## Persona 1
+## 3. Persona 1
 
 ### Nom: 
 
@@ -30,7 +32,7 @@ Rapport au domaine (santé animale) : Il connaît très bien l'anatomie des rept
 
 Ali veut pouvoir trouver le téléphone d'urgence immédiatement, réserver le premier créneau d'examen disponible, et voir tout de suite les détails de son rendez-vous.
 
-## Persona 2
+## 3. Persona 2
 
 ### Nom : 
 
@@ -52,7 +54,7 @@ Rapport au domaine (santé animale) : Nouveau propriétaire de chien, il prend s
 
 Justin veut connaître le personnel de la clinique et s'assurer de leur compétence pour son chien très actif. Il souhaite également connaître les types de soins offerts ainsi que les moyens de les contacter par courriel s'il décide de devenir client.
 
-## Scénarimage 1 : 
+## 3. Scénarimage 1 : 
 
 <img width="1280" height="720" alt="Scenarimages-1" src="https://github.com/user-attachments/assets/79819e30-9c3c-46b9-8b40-bfc73630af38" />
 
@@ -75,7 +77,7 @@ Cette maquette remplit la troisième partie de l'objectif d'Ali : visualiser les
 But de Ali:  
 Objectif d'Ali : Ali veut pouvoir trouver le téléphone d'urgence immédiatement, réserver le premier créneau d'examen disponible et « voir tout de suite les détails de son rendez-vous ».
 
-## Scénarimage 2 : 
+## 3. Scénarimage 2 : 
 
 <img width="1280" height="721" alt="Scenarimages-4" src="https://github.com/user-attachments/assets/295743df-cf62-41a3-9fc3-0bcc7d584d89" />
 
@@ -98,7 +100,7 @@ Cette maquette répond au troisième point de l'objectif de Justin : voir les mo
 Objectif de Justin :  
 Justin veut savoir qui travaille dans la clinique et s'ils seront à la hauteur des soins pour son chien très actif, le type de soins offerts ainsi que les moyens de les contacter par courriel s'il décide de devenir client.
 
-## Prototype haute-fidélité
+## 4. Prototype haute-fidélité
 
 ### Explication des choix de conception visuelle en lien avec les scénarimages (différences et similitudes)
 
@@ -116,11 +118,11 @@ Le niveau de finition est évidemment très différent entre le prototype haute-
 [https://ryanbeland.netlify.app/](https://ryanbeland.netlify.app/)   
 [https://ryanbeland.netlify.app/devoir2](https://ryanbeland.netlify.app/devoir2)
 
-## Code
+## 5. Code
 
 [https://github.com/Beryshadow/SEG3525Website](https://github.com/Beryshadow/SEG3525Website) 
 
-## Reconnaissance de l’IA générative
+## 6. Reconnaissance de l’IA générative
 
 Puisque j’ai réalisé le premier devoir en HTML statique et que j’ai utilisé React pour celui-ci, j’ai eu recours à Gemini pour convertir mon index.html vers React.
 
