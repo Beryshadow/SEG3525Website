@@ -40,7 +40,9 @@ export const TRANSLATIONS = {
     project4Title: "Tableau de bord d'escalade",
     project4Text: "Visualisation de données pour aider les grimpeurs à suivre leurs cotations et séances.",
     comingSoon: "À venir",
-    footerCourse: "Créé pour le cours SEG3525"
+    footerCourse: "Créé pour le cours SEG3525",
+    flashcardTitle: "Flashcards",
+    flashcardText: "Un outil de flashcards propulsé par l'IA pour vous aider à réviser efficacement au dernier moment.",
   },
   en: {
     navHome: "Home",
@@ -83,6 +85,8 @@ export const TRANSLATIONS = {
     project4Title: "Climbing Dashboard",
     project4Text: "Data visualization to help climbers track their grades and sessions.",
     comingSoon: "Coming Soon",
-    footerCourse: "Created for the SEG3525 course"
+    footerCourse: "Created for the SEG3525 course",
+    flashcardTitle: "Flashcards",
+    flashcardText: "An AI powered flashcard tool to help you cram efficiently.",
   }
 };

@@ -3,6 +3,8 @@ import { useSharedLogic } from '../shared';
 import { TRANSLATIONS } from '../data/portfolioData';
 import '../App.css';
 import '../Vet.css';
+import '../Games.css';
+import '../Flashcard.css';
 
 export default function Portfolio() {
   const {
@@ -185,7 +187,30 @@ export default function Portfolio() {
                   <div className="neu-panel p-8">
                     <p className="text-lg">{t.methodP1}</p>
                     <p className="text-lg">
-                      Je suis le cours <a href="https://catalogue.uottawa.ca/en/courses/seg/#:~:text=SEG%203525" target="_blank" rel="noreferrer" className="text-accent font-semibold">SEG3525</a> à l'<a href="https://www.uottawa.ca/" target="_blank" rel="noreferrer" className="text-accent font-semibold">Université d'Ottawa</a>, {t.methodP2.split('Université d\'Ottawa,')[1] || t.methodP2}
+                      {t.methodP2.split(/(SEG3525|Université d'Ottawa|University of Ottawa|NN\/g)/g).map((part, index) => {
+                        if (part === 'SEG3525') {
+                          return (
+                            <a key={index} href="https://catalogue.uottawa.ca/en/courses/seg/#:~:text=SEG%203525" target="_blank" rel="noreferrer" className="text-accent font-semibold">
+                              {part}
+                            </a>
+                          );
+                        }
+                        if (part === "Université d'Ottawa" || part === "University of Ottawa") {
+                          return (
+                            <a key={index} href="https://www.uottawa.ca/" target="_blank" rel="noreferrer" className="text-accent font-semibold">
+                              {part}
+                            </a>
+                          );
+                        }
+                        if (part === 'NN/g') {
+                          return (
+                            <a key={index} href="https://www.nngroup.com/" target="_blank" rel="noreferrer" className="text-accent font-semibold">
+                              {part}
+                            </a>
+                          );
+                        }
+                        return part;
+                      })}
                     </p>
                     <div className="neu-pressed p-5 mt-6">
                       <p className="text-sm italic text-textMuted mb-0 leading-relaxed">{t.methodNote}</p>
@@ -195,7 +220,7 @@ export default function Portfolio() {
                 </div>
                 <div className="col-lg-6">
                   <div className="flex flex-col gap-5">
-                    <div className="neu-card neu-pressed p-5 block">
+                    <a href="https://www.designcouncil.org.uk/resources/the-double-diamond/" target="_blank" rel="noreferrer" className="neu-card neu-pressed p-5 block">
                       <h5 className="font-bold text-xl text-accent mb-2">{t.step1Title}</h5>
                       <p className="text-lg text-textMain mb-0">{t.step1Text}</p>
                       <br />
@@ -211,12 +236,13 @@ export default function Portfolio() {
                       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                         <i className="fas fa-external-link-alt text-s opacity-50"></i>
                       </div>
-                    </div>
+                    </a>
                   </div>
                 </div>
               </div>
             </section>
 
+            
             {/* Projects */}
             <section id="projects" className="mb-16">
               <div className="text-center text-lg-start mb-10 lg:ml-2">
@@ -244,8 +270,11 @@ export default function Portfolio() {
 
                 <div className="col">
                   <Link to="/design2" className="neu-card block p-6 h-100 group">
-                    <div className="neu-pressed h-40 flex items-center justify-center mb-6">
-                      <i className="fas fa-brain fa-3x text-accent opacity-80 group-hover:scale-110 transition-transform duration-500"></i>
+                    <div className={`${theme === 'light' ? 'light-mode' : ''} game-route neu-pressed h-40 flex items-center justify-center mb-6`}>
+                      <i
+                        className="fas fa-brain fa-3x opacity-80 group-hover:scale-110 transition-transform duration-500"
+                        style={{ color: 'var(--accent)' }}
+                      ></i>
                     </div>
                     <h5 className="font-bold text-lg text-[var(--text-main)] mb-3">
                       <span>{t.project2Title}</span>
@@ -253,9 +282,6 @@ export default function Portfolio() {
                     <p className="text-sm text-textMain mb-4">
                       <span>{t.project2Text}</span>
                     </p>
-                    <div className="neu-panel px-4 py-2 text-xs text-textMuted font-bold uppercase tracking-wider d-inline-block border-0">
-                      <span>{t.comingSoon}</span>
-                    </div>
                   </Link>
                 </div>
 
@@ -277,7 +303,7 @@ export default function Portfolio() {
                 </div>
 
                 <div className="col">
-                  <Link to="/design2" className="neu-card block p-6 h-100 group">
+                  <Link to="/design4" className="neu-card block p-6 h-100 group">
                     <div className="neu-pressed h-40 flex items-center justify-center mb-6">
                       <i className="fas fa-mountain fa-3x text-accent opacity-80 group-hover:scale-110 transition-transform duration-500"></i>
                     </div>
@@ -292,6 +318,24 @@ export default function Portfolio() {
                     </div>
                   </Link>
                 </div>
+
+                <div className="col">
+                  <Link to="/flashcard" className="neu-card block p-6 h-100 group">
+                    <div className={`${theme === 'light' ? 'light-mode' : ''} flashcard-route neu-pressed h-40 flex items-center justify-center mb-6`}>
+                      <i
+                        className="fas fa-floppy-disk fa-3x opacity-80 group-hover:scale-110 transition-transform duration-500"
+                        style={{ color: 'var(--accent)' }}
+                      ></i>
+                    </div>
+                    <h5 className="font-bold text-lg text-[var(--text-main)] mb-3">
+                      <span>{t.flashcardTitle}</span>
+                    </h5>
+                    <p className="text-sm text-textMain mb-4">
+                      <span>{t.flashcardText}</span>
+                    </p>
+                  </Link>
+                </div>
+
               </div>
             </section>
 
