@@ -356,7 +356,7 @@ const StudyView = ({ activeList, lists, setActiveListId, updateList, nliModel, a
       {/* Navigation Header */}
       <div className="w-full flex justify-between items-center bg-black/10 p-3 rounded-2xl border border-white/5">
          <button onClick={() => { const idx = lists.findIndex(l => l.id === activeList.id); setActiveListId(lists[(idx - 1 + lists.length) % lists.length].id); }} className="neu-btn px-4 py-3 rounded-xl text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors"><i className="fas fa-chevron-left"></i></button>
-         <h2 className="font-black text-base sm:text-xl md:text-2xl text-[var(--text-main)] uppercase tracking-widest text-center line-clamp-2 leading-tight px-4 flex-1">{activeList.title}</h2>
+         <h2 className="font-black text-base sm:text-xl md:text-2xl text-[var(--text-main)] uppercase tracking-widest text-center break-words leading-tight px-4 flex-1">{activeList.title}</h2>
          <button onClick={() => { const idx = lists.findIndex(l => l.id === activeList.id); setActiveListId(lists[(idx + 1) % lists.length].id); }} className="neu-btn px-4 py-3 rounded-xl text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors"><i className="fas fa-chevron-right"></i></button>
       </div>
 
@@ -659,7 +659,7 @@ const ManageView = ({ lists, setLists, setActiveListId, activeListId, showToast,
                            <input type="checkbox" checked={selectedIds.has(list.id)} onChange={(e) => toggleSelect(list.id, e)} className="cursor-pointer w-4 h-4" />
                         </td>
                         <td className="py-4 px-4 font-bold text-sm text-[var(--text-main)] group-hover:text-[var(--accent)] transition-colors">
-                           <div className="line-clamp-2 max-w-[200px] sm:max-w-[300px] whitespace-normal leading-snug">{list.title}</div>
+                           <div className="break-words whitespace-normal leading-snug">{list.title}</div>
                         </td>
                         <td className="py-4 px-4 text-center font-bold text-[var(--text-muted)] text-sm">{list.items.length}</td>
                         <td className="py-4 px-4 text-center" onClick={e => e.stopPropagation()}>
