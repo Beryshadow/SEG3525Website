@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import { useState, useEffect } from 'react';
 import '../App.css';
 import '../Vet.css';
@@ -138,6 +139,18 @@ export default function VetPortal() {
   return (
     <div className={`${theme === 'light' ? 'light-mode' : ''} vet-route`}>
       <div className="min-h-screen font-sans text-[var(--text-main)] transition-colors duration-300 relative">
+        {typeof document !== 'undefined' && createPortal(
+          <a
+            href="/maquettes.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ position: 'fixed', top: '40px', right: '40px', zIndex: 9999 }}
+            className="hidden lg:flex w-10 h-10 items-center justify-center shrink-0 text-textMain hover:scale-105 transition-transform neu-btn text-decoration-none"
+          >
+            <i className="fas fa-file-pdf text-2xl"></i>
+          </a>,
+          document.body
+        )}
         <nav className="navbar navbar-dark sticky-top z-50 w-full px-4 pt-4 mb-8 d-flex flex-column align-items-center">
           <div className="neu-panel w-full lg:w-auto px-4 py-3 d-flex justify-content-between align-items-center gap-4 lg:gap-8">
             <button
@@ -374,7 +387,6 @@ export default function VetPortal() {
                   ))}
                 </div>
               </section>
-
               <section id="services" className="flex flex-col justify-center py-16 lg:py-24">
                 <div className="text-center mb-10">
                   <h2 className="text-4xl font-black uppercase tracking-widest text-accent mb-3">
@@ -399,55 +411,64 @@ export default function VetPortal() {
                 <div className="row g-5">
                   <div className="col-lg-8">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                      {filteredServices.map(service => (
-                        <div key={service.id} className="neu-panel p-4 flex flex-col justify-between h-full gap-4">
+                      {filteredServices.map(service => {
+                        const currentTime = selectedTimes[service.id] || '';
+                        const isInvalidTime = currentTime && (currentTime < "09:00" || currentTime > "16:00");
 
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <h5 className="font-bold text-base mb-2 text-textMain">{service.name[currentLangKey]}</h5>
-                              <span className="text-accent font-black text-sm">${service.price.toFixed(2)}</span>
+                        return (
+                          <div key={service.id} className="neu-panel p-4 flex flex-col justify-between h-full gap-4">
+
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <h5 className="font-bold text-base mb-2 text-textMain">{service.name[currentLangKey]}</h5>
+                                <span className="text-accent font-black text-sm">${service.price.toFixed(2)}</span>
+                              </div>
+                              <i className={`fas ${service.icon} text-textMuted opacity-30 text-2xl`}></i>
                             </div>
-                            <i className={`fas ${service.icon} text-textMuted opacity-30 text-2xl`}></i>
-                          </div>
 
-                          <div className="flex flex-col gap-3 mt-auto">
-                            <input
-                              type="date"
-                              min={new Date().toISOString().split('T')[0]}
-                              value={selectedDates[service.id] || ''}
-                              onChange={(e) => handleDateChange(service.id, e.target.value)}
-                              className="neu-pressed bg-transparent border-0 text-sm p-3 rounded-xl w-full outline-none text-inherit font-bold"
-                            />
-                            <input
-                              type="time"
-                              min="09:00"
-                              max="16:00"
-                              value={selectedTimes[service.id] || ''}
-                              onChange={(e) => {
-                                const time = e.target.value;
-                                if (time >= "09:00" && time <= "16:00") {
-                                  handleTimeChange(service.id, time);
-                                } else {
-                                  alert(t.alertTimeRange);
-                                }
-                              }}
-                              className="neu-pressed bg-transparent border-0 text-sm p-3 rounded-xl w-full outline-none text-inherit font-bold"
-                            />
-                            <button
-                              onClick={() => handleAddToCart(service)}
-                              className="neu-btn px-4 py-1 text-accent hover:scale-105 transition-all flex items-center justify-center w-full"
-                            >
-                              <i className="fas fa-cart-plus text-base"></i>
-                            </button>
-                          </div>
+                            <div className="flex flex-col gap-3 mt-auto">
+                              <input
+                                type="date"
+                                min={new Date().toISOString().split('T')[0]}
+                                value={selectedDates[service.id] || ''}
+                                onChange={(e) => handleDateChange(service.id, e.target.value)}
+                                className="neu-pressed bg-transparent border-0 text-sm p-3 rounded-xl w-full outline-none text-inherit font-bold"
+                              />
+                              <input
+                                type="time"
+                                min="09:00"
+                                max="16:00"
+                                value={currentTime}
+                                onChange={(e) => handleTimeChange(service.id, e.target.value)} // Let state update freely
+                                className={`neu-pressed bg-transparent text-sm p-3 rounded-xl w-full outline-none font-bold transition-colors duration-300 ${isInvalidTime
+                                  ? 'text-red-500 border-2 border-red-500 shadow-[inset_0_0_10px_rgba(239,68,68,0.1)]'
+                                  : 'border-0 text-inherit'
+                                  }`}
+                              />
+                              <button
+                                onClick={() => {
+                                  if (isInvalidTime) {
+                                    showToast(t.alertTimeRange);
+                                  } else {
+                                    handleAddToCart(service);
+                                  }
+                                }}
+                                className="neu-btn px-4 py-1 text-accent hover:scale-105 transition-all flex items-center justify-center w-full"
+                              >
+                                <i className="fas fa-cart-plus text-base"></i>
+                              </button>
+                            </div>
 
-                        </div>
-                      ))}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
+
                   <div className="col-lg-4">
                     <div className="sticky top-6 h-[calc(100vh-6rem)]">
                       <div className="neu-pressed p-8 h-full flex flex-col justify-between rounded-3xl">
+
                         <div>
                           <h4 className="font-bold mb-6 flex items-center gap-3 text-sm text-accent uppercase tracking-widest">
                             <i className="fas fa-shopping-basket text-lg"></i>
@@ -482,30 +503,34 @@ export default function VetPortal() {
                             <span>{t.cartTotal}</span>
                             <span>${cartTotal.toFixed(2)}</span>
                           </div>
-                          <button
-                            onClick={transferCartToNotes}
-                            disabled={cart.length === 0}
-                            className={`neu-btn w-full block text-center py-4 text-xs font-black uppercase tracking-wider text-accent ${cart.length === 0 ? 'opacity-30 cursor-not-allowed' : ''}`}
-                          >
-                            {t.cartTransfer}
-                          </button>
-                          <button
-                            onClick={() => {
-                              setCart([]);
-                              showToast(t.toastSuccess);
-                            }}
-                            disabled={cart.length === 0}
-                            className={`neu-btn w-full block text-center py-4 text-xs font-black uppercase tracking-wider text-accent 
-                          ${cart.length === 0 ? 'opacity-30 cursor-not-allowed' : 'hover:scale-[1.02] transition-transform'}`}
-                          >
-                            {t.bookInstantly}
-                          </button>
+
+                          <div className="flex flex-col gap-3">
+                            <button
+                              onClick={transferCartToNotes}
+                              disabled={cart.length === 0}
+                              className={`neu-btn w-full block text-center py-4 text-xs font-black uppercase tracking-wider text-accent ${cart.length === 0 ? 'opacity-30 cursor-not-allowed' : 'hover:scale-[1.02] transition-transform'}`}
+                            >
+                              {t.cartTransfer}
+                            </button>
+                            <button
+                              onClick={() => {
+                                setCart([]);
+                                showToast(t.toastSuccess);
+                              }}
+                              disabled={cart.length === 0}
+                              className={`neu-btn w-full block text-center py-4 text-xs font-black uppercase tracking-wider text-accent ${cart.length === 0 ? 'opacity-30 cursor-not-allowed' : 'hover:scale-[1.02] transition-transform'}`}
+                            >
+                              {t.bookInstantly}
+                            </button>
+                          </div>
                         </div>
+
                       </div>
                     </div>
                   </div>
                 </div>
               </section>
+
 
               <section id="booking" className="flex flex-col justify-center py-16 lg:py-24">
                 <div className="neu-panel p-10 lg:p-12">
