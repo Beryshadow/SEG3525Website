@@ -13,7 +13,7 @@ const DEFAULT_LISTS = [
   },
   {
     id: "2",
-    title: "Order of Operations",
+    title: "Order of Operation",
     items: ["Parentheses", "Exponents", "Multiplication", "Division", "Addition", "Subtraction"],
     mnemonic: "Please Excuse My Dear Aunt Sally.",
     masteryLevel: 0
