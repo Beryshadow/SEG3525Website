@@ -6,6 +6,7 @@ import Design2 from './pages/Design2';
 import Design3 from './pages/Design3';
 import Design4 from './pages/Design4';
 import Flashcard from './pages/Flashcard';
+import ListMem from './pages/ListMem';
 
 function ScrollToTop() {
   const { pathname, hash } = useLocation();
@@ -54,6 +55,7 @@ export default function App() {
         <Route path="/design3" element={<Design3 />} />
         <Route path="/design4" element={<Design4 />} />
         <Route path="/flashcard" element={<Flashcard />} />
+        <Route path="/listmem" element={<ListMem />} />
       </Routes>
     </Router>
   );
