@@ -3,7 +3,7 @@
 }
 
 .flashcard-route.light-mode {
-  --accent: #63F6f1;
+  --accent: #6366f1;
 }
 
 @keyframes customShake {
