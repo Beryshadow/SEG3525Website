@@ -35,6 +35,7 @@ const DownloadIcon = () => <i className="fas fa-download"></i>;
 const UploadIcon = () => <i className="fas fa-upload"></i>;
 const CopyIcon = () => <i className="fas fa-copy"></i>;
 const EditIcon = () => <i className="fas fa-pencil-alt"></i>;
+const RefreshIcon = () => <i className="fas fa-undo"></i>;
 
 // Escape utility for regex
 const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -59,7 +60,7 @@ const levenshtein = (a, b) => {
   return matrix[b.length][a.length];
 };
 
-export default function ListMemorizer() {
+export default function ListMem() {
   const [view, setView] = useState("study");
   const navigate = useNavigate();
   const { theme, toggleTheme, lang } = useSharedLogic([]);
@@ -242,10 +243,14 @@ const StudyView = ({ activeList, lists, setActiveListId, updateList, nliModel, a
     
     let hideCount = 0;
     const total = activeList.items.length;
-    if (activeList.masteryLevel === 1) hideCount = Math.max(1, Math.floor(total * 0.25));
-    if (activeList.masteryLevel === 2) hideCount = Math.max(2, Math.floor(total * 0.5));
-    if (activeList.masteryLevel === 3) hideCount = Math.max(3, Math.floor(total * 0.75));
-    if (activeList.masteryLevel >= 4) hideCount = total;
+    const maxLevel = total + 1;
+    const currentLevel = Math.min(activeList.masteryLevel, maxLevel);
+
+    if (currentLevel > 0 && currentLevel <= total) {
+      hideCount = currentLevel;
+    } else if (currentLevel === maxLevel) {
+      hideCount = total;
+    }
     
     const indices = [];
     while(indices.length < hideCount) {
@@ -253,7 +258,7 @@ const StudyView = ({ activeList, lists, setActiveListId, updateList, nliModel, a
       if(indices.indexOf(r) === -1) indices.push(r);
     }
     setHiddenIndices(new Set(indices));
-  }, [activeList, activeList?.masteryLevel]);
+  }, [activeList, activeList?.masteryLevel, activeList?.items?.length]);
 
   const handleInput = (index, value) => {
     setUserInputs(prev => ({ ...prev, [index]: value }));
@@ -321,24 +326,30 @@ const StudyView = ({ activeList, lists, setActiveListId, updateList, nliModel, a
     setValidation(newValidation);
     setIsEvaluating(false);
 
+    const maxLevel = activeList.items.length + 1;
+    const currentLevel = Math.min(activeList.masteryLevel, maxLevel);
+
     if (allCorrect) {
-      if (activeList.masteryLevel === 5) {
+      if (currentLevel === maxLevel) {
         showToast("Flawless! You have completely mastered this list.");
       } else {
         showToast("Perfect recall! Increasing difficulty...");
         setTimeout(() => {
-          updateList(activeList.id, { masteryLevel: Math.min(5, activeList.masteryLevel + 1) });
+          updateList(activeList.id, { masteryLevel: Math.min(maxLevel, currentLevel + 1) });
         }, 1500);
       }
     } else {
       showToast("Some items are incorrect. Try again!");
-      if (activeList.masteryLevel === 5) {
+      if (currentLevel === maxLevel) {
         setMnemonicRevealed(true);
       }
     }
   };
 
   if (!activeList) return null;
+
+  const maxLevel = activeList.items.length + 1;
+  const currentLevel = Math.min(activeList.masteryLevel, maxLevel);
 
   return (
     <div className="w-full space-y-6">
@@ -351,14 +362,14 @@ const StudyView = ({ activeList, lists, setActiveListId, updateList, nliModel, a
 
       {/* Mnemonic Anchor Panel */}
       {activeList.mnemonic && activeList.mnemonic.trim() !== "" && (
-         <div className={`neu-panel p-6 sm:p-8 relative overflow-hidden border-l-4 ${activeList.masteryLevel === 5 && !mnemonicRevealed ? 'border-[var(--text-muted)]' : 'border-[var(--accent)]'}`}>
+         <div className={`neu-panel p-6 sm:p-8 relative overflow-hidden border-l-4 ${currentLevel === maxLevel && !mnemonicRevealed ? 'border-[var(--text-muted)]' : 'border-[var(--accent)]'}`}>
             <div className="absolute top-0 right-0 opacity-10 pointer-events-none">
               <SparklesIcon className="text-9xl" />
             </div>
             <h3 className="text-xs font-black uppercase tracking-widest text-[var(--accent)] mb-3 flex items-center">
                <SparklesIcon className="mr-2" /> Mnemonic Anchor
             </h3>
-            {activeList.masteryLevel === 5 && !mnemonicRevealed ? (
+            {currentLevel === maxLevel && !mnemonicRevealed ? (
               <div className="flex flex-col items-center justify-center py-4 relative z-10">
                 <p className="font-bold text-[var(--text-muted)] mb-4 uppercase tracking-widest text-xs sm:text-sm">Mnemonic is hidden for Mastery check</p>
                 <button onClick={() => setMnemonicRevealed(true)} className="neu-btn px-6 py-3 rounded-xl text-xs sm:text-sm font-bold text-[var(--text-main)] uppercase tracking-widest">
@@ -378,11 +389,11 @@ const StudyView = ({ activeList, lists, setActiveListId, updateList, nliModel, a
          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
             <h2 className="text-sm font-black uppercase tracking-widest text-[var(--text-muted)] flex items-center">
               <EyeSlashIcon className="mr-2" /> 
-              {activeList.masteryLevel === 5 ? "Level 5: Mastery Mode" : `Level ${activeList.masteryLevel}: ${activeList.masteryLevel === 0 ? "Study Mode" : `Hiding ${hiddenIndices.size} items`}`}
+              {currentLevel === maxLevel ? `Level ${maxLevel}: Mastery Mode` : `Level ${currentLevel}: ${currentLevel === 0 ? "Study Mode" : `Hiding ${hiddenIndices.size} of ${activeList.items.length} items`}`}
             </h2>
             <div className="flex gap-2 w-full sm:w-auto">
-              <button onClick={() => updateList(activeList.id, { masteryLevel: Math.max(0, activeList.masteryLevel - 1)})} disabled={activeList.masteryLevel===0} className="neu-btn flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold disabled:opacity-50 text-[var(--text-main)] uppercase tracking-widest">Easier</button>
-              <button onClick={() => updateList(activeList.id, { masteryLevel: Math.min(5, activeList.masteryLevel + 1)})} disabled={activeList.masteryLevel===5} className="neu-btn flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold disabled:opacity-50 text-[var(--accent)] uppercase tracking-widest">Harder</button>
+              <button onClick={() => updateList(activeList.id, { masteryLevel: Math.max(0, currentLevel - 1)})} disabled={currentLevel===0} className="neu-btn flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold disabled:opacity-50 text-[var(--text-main)] uppercase tracking-widest">Easier</button>
+              <button onClick={() => updateList(activeList.id, { masteryLevel: Math.min(maxLevel, currentLevel + 1)})} disabled={currentLevel===maxLevel} className="neu-btn flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold disabled:opacity-50 text-[var(--accent)] uppercase tracking-widest">Harder</button>
             </div>
          </div>
 
@@ -637,8 +648,8 @@ const ManageView = ({ lists, setLists, setActiveListId, activeListId, showToast,
                      <th className="py-4 px-4 w-12 text-center"><input type="checkbox" checked={selectedIds.size === lists.length && lists.length > 0} onChange={toggleSelectAll} className="cursor-pointer w-4 h-4" /></th>
                      <th className="py-4 px-4 font-black">Title</th>
                      <th className="py-4 px-4 font-black text-center w-20">Items</th>
-                     <th className="py-4 px-4 font-black text-center w-24">Mastery</th>
-                     <th className="py-4 px-4 font-black text-center w-20">Actions</th>
+                     <th className="py-4 px-4 font-black text-center w-32">Mastery</th>
+                     <th className="py-4 px-4 font-black text-center w-24">Actions</th>
                   </tr>
                </thead>
                <tbody>
@@ -651,11 +662,48 @@ const ManageView = ({ lists, setLists, setActiveListId, activeListId, showToast,
                            <div className="line-clamp-2 max-w-[200px] sm:max-w-[300px] whitespace-normal leading-snug">{list.title}</div>
                         </td>
                         <td className="py-4 px-4 text-center font-bold text-[var(--text-muted)] text-sm">{list.items.length}</td>
-                        <td className="py-4 px-4 text-center text-xs font-black text-[var(--accent)]">Lvl {list.masteryLevel}</td>
                         <td className="py-4 px-4 text-center" onClick={e => e.stopPropagation()}>
-                           <button onClick={() => setEditingListId(list.id)} className="text-[var(--text-muted)] hover:text-[var(--accent)] p-2 transition-colors">
-                              <EditIcon />
-                           </button>
+                           {(() => {
+                             const maxLevel = list.items.length + 1;
+                             const currentLevel = Math.min(list.masteryLevel, maxLevel);
+                             const levels = Array.from({length: maxLevel + 1}, (_, i) => i);
+                             return (
+                               <select
+                                 value={currentLevel}
+                                 onChange={(e) => {
+                                   setLists(prev => prev.map(l => l.id === list.id ? { ...l, masteryLevel: parseInt(e.target.value) } : l));
+                                 }}
+                                 className={`neu-pressed px-2 py-1 rounded text-[10px] sm:text-xs font-black outline-none cursor-pointer uppercase tracking-widest w-full text-center ${
+                                   currentLevel === maxLevel ? "text-purple-500" :
+                                   currentLevel >= Math.ceil(maxLevel / 2) ? "text-green-500" :
+                                   currentLevel >= 1 ? "text-orange-500" :
+                                   "text-[var(--text-muted)]"
+                                 }`}
+                               >
+                                 {levels.map(lvl => (
+                                   <option key={lvl} value={lvl} className="bg-[var(--bg-main)]">
+                                     {lvl === maxLevel ? "Mastery" : `Lvl ${lvl}`}
+                                   </option>
+                                 ))}
+                               </select>
+                             );
+                           })()}
+                        </td>
+                        <td className="py-4 px-4 text-center" onClick={e => e.stopPropagation()}>
+                           <div className="flex justify-center gap-2">
+                             <button onClick={() => {
+                                 setLists(prev => prev.map(l => l.id === list.id ? { ...l, masteryLevel: 0 } : l));
+                                 showToast("Mastery reset");
+                               }} 
+                               className="text-[var(--text-muted)] hover:text-orange-500 p-2 transition-colors" 
+                               title="Reset Mastery"
+                             >
+                                <RefreshIcon />
+                             </button>
+                             <button onClick={() => setEditingListId(list.id)} className="text-[var(--text-muted)] hover:text-[var(--accent)] p-2 transition-colors" title="Edit List">
+                                <EditIcon />
+                             </button>
+                           </div>
                         </td>
                      </tr>
                   ))}
