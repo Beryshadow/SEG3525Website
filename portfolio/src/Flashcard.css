@@ -1,11 +1,8 @@
-/* Flashcard specific overrides and animations */
 .flashcard-route {
-  /* You can uncomment and change this to give the flashcard page its own unique accent color! */
   --accent: #6366f1;
 }
 
 .flashcard-route.light-mode {
-  /* You can uncomment and change this to give the flashcard page its own unique accent color! */
   --accent: #6366f1;
 }
 
