@@ -9,14 +9,18 @@ const DEFAULT_LISTS = [
     title: "Biological Classification",
     items: ["Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species"],
     mnemonic: "Kings Play Chess On Fine Glass Surfaces.",
-    masteryLevel: 0
+    masteryLevel: 0,
+    performanceScore: 0,
+    dueDate: 0
   },
   {
     id: "2",
     title: "Order of Operation",
     items: ["Parentheses", "Exponents", "Multiplication", "Division", "Addition", "Subtraction"],
     mnemonic: "Please Excuse My Dear Aunt Sally.",
-    masteryLevel: 0
+    masteryLevel: 0,
+    performanceScore: 0,
+    dueDate: 0
   }
 ];
 
@@ -36,6 +40,8 @@ const UploadIcon = () => <i className="fas fa-upload"></i>;
 const CopyIcon = () => <i className="fas fa-copy"></i>;
 const EditIcon = () => <i className="fas fa-pencil-alt"></i>;
 const RefreshIcon = () => <i className="fas fa-undo"></i>;
+const DumbbellIcon = () => <i className="fas fa-dumbbell text-xl"></i>;
+const ArrowRightIcon = () => <i className="fas fa-arrow-right"></i>;
 
 // Escape utility for regex
 const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -61,7 +67,7 @@ const levenshtein = (a, b) => {
 };
 
 export default function ListMem() {
-  const [view, setView] = useState("study");
+  const [view, setView] = useState("study"); // study, practice, manage
   const navigate = useNavigate();
   const { theme, toggleTheme, lang } = useSharedLogic([]);
   const currentLang = (lang || 'en').toLowerCase();
@@ -162,11 +168,11 @@ export default function ListMem() {
         <div className="neu-panel w-full max-w-5xl px-6 py-4 flex justify-between items-center gap-3">
           <div className="flex items-center space-x-3 text-[var(--accent)] font-bold text-xl cursor-pointer" onClick={() => setView("study")}>
             <ListIcon />
-            <span className="uppercase tracking-widest text-sm whitespace-nowrap">SeriaRecall</span>
+            <span className="uppercase tracking-widest text-sm whitespace-nowrap hidden sm:inline">SeriaRecall</span>
           </div>
 
           <div className="flex items-center space-x-4">
-            <div className="hidden md:flex items-center space-x-2 text-xs px-4 py-2 neu-pressed text-[var(--text-muted)] relative overflow-hidden">
+            <div className="hidden lg:flex items-center space-x-2 text-xs px-4 py-2 neu-pressed text-[var(--text-muted)] relative overflow-hidden">
               <div className="relative flex items-center space-x-2 z-10 font-bold">
                 <CpuIcon />
                 <span className="truncate max-w-[150px]">
@@ -181,10 +187,13 @@ export default function ListMem() {
             <button onClick={toggleTheme} className="neu-btn w-10 h-10 flex items-center justify-center rounded-full text-[var(--text-main)]">
               {theme === 'dark' ? <i className="fas fa-sun"></i> : <i className="fas fa-moon"></i>}
             </button>
-            <button onClick={() => setView("study")} className={`neu-btn w-10 h-10 flex items-center justify-center rounded-full ${view === "study" ? "text-[var(--accent)]" : "text-[var(--text-main)]"}`}>
+            <button onClick={() => setView("study")} className={`neu-btn w-10 h-10 flex items-center justify-center rounded-full ${view === "study" ? "text-[var(--accent)]" : "text-[var(--text-main)]"}`} title="Study Mode">
               <BrainIcon />
             </button>
-            <button onClick={() => setView("manage")} className={`neu-btn w-10 h-10 flex items-center justify-center rounded-full ${view === "manage" ? "text-[var(--accent)]" : "text-[var(--text-main)]"}`}>
+            <button onClick={() => setView("practice")} className={`neu-btn w-10 h-10 flex items-center justify-center rounded-full ${view === "practice" ? "text-[var(--accent)]" : "text-[var(--text-main)]"}`} title="Practice Mode">
+              <DumbbellIcon />
+            </button>
+            <button onClick={() => setView("manage")} className={`neu-btn w-10 h-10 flex items-center justify-center rounded-full ${view === "manage" ? "text-[var(--accent)]" : "text-[var(--text-main)]"}`} title="Manage Lists">
               <SettingsIcon />
             </button>
           </div>
@@ -201,6 +210,15 @@ export default function ListMem() {
             nliModel={nliModel}
             aiStatus={aiStatus}
             showToast={showToast}
+          />
+        )}
+        {view === "practice" && (
+          <PracticeView 
+            lists={lists} 
+            updateList={updateList}
+            nliModel={nliModel}
+            showToast={showToast}
+            setView={setView}
           />
         )}
         {view === "manage" && (
@@ -353,14 +371,15 @@ const StudyView = ({ activeList, lists, setActiveListId, updateList, nliModel, a
 
   return (
     <div className="w-full space-y-6">
-      {/* Navigation Header */}
       <div className="w-full flex justify-between items-center bg-black/10 p-3 rounded-2xl border border-white/5">
          <button onClick={() => { const idx = lists.findIndex(l => l.id === activeList.id); setActiveListId(lists[(idx - 1 + lists.length) % lists.length].id); }} className="neu-btn px-4 py-3 rounded-xl text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors"><i className="fas fa-chevron-left"></i></button>
-         <h2 className="font-black text-base sm:text-xl md:text-2xl text-[var(--text-main)] uppercase tracking-widest text-center break-words leading-tight px-4 flex-1">{activeList.title}</h2>
+         <div className="flex flex-col items-center flex-1 px-4">
+            <span className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] mb-1">Study Mode</span>
+            <h2 className="font-black text-base sm:text-xl md:text-2xl text-[var(--text-main)] uppercase tracking-widest text-center break-words leading-tight">{activeList.title}</h2>
+         </div>
          <button onClick={() => { const idx = lists.findIndex(l => l.id === activeList.id); setActiveListId(lists[(idx + 1) % lists.length].id); }} className="neu-btn px-4 py-3 rounded-xl text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors"><i className="fas fa-chevron-right"></i></button>
       </div>
 
-      {/* Mnemonic Anchor Panel */}
       {activeList.mnemonic && activeList.mnemonic.trim() !== "" && (
          <div className={`neu-panel p-6 sm:p-8 relative overflow-hidden border-l-4 ${currentLevel === maxLevel && !mnemonicRevealed ? 'border-[var(--text-muted)]' : 'border-[var(--accent)]'}`}>
             <div className="absolute top-0 right-0 opacity-10 pointer-events-none">
@@ -384,7 +403,6 @@ const StudyView = ({ activeList, lists, setActiveListId, updateList, nliModel, a
          </div>
       )}
 
-      {/* Progressive Fade Training Area */}
       <div className="neu-panel p-6 sm:p-10 relative">
          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
             <h2 className="text-sm font-black uppercase tracking-widest text-[var(--text-muted)] flex items-center">
@@ -441,6 +459,341 @@ const StudyView = ({ activeList, lists, setActiveListId, updateList, nliModel, a
   );
 };
 
+// --- PRACTICE VIEW: SPACED REPETITION ---
+const PracticeView = ({ lists, updateList, nliModel, showToast, setView }) => {
+  const [isSessionActive, setIsSessionActive] = useState(false);
+  const [settings, setSettings] = useState({
+    deliveryOrder: 'Randomized',
+    showMnemonic: false,
+    difficulty: 'adaptive'
+  });
+  
+  const [queue, setQueue] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  
+  const [hiddenIndices, setHiddenIndices] = useState(new Set());
+  const [userInputs, setUserInputs] = useState({});
+  const [validation, setValidation] = useState({});
+  const [isEvaluating, setIsEvaluating] = useState(false);
+  const [isEvaluated, setIsEvaluated] = useState(false);
+
+  // Analyze queue on load
+  const now = Date.now();
+  const dueLists = useMemo(() => lists.filter(l => (l.dueDate || 0) <= now), [lists, now]);
+
+  const startPractice = () => {
+    // SRS Sort: Prioritize due cards, then lowest performance scores
+    let sorted = [...lists].sort((a, b) => {
+        const dueA = a.dueDate || 0;
+        const dueB = b.dueDate || 0;
+        const isDueA = dueA <= now;
+        const isDueB = dueB <= now;
+        
+        if (isDueA && !isDueB) return -1;
+        if (!isDueA && isDueB) return 1;
+        
+        const scoreA = a.performanceScore || 0;
+        const scoreB = b.performanceScore || 0;
+        if (scoreA !== scoreB) return scoreA - scoreB;
+        
+        return dueA - dueB;
+    });
+
+    if (settings.deliveryOrder === 'Randomized') {
+        // Group by exact priority level (Due Status + Score) and shuffle within those groups
+        const buckets = {};
+        sorted.forEach(l => {
+            const isDue = (l.dueDate || 0) <= now ? 1 : 0;
+            const score = l.performanceScore || 0;
+            const priorityKey = `${isDue}_${score}`;
+            if(!buckets[priorityKey]) buckets[priorityKey] = [];
+            buckets[priorityKey].push(l);
+        });
+        
+        let randomizedList = [];
+        const sortedKeys = Object.keys(buckets).sort((k1, k2) => {
+            const [due1, score1] = k1.split('_').map(Number);
+            const [due2, score2] = k2.split('_').map(Number);
+            if (due1 !== due2) return due2 - due1; // Due (1) comes before Not Due (0)
+            return score1 - score2; // Lowest score first
+        });
+        
+        sortedKeys.forEach(key => {
+            let bucket = buckets[key];
+            bucket.sort(() => Math.random() - 0.5);
+            randomizedList.push(...bucket);
+        });
+        sorted = randomizedList;
+    }
+
+    setQueue(sorted.map(l => l.id));
+    setCurrentIndex(0);
+    setIsSessionActive(true);
+  };
+
+  useEffect(() => {
+    if (!isSessionActive || !queue[currentIndex]) return;
+    const list = lists.find(l => l.id === queue[currentIndex]);
+    if (!list) return;
+
+    setUserInputs({});
+    setValidation({});
+    setIsEvaluated(false);
+    
+    const total = list.items.length;
+    let hideCount = 0;
+    
+    if (settings.difficulty === 'adaptive') {
+      hideCount = Math.min(list.masteryLevel || 0, total + 1);
+      if (hideCount > total) hideCount = total;
+    } else if (settings.difficulty === 'easy') {
+      hideCount = Math.min(1, total);
+    } else if (settings.difficulty === 'medium') {
+      hideCount = Math.ceil(total / 2);
+    } else if (settings.difficulty === 'hard') {
+      hideCount = total;
+    }
+
+    // Always hide at least 1 item in practice mode if difficulty allows
+    if (hideCount === 0 && total > 0) hideCount = 1;
+
+    const indices = [];
+    while(indices.length < hideCount && indices.length < total) {
+      let r = Math.floor(Math.random() * total);
+      if(indices.indexOf(r) === -1) indices.push(r);
+    }
+    setHiddenIndices(new Set(indices));
+  }, [currentIndex, isSessionActive, queue, lists, settings.difficulty]);
+
+  const handleInput = (index, value) => {
+    if (isEvaluated) return;
+    setUserInputs(prev => ({ ...prev, [index]: value }));
+    if (validation[index]) {
+       setValidation(prev => { const next = {...prev}; delete next[index]; return next; });
+    }
+  };
+
+  const checkEntailment = async (truth, input) => {
+    if (!nliModel || input.trim() === "") return false;
+    const sepToken = nliModel?.tokenizer?.sep_token || "[SEP]";
+    const statementTruth = `The item is: ${truth}`;
+    const statementInput = `The item is: ${input}`;
+    try {
+       const combined = `${statementInput} ${sepToken} ${statementTruth}`;
+       const out = await nliModel(combined, { top_k: 5 });
+       const classes = Array.isArray(out) && Array.isArray(out[0]) ? out[0] : (Array.isArray(out) ? out : [out]);
+       let entailScore = 0;
+       for (const c of classes) {
+           const label = c.label.toUpperCase();
+           if (label.includes('ENTAIL') || label === 'LABEL_1') entailScore = c.score;
+       }
+       return entailScore > 0.85;
+    } catch (e) {
+       return false;
+    }
+  };
+
+  const verifyAnswers = async () => {
+    const currentList = lists.find(l => l.id === queue[currentIndex]);
+    if (!currentList) return;
+
+    setIsEvaluating(true);
+    let allCorrect = true;
+    const newValidation = {};
+    const yieldThread = () => new Promise(res => setTimeout(res, 10));
+
+    for (const idx of hiddenIndices) {
+      const truth = currentList.items[idx].toLowerCase().trim();
+      const input = (userInputs[idx] || "").toLowerCase().trim();
+      
+      if (input === truth) {
+        newValidation[idx] = "correct";
+      } else {
+        const dist = levenshtein(truth, input);
+        const allowedTypos = truth.length <= 4 ? 1 : 2;
+        if (dist <= allowedTypos) {
+            newValidation[idx] = "correct";
+        } else {
+            const isSemanticMatch = await checkEntailment(truth, input);
+            await yieldThread();
+            if (isSemanticMatch) {
+                newValidation[idx] = "correct";
+            } else {
+                newValidation[idx] = "wrong";
+                allCorrect = false;
+            }
+        }
+      }
+    }
+
+    setValidation(newValidation);
+    setIsEvaluating(false);
+    setIsEvaluated(true);
+
+    let newScore = currentList.performanceScore || 0;
+    let newDue = Date.now();
+    
+    if (allCorrect) {
+       newScore += 1;
+       // Exponential interval scheduling
+       const interval = 1000 * 60 * 60 * 24 * Math.pow(2, newScore - 1);
+       newDue += interval;
+       showToast("Correct! Next review pushed further back.");
+    } else {
+       newScore = Math.max(0, newScore - 1);
+       showToast("Incorrect. Showing answers. Scheduled for early review.");
+       // Keeps due date as now so it's reviewed soon
+    }
+    
+    updateList(currentList.id, { performanceScore: newScore, dueDate: newDue });
+  };
+
+  const handleNextQuestion = () => {
+     if (currentIndex + 1 < queue.length) {
+        setCurrentIndex(curr => curr + 1);
+     } else {
+        setIsSessionActive(false);
+        showToast("Practice Session Complete!");
+     }
+  };
+
+  if (!isSessionActive) {
+    return (
+      <div className="w-full space-y-6 animate-fade-in">
+        <div className="neu-panel p-6 sm:p-10">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+             <h2 className="text-xl font-black uppercase tracking-widest text-[var(--accent)] flex items-center">
+                <DumbbellIcon className="mr-3" /> Practice Settings
+             </h2>
+             <div className="px-4 py-2 neu-pressed rounded-xl text-sm font-bold text-[var(--text-main)]">
+                <span className={dueLists.length > 0 ? "text-orange-500" : "text-green-500"}>{dueLists.length} Lists Due</span>
+             </div>
+          </div>
+
+          <p className="text-[var(--text-muted)] text-sm mb-8 font-medium">
+             Spaced Repetition (SRS) is always enabled. The system will continuously prioritize unmastered lists with the lowest performance scores to optimize your retention.
+          </p>
+
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+               <label className="text-xs font-black uppercase tracking-widest text-[var(--text-muted)] w-1/3">Delivery Order</label>
+               <select 
+                 value={settings.deliveryOrder} 
+                 onChange={e => setSettings({...settings, deliveryOrder: e.target.value})}
+                 className="neu-pressed px-4 py-3 rounded-xl bg-transparent font-bold text-[var(--text-main)] outline-none w-full sm:w-2/3 cursor-pointer"
+               >
+                 <option value="Randomized" className="bg-[var(--bg-main)]">Randomized</option>
+                 <option value="Sequential" className="bg-[var(--bg-main)]">Sequential</option>
+               </select>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+               <label className="text-xs font-black uppercase tracking-widest text-[var(--text-muted)] w-1/3">Local Scaled Difficulty</label>
+               <select 
+                 value={settings.difficulty} 
+                 onChange={e => setSettings({...settings, difficulty: e.target.value})}
+                 className="neu-pressed px-4 py-3 rounded-xl bg-transparent font-bold text-[var(--text-main)] outline-none w-full sm:w-2/3 cursor-pointer"
+               >
+                 <option value="adaptive" className="bg-[var(--bg-main)]">Adaptive (Based on List Mastery)</option>
+                 <option value="easy" className="bg-[var(--bg-main)]">Easy (Hide 1 item)</option>
+                 <option value="medium" className="bg-[var(--bg-main)]">Medium (Hide 50% of items)</option>
+                 <option value="hard" className="bg-[var(--bg-main)]">Hard (Hide 100% of items)</option>
+               </select>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+               <label className="text-xs font-black uppercase tracking-widest text-[var(--text-muted)] w-1/3">Mnemonic Anchor</label>
+               <div className="flex items-center gap-4 w-full sm:w-2/3">
+                 <button onClick={() => setSettings({...settings, showMnemonic: true})} className={`flex-1 py-3 rounded-xl font-bold transition-all ${settings.showMnemonic ? 'neu-pressed text-[var(--accent)]' : 'neu-btn text-[var(--text-muted)]'}`}>Show</button>
+                 <button onClick={() => setSettings({...settings, showMnemonic: false})} className={`flex-1 py-3 rounded-xl font-bold transition-all ${!settings.showMnemonic ? 'neu-pressed text-[var(--accent)]' : 'neu-btn text-[var(--text-muted)]'}`}>Hide</button>
+               </div>
+            </div>
+          </div>
+
+          <button onClick={startPractice} className="mt-10 neu-btn w-full py-5 rounded-2xl font-black uppercase tracking-widest text-[var(--accent)] flex items-center justify-center gap-3">
+             <PlayIcon /> Start Session ({lists.length} lists)
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Active Session rendering
+  const activeList = lists.find(l => l.id === queue[currentIndex]);
+  if (!activeList) return null;
+
+  return (
+    <div className="w-full space-y-6 animate-fade-in">
+       <div className="w-full flex justify-between items-center bg-black/10 p-3 rounded-2xl border border-white/5">
+         <div className="flex flex-col items-center flex-1 px-4">
+            <span className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] mb-1">
+               Practice Mode &bull; Question {currentIndex + 1} of {queue.length}
+            </span>
+            <h2 className="font-black text-base sm:text-xl md:text-2xl text-[var(--text-main)] uppercase tracking-widest text-center break-words leading-tight">
+               {activeList.title}
+            </h2>
+         </div>
+       </div>
+
+       {settings.showMnemonic && activeList.mnemonic && activeList.mnemonic.trim() !== "" && (
+         <div className="neu-panel p-6 relative overflow-hidden border-l-4 border-[var(--text-muted)]">
+            <h3 className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] mb-2 flex items-center">
+               <SparklesIcon className="mr-2" /> Mnemonic Anchor
+            </h3>
+            <p className="font-bold text-lg text-[var(--text-main)] italic">"{activeList.mnemonic}"</p>
+         </div>
+       )}
+
+       <div className="neu-panel p-6 sm:p-10 relative">
+          <div className="flex flex-col gap-4 mb-8">
+            {activeList.items.map((item, idx) => {
+               const isHidden = hiddenIndices.has(idx);
+               const status = validation[idx];
+               let inputStyle = "neu-pressed w-full px-5 py-4 rounded-xl bg-transparent font-black text-[var(--text-main)] outline-none text-lg transition-all";
+               if (status === "correct") inputStyle += " border-2 border-green-500 text-green-500 shadow-[inset_0_0_15px_rgba(34,197,94,0.1)]";
+               if (status === "wrong") inputStyle += " border-2 border-red-500 text-red-500 shadow-[inset_0_0_15px_rgba(239,68,68,0.1)]";
+
+               return (
+                 <div key={idx} className="flex items-center gap-4">
+                    <span className="w-10 h-10 flex-shrink-0 flex items-center justify-center neu-flat rounded-xl text-sm font-black text-[var(--text-muted)] opacity-50">{idx + 1}</span>
+                    {isHidden ? (
+                      <div className="relative w-full">
+                        <input 
+                          type="text" 
+                          value={userInputs[idx] || ""} 
+                          onChange={(e) => handleInput(idx, e.target.value)} 
+                          placeholder="Type missing item..." 
+                          className={inputStyle} 
+                          autoComplete="off" 
+                          disabled={isEvaluating || isEvaluated}
+                        />
+                        {isEvaluated && status === "wrong" && (
+                           <div className="absolute top-1/2 right-4 -translate-y-1/2 text-xs font-black uppercase text-green-500">Correct: {item}</div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="neu-btn w-full px-5 py-4 rounded-xl font-black text-[var(--text-main)] opacity-90 text-lg border-l-4 border-transparent">{item}</div>
+                    )}
+                 </div>
+               );
+            })}
+          </div>
+
+          {!isEvaluated ? (
+             <button onClick={verifyAnswers} disabled={isEvaluating || hiddenIndices.size === 0} className="neu-btn w-full py-5 rounded-2xl font-black uppercase tracking-widest text-[var(--accent)] flex items-center justify-center gap-3 disabled:opacity-50 text-sm sm:text-base">
+               {isEvaluating ? <><i className="fas fa-spinner fa-spin"></i> Checking Answers...</> : <><CheckIcon /> Verify Answers</>}
+             </button>
+          ) : (
+             <button onClick={handleNextQuestion} className="neu-pressed w-full py-5 rounded-2xl font-black uppercase tracking-widest text-[var(--accent)] flex items-center justify-center gap-3 text-sm sm:text-base shadow-[inset_0_0_15px_rgba(168,85,247,0.1)] border-2 border-[var(--accent)]">
+               Next Question <ArrowRightIcon />
+             </button>
+          )}
+       </div>
+    </div>
+  );
+};
+
+
 // --- MANAGE VIEW: DASHBOARD & EDITOR ---
 const ManageView = ({ lists, setLists, setActiveListId, activeListId, showToast, currentLang, setView }) => {
   const [selectedIds, setSelectedIds] = useState(new Set());
@@ -495,7 +848,9 @@ const ManageView = ({ lists, setLists, setActiveListId, activeListId, showToast,
               ...p,
               id: p.id || Date.now().toString() + Math.random(),
               masteryLevel: p.masteryLevel || 0,
-              mnemonic: p.mnemonic || ""
+              mnemonic: p.mnemonic || "",
+              performanceScore: p.performanceScore || 0,
+              dueDate: p.dueDate || 0
            }));
            setLists(cleanParsed);
            setActiveListId(cleanParsed[0].id);
@@ -665,7 +1020,7 @@ const ManageView = ({ lists, setLists, setActiveListId, activeListId, showToast,
                         <td className="py-4 px-4 text-center" onClick={e => e.stopPropagation()}>
                            {(() => {
                              const maxLevel = list.items.length + 1;
-                             const currentLevel = Math.min(list.masteryLevel, maxLevel);
+                             const currentLevel = Math.min(list.masteryLevel || 0, maxLevel);
                              const levels = Array.from({length: maxLevel + 1}, (_, i) => i);
                              return (
                                <select
@@ -692,8 +1047,8 @@ const ManageView = ({ lists, setLists, setActiveListId, activeListId, showToast,
                         <td className="py-4 px-4 text-center" onClick={e => e.stopPropagation()}>
                            <div className="flex justify-center gap-2">
                              <button onClick={() => {
-                                 setLists(prev => prev.map(l => l.id === list.id ? { ...l, masteryLevel: 0 } : l));
-                                 showToast("Mastery reset");
+                                 setLists(prev => prev.map(l => l.id === list.id ? { ...l, masteryLevel: 0, performanceScore: 0, dueDate: 0 } : l));
+                                 showToast("Mastery & SRS reset");
                                }} 
                                className="text-[var(--text-muted)] hover:text-orange-500 p-2 transition-colors" 
                                title="Reset Mastery"
@@ -713,7 +1068,7 @@ const ManageView = ({ lists, setLists, setActiveListId, activeListId, showToast,
        </div>
 
        <button onClick={() => {
-         const newList = { id: Date.now().toString(), title: "New Custom List", items: ["Item 1", "Item 2"], mnemonic: "", masteryLevel: 0 };
+         const newList = { id: Date.now().toString(), title: "New Custom List", items: ["Item 1", "Item 2"], mnemonic: "", masteryLevel: 0, performanceScore: 0, dueDate: 0 };
          setLists(prev => [...prev, newList]);
          setEditingListId(newList.id);
        }} className="neu-btn w-full py-6 rounded-2xl font-black uppercase tracking-widest text-[var(--accent)] flex items-center justify-center gap-3 text-lg">
