@@ -42,6 +42,7 @@ const EditIcon = () => <i className="fas fa-pencil-alt"></i>;
 const RefreshIcon = () => <i className="fas fa-undo"></i>;
 const DumbbellIcon = () => <i className="fas fa-dumbbell text-xl"></i>;
 const ArrowRightIcon = () => <i className="fas fa-arrow-right"></i>;
+const FireIcon = () => <i className="fas fa-fire"></i>;
 
 // Escape utility for regex
 const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -91,15 +92,39 @@ export default function ListMem() {
   const [aiBackend, setAiBackend] = useState("");
   const [aiProgress, setAiProgress] = useState(0);
 
+  const [streak, setStreak] = useState(() => {
+    try {
+      const savedStreak = localStorage.getItem('list-memorizer-streak');
+      return savedStreak ? parseInt(savedStreak, 10) : 0;
+    } catch (e) {
+      return 0;
+    }
+  });
+
   const [toastMessage, setToastMessage] = useState("");
+  const toastTimeoutRef = useRef(null);
+
   const showToast = useCallback((msg) => {
+    if (toastTimeoutRef.current) {
+      clearTimeout(toastTimeoutRef.current);
+    }
     setToastMessage(msg);
-    setTimeout(() => setToastMessage(""), 4000);
+    toastTimeoutRef.current = setTimeout(() => setToastMessage(""), 4000);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    }
   }, []);
 
   useEffect(() => {
     localStorage.setItem('list-memorizer-data', JSON.stringify(lists));
   }, [lists]);
+
+  useEffect(() => {
+    localStorage.setItem('list-memorizer-streak', streak.toString());
+  }, [streak]);
 
   useEffect(() => {
     let isMounted = true;
@@ -184,6 +209,11 @@ export default function ListMem() {
               )}
             </div>
 
+            <div className="hidden sm:flex items-center space-x-2 neu-pressed px-4 py-2 rounded-full text-sm font-black" title="Current Streak">
+              <FireIcon className={streak > 0 ? "text-orange-500" : "text-[var(--text-muted)]"} />
+              <span className={streak > 0 ? "text-[var(--text-main)]" : "text-[var(--text-muted)]"}>{streak}</span>
+            </div>
+
             <button onClick={toggleTheme} className="neu-btn w-10 h-10 flex items-center justify-center rounded-full text-[var(--text-main)]">
               {theme === 'dark' ? <i className="fas fa-sun"></i> : <i className="fas fa-moon"></i>}
             </button>
@@ -210,6 +240,7 @@ export default function ListMem() {
             nliModel={nliModel}
             aiStatus={aiStatus}
             showToast={showToast}
+            setStreak={setStreak}
           />
         )}
         {view === "practice" && (
@@ -219,6 +250,7 @@ export default function ListMem() {
             nliModel={nliModel}
             showToast={showToast}
             setView={setView}
+            setStreak={setStreak}
           />
         )}
         {view === "manage" && (
@@ -246,19 +278,23 @@ export default function ListMem() {
 }
 
 // --- STUDY VIEW: UNIFIED MNEMONIC & FADE ---
-const StudyView = ({ activeList, lists, setActiveListId, updateList, nliModel, aiStatus, showToast }) => {
+const StudyView = ({ activeList, lists, setActiveListId, updateList, nliModel, aiStatus, showToast, setStreak }) => {
   const [hiddenIndices, setHiddenIndices] = useState(new Set());
   const [userInputs, setUserInputs] = useState({});
   const [validation, setValidation] = useState({}); 
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [mnemonicRevealed, setMnemonicRevealed] = useState(false);
+  const timeoutRef = useRef(null);
+  const lastHiddenRef = useRef(new Set());
 
   useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    }
+  }, []);
+
+  const setupIndices = useCallback((isRetry = false) => {
     if (!activeList) return;
-    setUserInputs({});
-    setValidation({});
-    setMnemonicRevealed(false);
-    
     let hideCount = 0;
     const total = activeList.items.length;
     const maxLevel = total + 1;
@@ -270,13 +306,43 @@ const StudyView = ({ activeList, lists, setActiveListId, updateList, nliModel, a
       hideCount = total;
     }
     
-    const indices = [];
-    while(indices.length < hideCount) {
-      let r = Math.floor(Math.random() * total);
-      if(indices.indexOf(r) === -1) indices.push(r);
+    let indices = [];
+    const allIndices = Array.from({length: total}, (_, i) => i);
+
+    if (isRetry && lastHiddenRef.current.size > 0 && hideCount < total) {
+      // Smart Randomization: Prioritize indices that were NOT hidden last time
+      const visibleLastTime = allIndices.filter(i => !lastHiddenRef.current.has(i));
+      visibleLastTime.sort(() => Math.random() - 0.5);
+
+      while (indices.length < hideCount && visibleLastTime.length > 0) {
+        indices.push(visibleLastTime.pop());
+      }
+
+      // If we still need more to meet hideCount, take from previously hidden ones
+      const remainingToHide = allIndices.filter(i => !indices.includes(i));
+      remainingToHide.sort(() => Math.random() - 0.5);
+      while(indices.length < hideCount) {
+        indices.push(remainingToHide.pop());
+      }
+    } else {
+      // Pure random initialization
+      while(indices.length < hideCount) {
+        let r = Math.floor(Math.random() * total);
+        if(indices.indexOf(r) === -1) indices.push(r);
+      }
     }
-    setHiddenIndices(new Set(indices));
-  }, [activeList, activeList?.masteryLevel, activeList?.items?.length]);
+
+    const newHidden = new Set(indices);
+    setHiddenIndices(newHidden);
+    lastHiddenRef.current = newHidden;
+    setUserInputs({});
+    setValidation({});
+    setMnemonicRevealed(false);
+  }, [activeList?.id, activeList?.masteryLevel, activeList?.items?.length]);
+
+  useEffect(() => {
+    setupIndices();
+  }, [setupIndices]);
 
   const handleInput = (index, value) => {
     setUserInputs(prev => ({ ...prev, [index]: value }));
@@ -305,6 +371,12 @@ const StudyView = ({ activeList, lists, setActiveListId, updateList, nliModel, a
        return entailScore > 0.85; // Strict threshold for lists
     } catch (e) {
        return false;
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !isEvaluating && hiddenIndices.size > 0) {
+       verifyAnswers();
     }
   };
 
@@ -348,19 +420,30 @@ const StudyView = ({ activeList, lists, setActiveListId, updateList, nliModel, a
     const currentLevel = Math.min(activeList.masteryLevel, maxLevel);
 
     if (allCorrect) {
+      setStreak(s => s + 1);
       if (currentLevel === maxLevel) {
-        showToast("Flawless! You have completely mastered this list.");
+        showToast("Flawless! Mastered! Moving to next list...");
+        timeoutRef.current = setTimeout(() => {
+          const currentIdx = lists.findIndex(l => l.id === activeList.id);
+          const nextList = lists[(currentIdx + 1) % lists.length];
+          setActiveListId(nextList.id);
+        }, 1500);
       } else {
         showToast("Perfect recall! Increasing difficulty...");
-        setTimeout(() => {
+        timeoutRef.current = setTimeout(() => {
           updateList(activeList.id, { masteryLevel: Math.min(maxLevel, currentLevel + 1) });
         }, 1500);
       }
     } else {
-      showToast("Some items are incorrect. Try again!");
+      setStreak(0);
+      showToast("Incorrect answers. Re-randomizing...");
       if (currentLevel === maxLevel) {
         setMnemonicRevealed(true);
       }
+      // Re-randomize immediately after brief pause for feedback, using smart retry
+      timeoutRef.current = setTimeout(() => {
+        setupIndices(true);
+      }, 1500);
     }
   };
 
@@ -431,6 +514,7 @@ const StudyView = ({ activeList, lists, setActiveListId, updateList, nliModel, a
                         type="text" 
                         value={userInputs[idx] || ""} 
                         onChange={(e) => handleInput(idx, e.target.value)} 
+                        onKeyDown={handleKeyDown}
                         placeholder="Type missing item..." 
                         className={inputStyle} 
                         autoComplete="off" 
@@ -460,7 +544,7 @@ const StudyView = ({ activeList, lists, setActiveListId, updateList, nliModel, a
 };
 
 // --- PRACTICE VIEW: SPACED REPETITION ---
-const PracticeView = ({ lists, updateList, nliModel, showToast, setView }) => {
+const PracticeView = ({ lists, updateList, nliModel, showToast, setView, setStreak }) => {
   const [isSessionActive, setIsSessionActive] = useState(false);
   const [settings, setSettings] = useState({
     deliveryOrder: 'Randomized',
@@ -476,6 +560,14 @@ const PracticeView = ({ lists, updateList, nliModel, showToast, setView }) => {
   const [validation, setValidation] = useState({});
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [isEvaluated, setIsEvaluated] = useState(false);
+  const [isCorrect, setIsCorrect] = useState(false);
+  const timeoutRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    }
+  }, []);
 
   // Analyze queue on load
   const now = Date.now();
@@ -539,6 +631,7 @@ const PracticeView = ({ lists, updateList, nliModel, showToast, setView }) => {
     setUserInputs({});
     setValidation({});
     setIsEvaluated(false);
+    setIsCorrect(false);
     
     const total = list.items.length;
     let hideCount = 0;
@@ -593,6 +686,31 @@ const PracticeView = ({ lists, updateList, nliModel, showToast, setView }) => {
     }
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      if (isEvaluated) {
+         handleNextQuestion();
+      } else if (!isEvaluating && hiddenIndices.size > 0) {
+         verifyAnswers();
+      }
+    }
+  };
+
+  const handlePrevQuestion = useCallback(() => {
+     if (currentIndex > 0) {
+        setCurrentIndex(curr => curr - 1);
+     }
+  }, [currentIndex]);
+
+  const handleNextQuestion = useCallback(() => {
+     if (currentIndex + 1 < queue.length) {
+        setCurrentIndex(curr => curr + 1);
+     } else {
+        setIsSessionActive(false);
+        showToast("Practice Session Complete!");
+     }
+  }, [currentIndex, queue.length, showToast]);
+
   const verifyAnswers = async () => {
     const currentList = lists.find(l => l.id === queue[currentIndex]);
     if (!currentList) return;
@@ -629,32 +747,31 @@ const PracticeView = ({ lists, updateList, nliModel, showToast, setView }) => {
     setValidation(newValidation);
     setIsEvaluating(false);
     setIsEvaluated(true);
+    setIsCorrect(allCorrect);
 
     let newScore = currentList.performanceScore || 0;
     let newDue = Date.now();
     
     if (allCorrect) {
+       setStreak(s => s + 1);
        newScore += 1;
        // Exponential interval scheduling
        const interval = 1000 * 60 * 60 * 24 * Math.pow(2, newScore - 1);
        newDue += interval;
        showToast("Correct! Next review pushed further back.");
+       
+       // Auto-advance only on correct
+       timeoutRef.current = setTimeout(() => {
+           handleNextQuestion();
+       }, 2000);
     } else {
+       setStreak(0);
        newScore = Math.max(0, newScore - 1);
-       showToast("Incorrect. Showing answers. Scheduled for early review.");
+       showToast("Incorrect. Showing answers. Please review and manually advance.");
        // Keeps due date as now so it's reviewed soon
     }
     
     updateList(currentList.id, { performanceScore: newScore, dueDate: newDue });
-  };
-
-  const handleNextQuestion = () => {
-     if (currentIndex + 1 < queue.length) {
-        setCurrentIndex(curr => curr + 1);
-     } else {
-        setIsSessionActive(false);
-        showToast("Practice Session Complete!");
-     }
   };
 
   if (!isSessionActive) {
@@ -725,6 +842,7 @@ const PracticeView = ({ lists, updateList, nliModel, showToast, setView }) => {
   return (
     <div className="w-full space-y-6 animate-fade-in">
        <div className="w-full flex justify-between items-center bg-black/10 p-3 rounded-2xl border border-white/5">
+         <button onClick={handlePrevQuestion} disabled={currentIndex === 0 || isEvaluating} className="neu-btn px-4 py-3 rounded-xl text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors disabled:opacity-30"><i className="fas fa-chevron-left"></i></button>
          <div className="flex flex-col items-center flex-1 px-4">
             <span className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] mb-1">
                Practice Mode &bull; Question {currentIndex + 1} of {queue.length}
@@ -733,6 +851,11 @@ const PracticeView = ({ lists, updateList, nliModel, showToast, setView }) => {
                {activeList.title}
             </h2>
          </div>
+         <button onClick={handleNextQuestion} disabled={isEvaluating} className="neu-btn px-4 py-3 rounded-xl text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors disabled:opacity-30"><i className="fas fa-chevron-right"></i></button>
+       </div>
+
+       <div className="w-full h-1.5 bg-black/10 rounded-full overflow-hidden shadow-inner -mt-2">
+           <div className="h-full bg-[var(--accent)] transition-all duration-500 ease-out" style={{ width: `${((currentIndex + 1) / queue.length) * 100}%` }}></div>
        </div>
 
        {settings.showMnemonic && activeList.mnemonic && activeList.mnemonic.trim() !== "" && (
@@ -762,6 +885,7 @@ const PracticeView = ({ lists, updateList, nliModel, showToast, setView }) => {
                           type="text" 
                           value={userInputs[idx] || ""} 
                           onChange={(e) => handleInput(idx, e.target.value)} 
+                          onKeyDown={handleKeyDown}
                           placeholder="Type missing item..." 
                           className={inputStyle} 
                           autoComplete="off" 
@@ -781,11 +905,11 @@ const PracticeView = ({ lists, updateList, nliModel, showToast, setView }) => {
 
           {!isEvaluated ? (
              <button onClick={verifyAnswers} disabled={isEvaluating || hiddenIndices.size === 0} className="neu-btn w-full py-5 rounded-2xl font-black uppercase tracking-widest text-[var(--accent)] flex items-center justify-center gap-3 disabled:opacity-50 text-sm sm:text-base">
-               {isEvaluating ? <><i className="fas fa-spinner fa-spin"></i> Checking Answers...</> : <><CheckIcon /> Verify Answers</>}
+               {isEvaluating ? <><i className="fas fa-spinner fa-spin"></i> Checking Answers...</> : <><CheckIcon /> Verify Answers (Enter)</>}
              </button>
           ) : (
-             <button onClick={handleNextQuestion} className="neu-pressed w-full py-5 rounded-2xl font-black uppercase tracking-widest text-[var(--accent)] flex items-center justify-center gap-3 text-sm sm:text-base shadow-[inset_0_0_15px_rgba(168,85,247,0.1)] border-2 border-[var(--accent)]">
-               Next Question <ArrowRightIcon />
+             <button onClick={handleNextQuestion} className="neu-pressed w-full py-5 rounded-2xl font-black uppercase tracking-widest text-[var(--accent)] flex items-center justify-center gap-3 text-sm sm:text-base border-2 border-[var(--accent)] transition-colors hover:bg-[var(--accent)] hover:text-white cursor-pointer">
+               {isCorrect ? <><i className="fas fa-spinner fa-spin"></i> Auto-advancing...</> : <>Next Question (Enter) <ArrowRightIcon /></>}
              </button>
           )}
        </div>
