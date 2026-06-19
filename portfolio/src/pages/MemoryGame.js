@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useSharedLogic } from '../utilities/shared'; 
+import { useSharedLogic } from '../utilities/shared';
 import CardGame from './gameFiles/CardGame.js';
 import SwipeGame from './gameFiles/PasswordGame.js';
 import { GAME_TRANSLATIONS } from '../data/gameData';
-import { GameContext, useLocalStorage } from '../utilities/GameContext'; 
+import { GameContext, useLocalStorage } from '../utilities/GameContext';
 import '../App.css';
 import '../stylesheets/Games.css';
 
@@ -44,13 +44,13 @@ export default function App() {
 
   useEffect(() => {
     const htmlElement = document.documentElement;
-    
+
     htmlElement.classList.remove('light-mode', 'theme-rust-light', 'theme-rust-dark', 'theme-rust-ayu', 'theme-ocean');
-    
+
     if (themeClass) {
       htmlElement.classList.add(themeClass);
     }
-    
+
     document.body.style.backgroundColor = 'var(--bg-main)';
     document.body.style.color = 'var(--text-main)';
     document.body.style.transition = 'background-color 0.5s ease, color 0.5s ease';
@@ -64,13 +64,13 @@ export default function App() {
 
   return (
     <GameContext.Provider value={{ appTheme, setAppTheme }}>
-      <div 
+      <div
         className={`${themeClass} game-route`}
-        style={{ 
-          backgroundColor: 'var(--bg-main)', 
-          color: 'var(--text-main)', 
-          minHeight: '100vh', 
-          transition: 'background-color 0.5s ease, color 0.5s ease' 
+        style={{
+          backgroundColor: 'var(--bg-main)',
+          color: 'var(--text-main)',
+          minHeight: '100vh',
+          transition: 'background-color 0.5s ease, color 0.5s ease'
         }}
       >
         <div className="font-sans antialiased overflow-clip min-h-screen">
@@ -128,7 +128,7 @@ export default function App() {
               {/* Sidebar Desktop*/}
               <aside className="col-lg-2 d-none d-lg-block" aria-label="Menu principal">
                 <div className="sticky top-12 flex flex-col gap-8">
-                  <div className="neu-panel p-6 text-center">
+                  <div id='info-card' aria-label='card-panel' className="neu-panel p-6 text-center">
                     <h1 className="font-extrabold text-xl tracking-wider text-accent block mb-2">RB</h1>
                     <span className="text-xs text-textMuted uppercase tracking-widest">Jeux</span>
                   </div>
@@ -162,11 +162,11 @@ export default function App() {
 
                   <div className="neu-panel p-2 flex flex-col gap-3 mt-4 rounded-full items-center">
                     {THEME_OPTIONS.map(tOpt => (
-                      <button 
-                        key={tOpt.id} 
-                        onClick={() => setAppTheme(tOpt.id)} 
-                        className="w-8 h-8 rounded-full border-2 transition-transform hover:scale-110" 
-                        style={{ backgroundColor: tOpt.color, borderColor: appTheme === tOpt.id ? 'var(--accent)' : 'transparent' }} 
+                      <button
+                        key={tOpt.id}
+                        onClick={() => setAppTheme(tOpt.id)}
+                        className="w-8 h-8 rounded-full border-2 transition-transform hover:scale-110"
+                        style={{ backgroundColor: tOpt.color, borderColor: appTheme === tOpt.id ? 'var(--accent)' : 'transparent' }}
                         title={tOpt.label}
                         aria-label={`Activer le thème ${tOpt.label}`}
                       />

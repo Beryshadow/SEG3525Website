@@ -1,0 +1,4 @@
+.direnv/
+package-lock.json
+portfolio/public/
+PDF/
