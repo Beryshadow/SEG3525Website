@@ -122,15 +122,14 @@ export default function App() {
             )}
           </nav>
 
-          <h1 className="sr-only">Mini Jeux</h1>
           <div className="container-fluid max-w-[1500px] mx-auto py-8 lg:py-16 px-4 lg:px-8">
             <div className="row g-5">
 
               {/* Sidebar Desktop*/}
-              <aside className="col-lg-2 d-none d-lg-block">
+              <aside className="col-lg-2 d-none d-lg-block" aria-label="Menu principal">
                 <div className="sticky top-12 flex flex-col gap-8">
                   <div className="neu-panel p-6 text-center">
-                    <span className="font-extrabold text-xl tracking-wider text-accent block mb-2">RB</span>
+                    <h1 className="font-extrabold text-xl tracking-wider text-accent block mb-2">RB</h1>
                     <span className="text-xs text-textMuted uppercase tracking-widest">Jeux</span>
                   </div>
                   <nav className="flex flex-col gap-4">
@@ -155,7 +154,7 @@ export default function App() {
               </main>
 
               {/* Panneau Theme Desktop*/}
-              <aside className="col-lg-1 d-none d-lg-block">
+              <aside className="col-lg-1 d-none d-lg-block" aria-label="Paramètres du thème">
                 <div className="sticky top-12 flex flex-col items-center gap-4">
                   <button onClick={toggleLang} className="neu-btn w-12 h-12 flex items-center justify-center font-bold" title={t.navThemeTitle}>
                     {lang.toUpperCase() === 'FR' ? 'EN' : 'FR'}
