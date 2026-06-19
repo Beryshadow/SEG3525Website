@@ -1,14 +1,10 @@
-@layer bootstrap;
+@layer theme, base, bootstrap, components, utilities;
 
 @import "bootstrap/dist/css/bootstrap.min.css" layer(bootstrap);
 
 @import "tailwindcss";
 
-/* 
- * I got the neumorphism shadow values generated via neumorphism.io
- */
 :root {
-
   --grad-angle: 145deg;
   --shadow-x: 12px;
   --shadow-y: 12px;
@@ -16,15 +12,12 @@
   --light-y: -8px;
 
   --bg-main: #182429;
-  --accent: #3084C4;
+  --accent: #5AAADD;
   --text-main: #BFBDB6;
   --text-muted: #738290;
   --shadow-d: rgba(0, 0, 0, 0.5);
   --shadow-d-strong: rgba(0, 0, 0, 0.7);
-  --shadow-l: rgba(255, 255, 255, 0.06);
-
   --shadow-l: color-mix(in srgb, var(--bg-main) 95%, white);
-  --shadow-l: rgba(255, 255, 255, 0.05);
   --border-d: rgba(0, 0, 0, 0.4);
   --grad-l: rgba(255, 255, 255, 0.02);
   --grad-d: rgba(0, 0, 0, 0.07);
@@ -40,7 +33,6 @@
 }
 
 .light-mode {
-
   --bg-main: #e0e5ec;
   --accent: #1d6a96;
   --text-main: #4a5568;
@@ -68,12 +60,7 @@ body {
   transition: background-color 0.5s ease, color 0.5s ease;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+h1, h2, h3, h4, h5, h6 {
   margin-bottom: 1rem;
   font-weight: 700;
   color: var(--accent);
@@ -129,7 +116,7 @@ a {
   z-index: 1;
 }
 
-.neu-btn>* {
+.neu-btn > * {
   position: relative;
   z-index: 2;
 }
@@ -184,7 +171,7 @@ a {
   z-index: 1;
 }
 
-.neu-card>* {
+.neu-card > * {
   position: relative;
   z-index: 2;
 }

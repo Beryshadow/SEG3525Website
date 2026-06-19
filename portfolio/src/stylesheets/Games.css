@@ -1,9 +1,9 @@
 .game-route {
-  --accent: #b864ff;
+  --accent: #d294ff;
 }
 
 .game-route.light-mode {
-  --accent: #6f00cc;
+  --accent: #590ebd;
 }
 
 .theme-rust-light {
