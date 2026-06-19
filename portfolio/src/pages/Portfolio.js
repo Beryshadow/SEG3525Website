@@ -365,6 +365,7 @@ export default function Portfolio() {
                     <span>{t.footerCourse}</span>
                   </p>
                 </div>
+                <span>{window.__BUILD_TIME__}</span>
                 <p className="text-sm text-textMuted mt-4 mt-lg-0 mb-0">&copy; 2026 Université d'Ottawa / University of Ottawa.</p>
               </div>
             </footer>
