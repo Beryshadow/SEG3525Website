@@ -12,6 +12,9 @@ const transformJsxInJs = () => ({
 });
 
 export default defineConfig({
+  build: {
+    outDir: 'build', 
+  },
   plugins: [
     transformJsxInJs(), 
     tailwindcss(),
