@@ -127,7 +127,7 @@ export default function App() {
             <div className="row g-5">
 
               {/* Sidebar Desktop*/}
-              <aside className="col-lg-2 d-none d-lg-block">
+              <aside id='NavMenu' className="col-lg-2 d-none d-lg-block">
                 <div className="sticky top-12 flex flex-col gap-8">
                   <div id='info-card' aria-label='card-panel' className="neu-panel p-6 text-center">
                     <span className="font-extrabold text-xl tracking-wider text-accent block mb-2">RB</span>
@@ -155,7 +155,7 @@ export default function App() {
               </main>
 
               {/* Panneau Theme Desktop*/}
-              <aside className="col-lg-1 d-none d-lg-block">
+              <aside id="ThemeAndLang" className="col-lg-1 d-none d-lg-block">
                 <div className="sticky top-12 flex flex-col items-center gap-4">
                   <button onClick={toggleLang} className="neu-btn w-12 h-12 flex items-center justify-center font-bold" title={t.navThemeTitle}>
                     {lang.toUpperCase() === 'FR' ? 'EN' : 'FR'}
