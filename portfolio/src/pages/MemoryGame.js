@@ -129,7 +129,7 @@ export default function App() {
               {/* Sidebar Desktop*/}
               <aside className="col-lg-2 d-none d-lg-block">
                 <div className="sticky top-12 flex flex-col gap-8">
-                  <div className="neu-panel p-6 text-center">
+                  <div id='info-card' aria-label='card-panel' className="neu-panel p-6 text-center">
                     <span className="font-extrabold text-xl tracking-wider text-accent block mb-2">RB</span>
                     <span className="text-xs text-textMuted uppercase tracking-widest">Jeux</span>
                   </div>
@@ -139,7 +139,7 @@ export default function App() {
                       <span>{t.navReturn}</span>
                     </Link>
                     {navItems.map((item) => (
-                      <button key={item.id} type="button" onClick={() => handleScrollToSection(item.id)} className={`neu-btn p-4 flex items-center gap-4 text-sm font-bold nav-item text-left w-full ${activeSection === item.id ? 'active' : ''}`}>
+                      <button key={item.id} id={item.id} aria-label={itme.id} type="button" onClick={() => handleScrollToSection(item.id)} className={`neu-btn p-4 flex items-center gap-4 text-sm font-bold nav-item text-left w-full ${activeSection === item.id ? 'active' : ''}`}>
                         <i className={`fas ${item.icon} w-5 text-center`}></i>
                         <span>{item.label}</span>
                       </button>
