@@ -402,7 +402,7 @@ export const CardGame = ({ t }) => {
                 <div className="card-face card-front neu-btn w-full h-full absolute inset-0 flex items-center justify-center rounded-2xl backface-hidden">
                   <i className="fas fa-question text-textMuted opacity-20 text-xl lg:text-3xl"></i>
                   {card.hasBeenSeen && !card.isMatched && (
-                    <span className="absolute top-3 right-3 sm:top-4 sm:right-4 w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-accent opacity-100 shadow-[0_0_12px_var(--accent),_0_0_24px_var(--accent)] animate-pulse" title={t?.memorySeenBadgeTitle || 'Card already seen'}></span>
+                    <span className="!absolute top-3 right-3 sm:top-4 sm:right-4 w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-accent opacity-100 shadow-[0_0_12px_var(--accent),_0_0_24px_var(--accent)] animate-pulse" title={t?.memorySeenBadgeTitle || 'Card already seen'}></span>
                   )}
                 </div>
 
