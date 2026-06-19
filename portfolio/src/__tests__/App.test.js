@@ -21,7 +21,7 @@ jest.mock('react-router-dom', () => {
 }, { virtual: true });
 
 const appFileContent = fs.readFileSync(
-  path.resolve(__dirname, '../App.js'),
+  path.resolve(__dirname, '../App.jsx'),
   'utf8'
 );
 

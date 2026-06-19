@@ -357,19 +357,28 @@ export default function Portfolio() {
               </div>
             </section>
 
-            <footer className="pt-8 pb-4 mt-16 text-center lg:text-left">
-              <div className="neu-pressed p-6 d-flex flex-column flex-lg-row justify-content-between align-items-center">
-                <div>
-                  <h3 className="font-bold text-lg text-accent mb-1">Ryan Beland</h3>
-                  <p className="text-sm text-textMuted mb-0">
-                    <span>{t.footerCourse}</span>
-                  </p>
-                </div>
-                <span>{import.meta.env.VITE_BUILD_TIME}</span>
-                <p className="text-sm text-textMuted mt-4 mt-lg-0 mb-0">&copy; 2026 Université d'Ottawa / University of Ottawa.</p>
+          <footer className="pt-8 pb-4 mt-16 text-center lg:text-left">
+            <div className="neu-pressed p-6 d-flex flex-column flex-lg-row justify-content-between align-items-center">
+    
+              <div className="mb-4 mb-lg-0">
+                <h3 className="font-bold text-lg text-accent mb-1">Ryan Beland</h3>
+                <p className="text-sm text-textMuted mb-0">
+                  <span>{t.footerCourse}</span>
+                </p>
               </div>
-            </footer>
 
+              <div className="text-center lg:text-right d-flex flex-column gap-1">
+                <p className="text-sm text-textMuted mb-0">
+                  &copy; 2026 Université d'Ottawa / University of Ottawa.
+                </p>
+      
+                <span className="text-xs text-textMuted opacity-80">
+                  Mis à jour / Updated: {import.meta.env.VITE_BUILD_TIME}
+                </span>
+              </div>
+
+            </div>
+          </footer>
           </div>
 
           {/* Utility Panel */}

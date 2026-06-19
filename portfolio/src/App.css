@@ -1,7 +1,12 @@
+@layer bootstrap;
+
+@import "bootstrap/dist/css/bootstrap.min.css" layer(bootstrap);
+
+@import "tailwindcss";
+
 /* 
  * I got the neumorphism shadow values generated via neumorphism.io
  */
-
 :root {
 
   --grad-angle: 145deg;

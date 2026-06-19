@@ -35,7 +35,7 @@ function FaviconManager() {
     const links = document.querySelectorAll("link[rel*='icon']");
 
     links.forEach(link => {
-      link.href = `${process.env.PUBLIC_URL}/favicon-${pageName}.ico`;
+      link.href = `/favicon-${pageName}.ico`;
     });
   }, [pathname]);
 
