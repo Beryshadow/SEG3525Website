@@ -139,7 +139,7 @@ export default function App() {
                       <span>{t.navReturn}</span>
                     </Link>
                     {navItems.map((item) => (
-                      <button key={item.id} id={item.id} aria-label={itme.id} type="button" onClick={() => handleScrollToSection(item.id)} className={`neu-btn p-4 flex items-center gap-4 text-sm font-bold nav-item text-left w-full ${activeSection === item.id ? 'active' : ''}`}>
+                      <button key={item.id} id={item.id} aria-label={item.id} type="button" onClick={() => handleScrollToSection(item.id)} className={`neu-btn p-4 flex items-center gap-4 text-sm font-bold nav-item text-left w-full ${activeSection === item.id ? 'active' : ''}`}>
                         <i className={`fas ${item.icon} w-5 text-center`}></i>
                         <span>{item.label}</span>
                       </button>
