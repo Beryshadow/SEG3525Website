@@ -72,18 +72,27 @@ export function useSharedLogic(sectionIds) {
       }
       lastScrollY.current = currentScrollY;
 
-      let current = sectionIds[0];
+      let current = activeSection;
+      let closestDistance = Infinity;
+
       sectionIds.forEach(secId => {
         const el = document.getElementById(secId);
-        if (el && el.getBoundingClientRect().top <= window.innerHeight / 2) {
-          current = secId;
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          const distance = Math.abs(rect.top - (window.innerHeight / 3));
+
+          if (distance < closestDistance) {
+            closestDistance = distance;
+            current = secId;
+          }
         }
       });
+
       setActiveSection(current);
     };
 
     const handleGlobalClick = (e) => {
-      if (!isMobileMenuOpen) return; 
+      if (!isMobileMenuOpen) return;
 
       const menuEl = menuRef.current;
       const toggleEl = toggleRef.current;
@@ -94,7 +103,7 @@ export function useSharedLogic(sectionIds) {
 
       if ((clickedInsideMenu && clickedNavLink) || (!clickedInsideMenu && !clickedToggle)) {
         setIsMobileMenuOpen(false);
-        
+
         if (menuEl && menuEl.classList.contains('show') && window.bootstrap?.Collapse) {
           const bsCollapse = window.bootstrap.Collapse.getInstance(menuEl);
           if (bsCollapse) bsCollapse.hide();
@@ -112,8 +121,8 @@ export function useSharedLogic(sectionIds) {
       window.removeEventListener('scroll', handleScroll);
       document.removeEventListener('click', handleGlobalClick);
     };
-    
-  }, [sectionIds, isMobileMenuOpen]); 
+
+  }, [sectionIds, isMobileMenuOpen]);
 
   const handleScrollToSection = (id) => {
     setIsMobileMenuOpen(false);
@@ -132,13 +141,13 @@ export function useSharedLogic(sectionIds) {
     }, 150);
   };
 
-  return { 
-    theme, setTheme, 
-    lang, setLang, 
-    activeSection, 
+  return {
+    theme, setTheme,
+    lang, setLang,
+    activeSection,
     isMobileMenuOpen,
-    menuRef,      
-    toggleRef,    
+    menuRef,
+    toggleRef,
     toggleMobileMenu: () => setIsMobileMenuOpen(prev => !prev),
     closeMobileMenu: () => setIsMobileMenuOpen(false),
     toggleTheme: () => setTheme(t => t === 'dark' ? 'light' : 'dark'),

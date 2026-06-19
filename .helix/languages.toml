@@ -8,17 +8,17 @@ file_store = {}
 type = 'ollama'
 generate_endpoint = 'http://localhost:11434/api/generate'
 chat_endpoint = 'http://localhost:11434/api/chat'
-model = 'qwen2.5-coder:7b-base'
+model = 'deepseek-coder-v2:16b-lite-instruct-q5_K_M'
 
 [language-server.lsp-ai.config.completion]
 model = 'model1'
 
 [language-server.lsp-ai.config.completion.parameters]
-max_tokens = 30
-max_context = 300
+max_tokens = 64
+max_context = 2048
 
 [language-server.lsp-ai.config.completion.parameters.options]
-num_predict = 30
+num_predict = 64
 temperature = 0.1
 
 [[language-server.lsp-ai.config.completion.chat_messages]]
