@@ -83,7 +83,12 @@ export default function App() {
                 <button onClick={toggleLang} className="neu-btn w-10 h-10 flex align-items-center justify-center font-bold text-xs text-textMain hover:scale-105 transition-transform shrink-0">
                   <span>{lang.toUpperCase() === 'FR' ? 'EN' : 'FR'}</span>
                 </button>
-                <button ref={toggleRef} className="neu-btn w-10 h-10 flex align-items-center justify-center text-textMain hover:scale-105 transition-transform shrink-0 border-0" onClick={toggleMobileMenu}>
+                <button
+                  ref={toggleRef}
+                  className="neu-btn w-10 h-10 flex align-items-center justify-center text-textMain hover:scale-105 transition-transform shrink-0 border-0"
+                  onClick={toggleMobileMenu}
+                  aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+                >
                   <i className="fas fa-bars text-lg"></i>
                 </button>
               </div>
@@ -117,11 +122,12 @@ export default function App() {
             )}
           </nav>
 
+          <h1 className="sr-only">Mini Jeux</h1>
           <div className="container-fluid max-w-[1500px] mx-auto py-8 lg:py-16 px-4 lg:px-8">
             <div className="row g-5">
 
-              {/* Sidebar Bureau */}
-              <div className="col-lg-2 d-none d-lg-block">
+              {/* Sidebar Desktop*/}
+              <aside className="col-lg-2 d-none d-lg-block">
                 <div className="sticky top-12 flex flex-col gap-8">
                   <div className="neu-panel p-6 text-center">
                     <span className="font-extrabold text-xl tracking-wider text-accent block mb-2">RB</span>
@@ -140,16 +146,16 @@ export default function App() {
                     ))}
                   </nav>
                 </div>
-              </div>
+              </aside>
 
               {/* Contenu Principal */}
-              <div className="col-lg-9">
+              <main className="col-lg-9">
                 <SwipeGame t={t} />
                 <CardGame t={t} />
-              </div>
+              </main>
 
-              {/* Panneau Utilitaire Bureau */}
-              <div className="col-lg-1 d-none d-lg-block">
+              {/* Panneau Theme Desktop*/}
+              <aside className="col-lg-1 d-none d-lg-block">
                 <div className="sticky top-12 flex flex-col items-center gap-4">
                   <button onClick={toggleLang} className="neu-btn w-12 h-12 flex items-center justify-center font-bold" title={t.navThemeTitle}>
                     {lang.toUpperCase() === 'FR' ? 'EN' : 'FR'}
@@ -172,7 +178,7 @@ export default function App() {
                     <i className="fas fa-arrow-up"></i>
                   </a>
                 </div>
-              </div>
+              </aside>
 
             </div>
           </div>

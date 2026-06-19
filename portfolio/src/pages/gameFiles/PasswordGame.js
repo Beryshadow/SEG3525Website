@@ -427,8 +427,9 @@ export const SwipeGame = ({ t }) => {
         <div className="flex flex-wrap gap-6 items-center justify-center">
 
           <div className="flex flex-col gap-2">
-            <label className="text-xs font-bold text-textMuted uppercase tracking-wider">{t?.swipeGridSize || 'Grid Size'}</label>
+            <label htmlFor="swipe-grid" className="text-xs font-bold text-textMuted uppercase tracking-wider">{t?.swipeGridSize || 'Grid Size'}</label>
             <select
+              id="swipe-grid"
               className="neu-pressed px-4 py-2 text-textMain border-0 outline-none bg-transparent rounded-xl"
               value={gridSize}
               onChange={(e) => {
@@ -444,8 +445,9 @@ export const SwipeGame = ({ t }) => {
           </div>
 
           <div className="flex flex-col gap-2">
-            <label className="text-xs font-bold text-textMuted uppercase tracking-wider">{t?.swipeGameType || 'Game Type'}</label>
+            <label htmlFor="swipe-type" className="text-xs font-bold text-textMuted uppercase tracking-wider">{t?.swipeGameType || 'Game Type'}</label>
             <select
+              id="swipe-type"
               className="neu-pressed px-4 py-2 text-textMain border-0 outline-none bg-transparent rounded-xl"
               value={gameType}
               onChange={(e) => {
@@ -461,8 +463,9 @@ export const SwipeGame = ({ t }) => {
           </div>
 
           <div className="flex flex-col gap-2">
-            <label className="text-xs font-bold text-textMuted uppercase tracking-wider">{t?.swipePathLogic || 'Path Logic'}</label>
+            <label htmlFor="swipe-logic" className="text-xs font-bold text-textMuted uppercase tracking-wider">{t?.swipePathLogic || 'Path Logic'}</label>
             <select
+              id="swipe-logic"
               className="neu-pressed px-4 py-2 text-textMain border-0 outline-none bg-transparent rounded-xl"
               value={pathLogic}
               onChange={(e) => {

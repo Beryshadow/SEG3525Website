@@ -374,7 +374,6 @@ export const CardGame = ({ t }) => {
           maxWidth: 'min(100%, calc(100vh - 380px))',
           aspectRatio: '1 / 1'
         }}
-        role="grid"
       >
         {state.deck.map((card, index) => {
           let ariaLabel = `${t?.memoryCardHiddenAria || 'Hidden card'} ${index + 1}`;
@@ -384,7 +383,6 @@ export const CardGame = ({ t }) => {
           return (
             <button
               key={card.id}
-              role="gridcell"
               className={`
     card-scene w-full h-full text-left outline-none cursor-pointer
     focus-visible:ring-4 focus-visible:ring-accent focus-visible:ring-offset-4 focus-visible:ring-offset-surface rounded-2xl
@@ -398,8 +396,8 @@ export const CardGame = ({ t }) => {
               onKeyDown={(e) => e.key === "Enter" && handleCardClick(index)}
               disabled={card.isWildcard || card.isMatched}
               tabIndex={card.isMatched ? -1 : 0}
-              aria-label={ariaLabel}
             >
+            <span className="sr-only">{ariaLabel}</span>
               <div className="card-flipper h-full w-full relative preserve-3d transition-transform duration-500 pointer-events-none">
                 <div className="card-face card-front neu-btn w-full h-full absolute inset-0 flex items-center justify-center rounded-2xl backface-hidden">
                   <i className="fas fa-question text-textMuted opacity-20 text-xl lg:text-3xl"></i>
