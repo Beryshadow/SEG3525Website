@@ -10,6 +10,8 @@
 
 # production
 /build
+deploy.sh
+/build_live
 
 # misc
 .DS_Store

@@ -2,10 +2,11 @@ import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Portfolio from './pages/Portfolio';
 import VetPortal from './pages/uOPets';
-import Design2 from './pages/Design2';
+import Design2 from './pages/MemoryGame';
 import Design3 from './pages/Design3';
 import Design4 from './pages/Design4';
-import Flashcard from './pages/Flashcard';
+import NeuroDeck from './pages/NeuroDeck';
+import SerialRecall from './pages/SerialRecall';
 
 function ScrollToTop() {
   const { pathname, hash } = useLocation();
@@ -49,11 +50,12 @@ export default function App() {
 
       <Routes>
         <Route path="/" element={<Portfolio />} />
-        <Route path="/devoir2" element={<VetPortal />} />
-        <Route path="/design2" element={<Design2 />} />
+        <Route path="/uopets" element={<VetPortal />} />
+        <Route path="/memorygame" element={<Design2 />} />
         <Route path="/design3" element={<Design3 />} />
         <Route path="/design4" element={<Design4 />} />
-        <Route path="/flashcard" element={<Flashcard />} />
+        <Route path="/neurodeck" element={<NeuroDeck />} />
+        <Route path="/serialrecall" element={<SerialRecall />} />
       </Routes>
     </Router>
   );

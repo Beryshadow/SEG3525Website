@@ -1,8 +1,8 @@
 import { createPortal } from 'react-dom';
 import { useState, useEffect } from 'react';
 import '../App.css';
-import '../Vet.css';
-import { useSharedLogic } from '../shared';
+import '../stylesheets/Vet.css';
+import { useSharedLogic } from '../utilities/shared';
 import { useNavigate } from 'react-router-dom';
 import SVG from 'react-inlinesvg';
 import { TRANSLATIONS, SERVICES_DATA, TEAM_DATA, USER_DATA, CATEGORIES } from '../data/vetData';

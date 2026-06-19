@@ -1,10 +1,11 @@
 import { Link } from 'react-router-dom';
-import { useSharedLogic } from '../shared';
+import { useSharedLogic } from '../utilities/shared';
 import { TRANSLATIONS } from '../data/portfolioData';
 import '../App.css';
-import '../Vet.css';
-import '../Games.css';
-import '../Flashcard.css';
+import '../stylesheets/Vet.css';
+import '../stylesheets/Games.css';
+import '../stylesheets/NeuroDeck.css';
+import '../stylesheets/ListMemorizer.css';
 
 export default function Portfolio() {
   const {
@@ -252,7 +253,7 @@ export default function Portfolio() {
 
               <div className="row row-cols-1 row-cols-md-2 g-5">
                 <div className="col">
-                  <Link to="/devoir2" className="neu-card block p-6 h-100 group">
+                  <Link to="/uopets" className="neu-card block p-6 h-100 group">
                     <div className={`${theme === 'light' ? 'light-mode' : ''} vet-route neu-pressed h-40 flex items-center justify-center mb-6`}>
                       <i
                         className="fas fa-paw fa-3x opacity-80 group-hover:scale-110 transition-transform duration-500"
@@ -269,7 +270,7 @@ export default function Portfolio() {
                 </div>
 
                 <div className="col">
-                  <Link to="/design2" className="neu-card block p-6 h-100 group">
+                  <Link to="/memorygame" className="neu-card block p-6 h-100 group">
                     <div className={`${theme === 'light' ? 'light-mode' : ''} game-route neu-pressed h-40 flex items-center justify-center mb-6`}>
                       <i
                         className="fas fa-brain fa-3x opacity-80 group-hover:scale-110 transition-transform duration-500"
@@ -320,7 +321,7 @@ export default function Portfolio() {
                 </div>
 
                 <div className="col">
-                  <Link to="/flashcard" className="neu-card block p-6 h-100 group">
+                  <Link to="/neurodeck" className="neu-card block p-6 h-100 group">
                     <div className={`${theme === 'light' ? 'light-mode' : ''} flashcard-route neu-pressed h-40 flex items-center justify-center mb-6`}>
                       <i
                         className="fas fa-floppy-disk fa-3x opacity-80 group-hover:scale-110 transition-transform duration-500"
@@ -332,6 +333,23 @@ export default function Portfolio() {
                     </h5>
                     <p className="text-sm text-textMain mb-4">
                       <span>{t.flashcardText}</span>
+                    </p>
+                  </Link>
+                </div>
+
+                <div className="col">
+                  <Link to="/serialrecall" className="neu-card block p-6 h-100 group">
+                    <div className={`${theme === 'light' ? 'light-mode' : ''} serialrecall-route neu-pressed h-40 flex items-center justify-center mb-6`}>
+                      <i
+                        className="fas fa-list-ol fa-3x opacity-80 group-hover:scale-110 transition-transform duration-500"
+                        style={{ color: 'var(--accent)' }}
+                      ></i>
+                    </div>
+                    <h5 className="font-bold text-lg text-[var(--text-main)] mb-3">
+                      <span>{t.serialRecallTitle}</span>
+                    </h5>
+                    <p className="text-sm text-textMain mb-4">
+                      <span>{t.serialRecallText}</span>
                     </p>
                   </Link>
                 </div>

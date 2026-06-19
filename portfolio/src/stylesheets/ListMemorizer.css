@@ -1,0 +1,51 @@
+.listmemorizer-route {
+  --accent: #b3f6f1;
+}
+
+.listmemorizer-route.light-mode {
+  --accent: #b3f6f1;
+}
+
+@keyframes customShake {
+
+  10%,
+  90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+
+  20%,
+  80% {
+    transform: translate3d(2px, 0, 0);
+  }
+
+  30%,
+  50%,
+  70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+
+  40%,
+  60% {
+    transform: translate3d(4px, 0, 0);
+  }
+}
+
+.animate-custom-shake {
+  animation: customShake 0.5s cubic-bezier(.36, .07, .19, .97) both;
+}
+
+@keyframes flashcardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: flashcardFadeIn 0.4s ease-out forwards;
+}
