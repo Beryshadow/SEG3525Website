@@ -100,6 +100,13 @@ a {
   background-image: linear-gradient(var(--grad-angle), var(--grad-l), var(--grad-d));
 }
 
+.simply-flat {
+  border-radius: 2rem;
+  background-color: var(--bg-main);
+  background-image: linear-gradient(var(--grad-angle), var(--grad-l), var(--grad-d));
+  box-shadow: none !important;
+}
+
 .neu-pressed {
   border-radius: 1.5rem;
   background-color: var(--bg-main);

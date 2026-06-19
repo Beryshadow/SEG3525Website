@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSharedLogic } from '../shared';
+import { useSharedLogic } from '../utilities/shared';
 import { TRANSLATIONS, DEFAULT_DECK, STOP_WORDS } from '../data/flashcardData';
 
 // --- ICONS ---
@@ -1380,7 +1380,6 @@ const SettingsView = ({
 }) => {
   const [jsonInput, setJsonInput] = useState("");
   const [newDeckName, setNewDeckName] = useState("");
-  const [promptCopied, setPromptCopied] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   
   const [editingDeckId, setEditingDeckId] = useState(null);
@@ -1428,21 +1427,6 @@ const SettingsView = ({
     { id: "Xenova/nli-deberta-v3-base", name: "DeBERTa-v3 NLI (Base)", desc: t.moreAccurate || "Maximum accuracy (Slower)" }
   ];
 
-  const handleCopyPrompt = () => {
-    if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(t.llmPromptTemplate);
-    } else {
-      const textArea = document.createElement("textarea");
-      textArea.value = t.llmPromptTemplate;
-      document.body.appendChild(textArea);
-      textArea.select();
-      document.execCommand("copy");
-      textArea.remove();
-    }
-    setPromptCopied(true);
-    setTimeout(() => setPromptCopied(false), 2000);
-  };
-  
   const handleDrop = (e) => {
     e.preventDefault();
     setIsDraggingOver(false);

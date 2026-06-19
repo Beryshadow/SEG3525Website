@@ -41,8 +41,10 @@ export const TRANSLATIONS = {
     project4Text: "Visualisation de données pour aider les grimpeurs à suivre leurs cotations et séances.",
     comingSoon: "À venir",
     footerCourse: "Créé pour le cours SEG3525",
-    flashcardTitle: "Flashcards",
+    flashcardTitle: "Neurodeck",
     flashcardText: "Un outil de flashcards propulsé par l'IA pour vous aider à réviser efficacement au dernier moment.",
+    serialRecallTitle: "SerialRecall",
+  serialRecallText: "Un outil pour vous aider à mémoriser des listes extrêmement rapidement.",
   },
   en: {
     navHome: "Home",
@@ -86,7 +88,9 @@ export const TRANSLATIONS = {
     project4Text: "Data visualization to help climbers track their grades and sessions.",
     comingSoon: "Coming Soon",
     footerCourse: "Created for the SEG3525 course",
-    flashcardTitle: "Flashcards",
+    flashcardTitle: "Neurodeck",
     flashcardText: "An AI powered flashcard tool to help you cram efficiently.",
+    serialRecallTitle: "SerialRecall",
+    serialRecallText: "A tool to help you memorize lists extremely rapidly.",
   }
 };
