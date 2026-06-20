@@ -66,8 +66,7 @@
   --color-gradD: rgba(0, 0, 0, 0.3);
 }
 
-/* 
-ANIMATIONS (Shake & Confetti)
+/* ANIMATIONS (Shake & Confetti)
 */
 
 @keyframes shake-card {
@@ -81,8 +80,8 @@ ANIMATIONS (Shake & Confetti)
 }
 
 @keyframes win-pulse {
-  0%, 100% { box-shadow: var(--shadow-x) var(--shadow-y) 24px var(--shadow-d), var(--light-x) var(--light-y) 24px var(--shadow-l); }
-  50% { box-shadow: 0 0 40px var(--accent), var(--shadow-x) var(--shadow-y) 24px var(--shadow-d); }
+  0%, 100% { box-shadow: var(--shadow-x) var(--shadow-y) 24px var(--color-shadowD), var(--light-x) var(--light-y) 24px var(--color-shadowL); }
+  50% { box-shadow: 0 0 40px var(--color-accent), var(--shadow-x) var(--shadow-y) 24px var(--color-shadowD); }
 }
 
 .board-won {
@@ -95,7 +94,7 @@ ANIMATIONS (Shake & Confetti)
   position: absolute;
   width: 10px;
   height: 10px;
-  background-color: var(--accent);
+  background-color: var(--color-accent);
   animation: confetti-fall linear infinite;
   z-index: 100;
   border-radius: 2px;
@@ -112,8 +111,8 @@ ANIMATIONS (Shake & Confetti)
 }
 
 select option {
-  background-color: var(--bg-main);
-  color: var(--text-main);
+  background-color: var(--color-bgMain);
+  color: var(--color-textMain);
 }
 
 select.neu-pressed {
@@ -166,20 +165,20 @@ select.neu-pressed {
 @keyframes match-pop {
   0% {
     transform: rotateY(180deg) scale(1);
-    box-shadow: inset var(--shadow-x) var(--shadow-y) 20px var(--shadow-d),
-      inset var(--light-x) var(--light-y) 20px var(--shadow-l);
+    box-shadow: inset var(--shadow-x) var(--shadow-y) 20px var(--color-shadowD),
+      inset var(--light-x) var(--light-y) 20px var(--color-shadowL);
   }
 
   50% {
     transform: rotateY(180deg) scale(1.1);
-    background-color: color-mix(in srgb, var(--accent) 15%, var(--bg-main));
-    box-shadow: 0 0 25px var(--accent);
+    background-color: color-mix(in srgb, var(--color-accent) 15%, var(--color-bgMain));
+    box-shadow: 0 0 25px var(--color-accent);
   }
 
   100% {
     transform: rotateY(180deg) scale(1);
-    box-shadow: inset var(--shadow-x) var(--shadow-y) 20px var(--shadow-d),
-      inset var(--light-x) var(--light-y) 20px var(--shadow-l);
+    box-shadow: inset var(--shadow-x) var(--shadow-y) 20px var(--color-shadowD),
+      inset var(--light-x) var(--light-y) 20px var(--color-shadowL);
   }
 }
 
@@ -189,8 +188,7 @@ select.neu-pressed {
 }
 
 
-/* 
-ACCESSIBILITÉ : Réduction de mouvement
+/* ACCESSIBILITÉ : Réduction de mouvement
 */
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {

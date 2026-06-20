@@ -1,14 +1,18 @@
 export const GAME_TRANSLATIONS = {
   FR: {
     // root component
-    navCardGame: "Cartes Mémoire",
-    navSwipeGame: "Mot de Passe Spatial",
+    navCardGame: "Concentration",
+    navSwipeGame: "PasswordSwipe",
     navReturn: "Retour",
     navThemeTitle: "Changer la langue",
     navScrollTop: "Retour en haut",
+    footerCourse: "Projet de jeu cognitif",
+    footerUpdateLabel: "Mis à jour :",
+    navThemeLabel: "Thème",
+    game: "Jeux",
 
     // SwipeGame
-    swipeGameTitle: "Mot de Passe Spatial",
+    swipeGameTitle: "PasswordSwipe",
     swipeGameDesc: "Mémorisez la séquence et redessinez-la en glissant.",
     swipeGridSize: "Taille du Schéma",
     swipeEasy: "2 x 2 (Facile)",
@@ -22,8 +26,8 @@ export const GAME_TRANSLATIONS = {
     swipeAdjacent: "Adjacents (Croix) Facile",
     swipeDiagonal: "Diagonales (8 directions) Moyen",
     swipeRandom: "Aléatoire (Libre) Difficile",
-    swipeBtnStart: "Commencer",
-    swipeBtnRestart: "Recommencer",
+    swipeBtnStart: "Jouer",
+    swipeBtnRestart: "Rejouer",
     swipeRoundLabel: "Manche",
     swipeMaxLabel: "Max",
     swipeStatusLabel: "Statut",
@@ -36,7 +40,7 @@ export const GAME_TRANSLATIONS = {
     swipeStatusGameOver: "Oups, réessayer...",
 
     // CardGame
-    memoryTitle: "Jeu de Mémoire",
+    memoryTitle: "Concentration",
     memorySubtitle: "Testez vos capacités cognitives en utilisant des séquences mathématiques ou des associations d'images et de mots.",
     memoryGridLabel: "Grille",
     memoryPairTypeLabel: "Type de Paire",
@@ -61,7 +65,7 @@ export const GAME_TRANSLATIONS = {
     memoryCardFlippedAria: "Carte retournée : ",
     memorySeenBadgeTitle: "Carte déjà vue",
 
-    // Gestalt Translations
+    // Gestalt
     gestalt: {
       proximity: "Proximité",
       similarity: "Similitude",
@@ -85,14 +89,18 @@ export const GAME_TRANSLATIONS = {
   },
   EN: {
     // root
-    navCardGame: "Memory Cards",
-    navSwipeGame: "Password Swipe",
+    navCardGame: "Concentration",
+    navSwipeGame: "PasswordSwipe",
     navReturn: "Back",
     navThemeTitle: "Change language",
     navScrollTop: "Back to top",
+    footerCourse: "Cognitive game project",
+    footerUpdateLabel: "Updated:",
+    navThemeLabel: "Theme",
+    game: "Games",
 
     // SwipeGame
-    swipeGameTitle: "Spatial Password",
+    swipeGameTitle: "PasswordSwipe",
     swipeGameDesc: "Memorize the sequence and redraw it by swiping.",
     swipeGridSize: "Grid Size",
     swipeEasy: "2 x 2 (Easy)",
@@ -106,7 +114,7 @@ export const GAME_TRANSLATIONS = {
     swipeAdjacent: "Adjacent (Cross) Easy",
     swipeDiagonal: "Diagonal (8 directions) Medium",
     swipeRandom: "Random (Free) Hard",
-    swipeBtnStart: "Start",
+    swipeBtnStart: "Play",
     swipeBtnRestart: "Restart",
     swipeRoundLabel: "Round",
     swipeMaxLabel: "Max",
@@ -120,7 +128,7 @@ export const GAME_TRANSLATIONS = {
     swipeStatusGameOver: "Oops, try again...",
 
     // CardGame
-    memoryTitle: "Memory Game",
+    memoryTitle: "Concentration",
     memorySubtitle: "Test your cognitive abilities using mathematical equations or image and word associations.",
     memoryGridLabel: "Grid",
     memoryPairTypeLabel: "Pair Type",
@@ -145,7 +153,7 @@ export const GAME_TRANSLATIONS = {
     memoryCardFlippedAria: "Card flipped: ",
     memorySeenBadgeTitle: "Card already seen",
 
-    // Gestalt Translations
+    // Gestalt
     gestalt: {
       proximity: "Proximity",
       similarity: "Similarity",
@@ -165,7 +173,7 @@ export const GAME_TRANSLATIONS = {
       multistability: "Multistability",
       invariance: "Invariance",
       reification: "Reification"
-    },
+    }
   }
 };
 

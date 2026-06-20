@@ -304,67 +304,67 @@ export const CardGame = ({ t }) => {
       {showConfetti && (
         <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden" aria-hidden="true">
           {[...Array(60)].map((_, i) => (
-            <div key={i} className="confetti-particle" style={{ left: `${Math.random() * 100}%`, animationDelay: `${Math.random() * 3}s`, animationDuration: `${2 + Math.random() * 2}s`, backgroundColor: ['var(--accent)', '#fff', 'var(--text-main)'][Math.floor(Math.random() * 3)] }} />
+            <div key={i} className="confetti-particle" style={{ left: `${Math.random() * 100}%`, animationDelay: `${Math.random() * 3}s`, animationDuration: `${2 + Math.random() * 2}s`, backgroundColor: ['var(--color-accent)', '#fff', 'var(--color-textMain)'][Math.floor(Math.random() * 3)] }} />
           ))}
         </div>
       )}
 
       <div className="mb-8 text-center w-full">
-        <h2 className="text-3xl font-bold text-accent mb-2">{t?.memoryTitle || 'Jeu de Mémoire'}</h2>
-        <p className="text-textMuted max-w-2xl mx-auto">{t?.memorySubtitle || 'Testez vos capacités cognitives.'}</p>
+        <h2 className="text-3xl font-bold text-color-accent mb-2">{t?.memoryTitle || 'Jeu de Mémoire'}</h2>
+        <p className="text-color-textMuted max-w-2xl mx-auto">{t?.memorySubtitle || 'Testez vos capacités cognitives.'}</p>
       </div>
 
-      <div className="neu-panel p-6 mb-8 flex flex-col gap-6 bg-surface shadow-md rounded-2xl relative z-10 w-full max-w-4xl">
+      <div className="neu-panel p-6 mb-8 flex flex-col gap-6 bg-color-surface shadow-md rounded-2xl relative z-10 w-full max-w-4xl">
         <div className="flex flex-wrap gap-6 items-center justify-center">
           <div className="flex flex-col gap-2">
-            <label className="text-xs font-bold text-textMuted uppercase tracking-wider" htmlFor="grid-select">{t?.memoryGridLabel || 'Grille'}</label>
-            <select id="grid-select" className="neu-pressed px-4 py-2 text-textMain border-0 outline-none bg-transparent rounded-xl" value={gridSize} onChange={handleGridChange}>
+            <label className="text-xs font-bold text-color-textMuted uppercase tracking-wider" htmlFor="grid-select">{t?.memoryGridLabel || 'Grille'}</label>
+            <select id="grid-select" className="neu-pressed px-4 py-2 text-color-textMain border-0 outline-none bg-transparent rounded-xl" value={gridSize} onChange={handleGridChange}>
               <option value={4}>4 x 4</option>
               <option value={5}>5 x 5</option>
               <option value={6}>6 x 6</option>
             </select>
           </div>
           <div className="flex flex-col gap-2">
-            <label className="text-xs font-bold text-textMuted uppercase tracking-wider" htmlFor="match-select">{t?.memoryPairTypeLabel || 'Type de Paire'}</label>
-            <select id="match-select" className="neu-pressed px-4 py-2 text-textMain border-0 outline-none bg-transparent rounded-xl" value={matchType} onChange={handleMatchChange}>
+            <label className="text-xs font-bold text-color-textMuted uppercase tracking-wider" htmlFor="match-select">{t?.memoryPairTypeLabel || 'Type de Paire'}</label>
+            <select id="match-select" className="neu-pressed px-4 py-2 text-color-textMain border-0 outline-none bg-transparent rounded-xl" value={matchType} onChange={handleMatchChange}>
               <option value={2}>{t?.memoryPairsOption || 'Paires (2)'}</option>
               <option value={3}>{t?.memoryTripletsOption || 'Triplets (3)'}</option>
             </select>
           </div>
           <div className="flex flex-col gap-2">
-            <label className="text-xs font-bold text-textMuted uppercase tracking-wider" htmlFor="theme-select">{t?.memoryThemeLabel || 'Thème'}</label>
-            <select id="theme-select" className="neu-pressed px-4 py-2 text-textMain border-0 outline-none bg-transparent rounded-xl" value={gameTheme} onChange={handleThemeChange}>
+            <label className="text-xs font-bold text-color-textMuted uppercase tracking-wider" htmlFor="theme-select">{t?.memoryThemeLabel || 'Thème'}</label>
+            <select id="theme-select" className="neu-pressed px-4 py-2 text-color-textMain border-0 outline-none bg-transparent rounded-xl" value={gameTheme} onChange={handleThemeChange}>
               <option value="gestalt">{t?.memoryThemeGestalt || 'Principes Gestalt'}</option>
               <option value="math">{t?.memoryThemeMath || 'Équations Mathématiques'}</option>
             </select>
           </div>
           <div className="mt-2 md:mt-0 md:ml-auto">
-            <button onClick={() => startNewGame()} className="neu-btn px-6 py-3 font-bold text-accent rounded-xl hover:bg-opacity-80 transition-all focus-visible:ring-2 focus-visible:ring-accent">
+            <button onClick={() => startNewGame()} className="neu-btn px-6 py-3 font-bold text-color-accent rounded-xl hover:bg-opacity-80 transition-all focus-visible:ring-2 focus-visible:ring-color-accent">
               <i className="fas fa-rotate-right mr-2"></i> {t?.memoryBtnRestart || 'Recommencer'}
             </button>
           </div>
         </div>
 
-        <hr className="border-textMuted opacity-20" />
+        <hr className="border-color-textMuted opacity-20" />
 
         <div className="flex justify-around items-center text-center">
           <div>
-            <p className="text-xs text-textMuted uppercase font-bold tracking-wider mb-1">{t?.memoryFlipsLabel || 'Coups'}</p>
-            <p className="text-xl font-bold text-textMain">{state.flips}</p>
+            <p className="text-xs text-color-textMuted uppercase font-bold tracking-wider mb-1">{t?.memoryFlipsLabel || 'Coups'}</p>
+            <p className="text-xl font-bold text-color-textMain">{state.flips}</p>
           </div>
           <div>
-            <p className="text-xs text-textMuted uppercase font-bold tracking-wider mb-1">{t?.memoryMatchesLabel || 'Correspondances'}</p>
-            <p className="text-xl font-bold text-textMain">{state.matches} / {totalPossibleMatches}</p>
+            <p className="text-xs text-color-textMuted uppercase font-bold tracking-wider mb-1">{t?.memoryMatchesLabel || 'Correspondances'}</p>
+            <p className="text-xl font-bold text-color-textMain">{state.matches} / {totalPossibleMatches}</p>
           </div>
           <div>
-            <p className="text-xs text-textMuted uppercase font-bold tracking-wider mb-1">{t?.memoryEfficiencyLabel || 'Efficacité'}</p>
-            <p className={`text-xl font-bold ${efficiency >= 100 ? 'text-success' : 'text-accent'}`}>{efficiency}%</p>
+            <p className="text-xs text-color-textMuted uppercase font-bold tracking-wider mb-1">{t?.memoryEfficiencyLabel || 'Efficacité'}</p>
+            <p className={`text-xl font-bold ${efficiency >= 100 ? 'text-success' : 'text-color-accent'}`}>{efficiency}%</p>
           </div>
         </div>
       </div>
 
       <div
-        className={`game-board w-full mx-auto transition-all duration-700 ${state.isWon ? 'board-won neu-flat' : ''} ${isPulsing ? 'scale-105 shadow-[0_0_40px_var(--accent)] z-20 relative' : 'scale-100'}`}
+        className={`game-board w-full mx-auto transition-all duration-700 ${state.isWon ? 'board-won neu-flat' : ''} ${isPulsing ? 'scale-105 shadow-[0_0_40px_var(--color-accent)] z-20 relative' : 'scale-100'}`}
         style={{
           display: 'grid',
           gridTemplateColumns: `repeat(${gridSize}, 1fr)`,
@@ -385,7 +385,7 @@ export const CardGame = ({ t }) => {
               key={card.id}
               className={`
     card-scene w-full h-full text-left outline-none cursor-pointer
-    focus-visible:ring-4 focus-visible:ring-accent focus-visible:ring-offset-4 focus-visible:ring-offset-surface rounded-2xl
+    focus-visible:ring-4 focus-visible:ring-color-accent focus-visible:ring-offset-4 focus-visible:ring-offset-color-surface rounded-2xl
     ${card.isFlipped || card.isMatched || card.isWildcard ? 'is-flipped' : ''}
     ${card.justMatched ? 'animate-success' : ''}
     ${card.isMismatched ? 'animate-shake' : ''}
@@ -400,9 +400,9 @@ export const CardGame = ({ t }) => {
             <span className="sr-only">{ariaLabel}</span>
               <div className="card-flipper h-full w-full relative preserve-3d transition-transform duration-500 pointer-events-none">
                 <div className="card-face card-front neu-btn w-full h-full absolute inset-0 flex items-center justify-center rounded-2xl backface-hidden">
-                  <i className="fas fa-question text-textMuted opacity-20 text-xl lg:text-3xl"></i>
+                  <i className="fas fa-question text-color-textMuted opacity-20 text-xl lg:text-3xl"></i>
                   {card.hasBeenSeen && !card.isMatched && (
-                    <span className="!absolute top-3 right-3 sm:top-4 sm:right-4 w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-accent opacity-100 shadow-[0_0_12px_var(--accent),_0_0_24px_var(--accent)] animate-pulse" title={t?.memorySeenBadgeTitle || 'Card already seen'}></span>
+                    <span className="!absolute top-3 right-3 sm:top-4 sm:right-4 w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-color-accent opacity-100 shadow-[0_0_12px_var(--color-accent),_0_0_24px_var(--color-accent)] animate-pulse" title={t?.memorySeenBadgeTitle || 'Card already seen'}></span>
                   )}
                 </div>
 
@@ -410,7 +410,7 @@ export const CardGame = ({ t }) => {
                   {isImagePath(card.text) ? (
                     <img src={card.text} alt="" className="w-full h-full object-contain rounded-lg pointer-events-none drop-shadow-md" />
                   ) : (
-                    <span className={`font-bold text-center text-xs md:text-sm lg:text-base ${card.isResult ? 'text-accent text-lg md:text-xl lg:text-2xl' : 'text-textMain'}`}>
+                    <span className={`font-bold text-center text-xs md:text-sm lg:text-base ${card.isResult ? 'text-color-accent text-lg md:text-xl lg:text-2xl' : 'text-color-textMain'}`}>
                       {card.text}
                     </span>
                   )}
@@ -424,14 +424,14 @@ export const CardGame = ({ t }) => {
       {highScores.length > 0 && (
         <div className="mt-12 w-full max-w-lg mx-auto">
           <div className="neu-panel p-6">
-            <h3 className="text-xl font-bold text-accent text-center mb-4">
+            <h3 className="text-xl font-bold text-color-accent text-center mb-4">
               <i className="fas fa-trophy mr-2"></i> {t?.memoryHighScoreTitle || 'High Scores'}
             </h3>
             <ul className="flex flex-col gap-3">
               {highScores.map((score, i) => (
-                <li key={i} className="flex justify-between text-sm text-textMain border-b border-gray-600/30 pb-2">
+                <li key={i} className="flex justify-between text-sm text-color-textMain border-b border-gray-600/30 pb-2">
                   <span>{score.mode} - {score.date}</span>
-                  <span className="font-bold text-accent">{score.efficiency}% ({score.flips} {t?.memoryFlipsUnit || 'flips'})</span>
+                  <span className="font-bold text-color-accent">{score.efficiency}% ({score.flips} {t?.memoryFlipsUnit || 'flips'})</span>
                 </li>
               ))}
             </ul>

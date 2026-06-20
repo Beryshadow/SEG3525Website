@@ -135,7 +135,7 @@ export const SwipeGame = ({ t }) => {
       left: `${Math.random() * 100}%`,
       animationDelay: `${Math.random() * 2}s`,
       animationDuration: `${2 + Math.random() * 2}s`,
-      backgroundColor: ['var(--accent)', '#fff', 'var(--text-main)'][Math.floor(Math.random() * 3)]
+      backgroundColor: ['var(--color-accent)', '#fff', 'var(--color-textMain)'][Math.floor(Math.random() * 3)]
     }));
   }, []);
 
@@ -367,7 +367,7 @@ export const SwipeGame = ({ t }) => {
               key={`${i}-${start}-${end}`}
               x1={`${startCoord.x}%`} y1={`${startCoord.y}%`}
               x2={`${endCoord.x}%`} y2={`${endCoord.y}%`}
-              stroke={isErrorMode ? '#ef4444' : 'var(--text-main)'}
+              stroke={isErrorMode ? '#ef4444' : 'var(--color-textMain)'}
               strokeWidth={strokeWidth}
               strokeLinecap="round"
               className="transition-all duration-300"
@@ -417,20 +417,20 @@ export const SwipeGame = ({ t }) => {
       )}
 
       <div className="text-center mb-10">
-        <h2 className="text-3xl font-bold text-accent mb-2">{t?.swipeGameTitle || 'Spatial Password'}</h2>
-        <p className="text-textMuted max-w-2xl mx-auto">
+        <h2 className="text-3xl font-bold text-color-accent mb-2">{t?.swipeGameTitle || 'Spatial Password'}</h2>
+        <p className="text-color-textMuted max-w-2xl mx-auto">
           {t?.swipeGameDesc || 'Memorize the sequence and redraw it by swiping.'}
         </p>
       </div>
 
-      <div className="neu-panel p-6 mb-8 flex flex-col gap-6 bg-surface shadow-md rounded-2xl relative z-10">
+      <div className="neu-panel p-6 mb-8 flex flex-col gap-6 bg-color-surface shadow-md rounded-2xl relative z-10">
         <div className="flex flex-wrap gap-6 items-center justify-center">
 
           <div className="flex flex-col gap-2">
-            <label htmlFor="swipe-grid" className="text-xs font-bold text-textMuted uppercase tracking-wider">{t?.swipeGridSize || 'Grid Size'}</label>
+            <label htmlFor="swipe-grid" className="text-xs font-bold text-color-textMuted uppercase tracking-wider">{t?.swipeGridSize || 'Grid Size'}</label>
             <select
               id="swipe-grid"
-              className="neu-pressed px-4 py-2 text-textMain border-0 outline-none bg-transparent rounded-xl"
+              className="neu-pressed px-4 py-2 text-color-textMain border-0 outline-none bg-transparent rounded-xl"
               value={gridSize}
               onChange={(e) => {
                 const val = Number(e.target.value);
@@ -445,10 +445,10 @@ export const SwipeGame = ({ t }) => {
           </div>
 
           <div className="flex flex-col gap-2">
-            <label htmlFor="swipe-type" className="text-xs font-bold text-textMuted uppercase tracking-wider">{t?.swipeGameType || 'Game Type'}</label>
+            <label htmlFor="swipe-type" className="text-xs font-bold text-color-textMuted uppercase tracking-wider">{t?.swipeGameType || 'Game Type'}</label>
             <select
               id="swipe-type"
-              className="neu-pressed px-4 py-2 text-textMain border-0 outline-none bg-transparent rounded-xl"
+              className="neu-pressed px-4 py-2 text-color-textMain border-0 outline-none bg-transparent rounded-xl"
               value={gameType}
               onChange={(e) => {
                 const val = e.target.value;
@@ -463,10 +463,10 @@ export const SwipeGame = ({ t }) => {
           </div>
 
           <div className="flex flex-col gap-2">
-            <label htmlFor="swipe-logic" className="text-xs font-bold text-textMuted uppercase tracking-wider">{t?.swipePathLogic || 'Path Logic'}</label>
+            <label htmlFor="swipe-logic" className="text-xs font-bold text-color-textMuted uppercase tracking-wider">{t?.swipePathLogic || 'Path Logic'}</label>
             <select
               id="swipe-logic"
-              className="neu-pressed px-4 py-2 text-textMain border-0 outline-none bg-transparent rounded-xl"
+              className="neu-pressed px-4 py-2 text-color-textMain border-0 outline-none bg-transparent rounded-xl"
               value={pathLogic}
               onChange={(e) => {
                 const val = e.target.value;
@@ -481,31 +481,31 @@ export const SwipeGame = ({ t }) => {
           </div>
 
           <div className="mt-2 md:mt-0 md:ml-auto">
-            <button onClick={() => startGame(gridSize, gameType, pathLogic)} className="neu-btn px-6 py-3 font-bold text-accent rounded-xl hover:bg-opacity-80 transition-all">
+            <button onClick={() => startGame(gridSize, gameType, pathLogic)} className="neu-btn px-6 py-3 font-bold text-color-accent rounded-xl hover:bg-opacity-80 transition-all">
               <i className={phase === 'idle' ? "fas fa-play mr-2" : "fas fa-rotate-right mr-2"}></i>
               {phase === 'idle' ? (t?.swipeBtnStart || 'Start') : (t?.swipeBtnRestart || 'Restart')}
             </button>
           </div>
         </div>
 
-        <hr className="border-textMuted opacity-20" />
+        <hr className="border-color-textMuted opacity-20" />
 
         <div className="flex justify-around items-center text-center">
           <div>
-            <p className="text-xs text-textMuted uppercase font-bold tracking-wider mb-1">{t?.swipeRoundLabel || 'Round'}</p>
-            <p className="text-xl font-bold text-textMain">{phase === 'idle' ? '-' : gameType === 'puzzle' ? (t?.swipeMaxLabel || 'Max') : round}</p>
+            <p className="text-xs text-color-textMuted uppercase font-bold tracking-wider mb-1">{t?.swipeRoundLabel || 'Round'}</p>
+            <p className="text-xl font-bold text-color-textMain">{phase === 'idle' ? '-' : gameType === 'puzzle' ? (t?.swipeMaxLabel || 'Max') : round}</p>
           </div>
           <div>
-            <p className="text-xs text-textMuted uppercase font-bold tracking-wider mb-1">{t?.swipeStatusLabel || 'Status'}</p>
+            <p className="text-xs text-color-textMuted uppercase font-bold tracking-wider mb-1">{t?.swipeStatusLabel || 'Status'}</p>
             <p className="text-sm font-bold mt-1 px-3 py-1 rounded-full" style={{
-              color: isErrorState ? '#ef4444' : isSuccessState ? '#4ade80' : phase === 'showing' ? 'var(--accent)' : 'var(--text-muted)'
+              color: isErrorState ? '#ef4444' : isSuccessState ? '#4ade80' : phase === 'showing' ? 'var(--color-accent)' : 'var(--color-textMuted)'
             }}>
               {getStatusText()}
             </p>
           </div>
           <div>
-            <p className="text-xs text-textMuted uppercase font-bold tracking-wider mb-1">{t?.swipeRecordLabel || 'Highscore'}</p>
-            <p className="text-xl font-bold text-accent"><i className="fas fa-crown text-sm mr-1"></i> {gameType === 'puzzle' ? '-' : highScore}</p>
+            <p className="text-xs text-color-textMuted uppercase font-bold tracking-wider mb-1">{t?.swipeRecordLabel || 'Highscore'}</p>
+            <p className="text-xl font-bold text-color-accent"><i className="fas fa-crown text-sm mr-1"></i> {gameType === 'puzzle' ? '-' : highScore}</p>
           </div>
         </div>
       </div>
@@ -535,7 +535,7 @@ export const SwipeGame = ({ t }) => {
                 y1={`${getCoordinatePercent(userSequence[userSequence.length - 1], gridSize).y}%`}
                 x2={`${cursorPos.x}%`}
                 y2={`${cursorPos.y}%`}
-                stroke="var(--accent)"
+                stroke="var(--color-accent)"
                 strokeWidth="6"
                 strokeLinecap="round"
                 style={{ opacity: 0.8 }}
@@ -550,7 +550,7 @@ export const SwipeGame = ({ t }) => {
               const { x, y, totalUnits } = getCoordinatePercent(idx, gridSize);
               const sizePercent = (1 / totalUnits) * 100;
 
-              let bgColor = 'var(--accent)';
+              let bgColor = 'var(--color-accent)';
               let opacity = isActive ? 1 : 0.4;
               let scaleClass = isActive ? 'scale-125' : 'scale-75';
               let shadowClass = '';
@@ -563,7 +563,7 @@ export const SwipeGame = ({ t }) => {
                   bgColor = '#4ade80';
                   shadowClass = 'shadow-[0_0_15px_#4ade80]';
                 } else {
-                  shadowClass = 'shadow-[0_0_15px_var(--accent)]';
+                  shadowClass = 'shadow-[0_0_15px_var(--color-accent)]';
                 }
               }
 

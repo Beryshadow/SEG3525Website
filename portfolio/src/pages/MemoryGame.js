@@ -53,22 +53,20 @@ export default function App() {
 
   return (
     <GameContext.Provider value={{ appTheme, setAppTheme }}>
-      <div
-        className={`${themeClass} game-route`}
-      >
+      <div className={`${themeClass} game-route`}>
         <div className="font-sans antialiased overflow-clip min-h-screen">
 
           {/* Navigation Mobile */}
           <nav className="navbar navbar-dark d-lg-none sticky-top z-50 w-full px-4 pt-4 mb-8">
             <div className="neu-panel w-100 px-4 py-3 flex justify-between items-center">
-              <a className="font-bold tracking-wider text-accent" href="#card-game">JEUX</a>
+              <a className="font-bold tracking-wider text-color-accent" href="#card-game">JEUX</a>
               <div className="flex items-center gap-2">
-                <button onClick={toggleLang} className="neu-btn w-10 h-10 flex align-items-center justify-center font-bold text-xs text-textMain hover:scale-105 transition-transform shrink-0">
+                <button onClick={toggleLang} className="neu-btn w-10 h-10 flex align-items-center justify-center font-bold text-xs text-color-textMain hover:scale-105 transition-transform shrink-0">
                   <span>{lang.toUpperCase() === 'FR' ? 'EN' : 'FR'}</span>
                 </button>
                 <button
                   ref={toggleRef}
-                  className="neu-btn w-10 h-10 flex align-items-center justify-center text-textMain hover:scale-105 transition-transform shrink-0 border-0"
+                  className="neu-btn w-10 h-10 flex align-items-center justify-center text-color-textMain hover:scale-105 transition-transform shrink-0 border-0"
                   onClick={toggleMobileMenu}
                   aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
                 >
@@ -88,7 +86,7 @@ export default function App() {
                     {navItems.map((item) => (
                       <li key={item.id}>
                         <button className="nav-link-btn flex items-center gap-3 w-100 text-left" onClick={() => { handleScrollToSection(item.id); closeMobileMenu(); }}>
-                          <i className={`fas ${item.icon} w-5 text-center text-accent`}></i>
+                          <i className={`fas ${item.icon} w-5 text-center text-color-accent`}></i>
                           <span>{item.label}</span>
                         </button>
                       </li>
@@ -102,7 +100,7 @@ export default function App() {
                         onClick={() => setAppTheme(tOpt.id)}
                         className="w-8 h-8 rounded-full border-2 hover:scale-110 transition-transform"
                         style={{ backgroundColor: tOpt.color, borderColor: appTheme === tOpt.id ? 'var(--color-accent)' : 'transparent' }}
-                        aria-label={`Thème ${tOpt.label}`}
+                        aria-label={`${t.navThemeLabel} ${tOpt.label}`}
                       />
                     ))}
                   </div>
@@ -114,12 +112,12 @@ export default function App() {
           <div className="container-fluid max-w-[1500px] mx-auto py-8 lg:py-16 px-4 lg:px-8">
             <div className="row g-5">
 
-              {/* Sidebar Desktop*/}
+              {/* Sidebar Desktop */}
               <aside className="col-lg-2 d-none d-lg-block" aria-label="navigation menu">
                 <div className="sticky top-12 flex flex-col gap-8">
                   <div id='info-card' aria-label='card-panel' className="neu-panel p-6 text-center">
-                    <h1 className="font-extrabold text-xl tracking-wider text-accent block mb-2">RB</h1>
-                    <span className="text-xs text-textMuted uppercase tracking-widest">Jeux</span>
+                    <h1 className="font-extrabold text-xl tracking-wider text-color-accent block mb-2">RB</h1>
+                    <span className="text-xs text-color-textMuted uppercase tracking-widest">{t.game ?? 'Jeux'}</span>
                   </div>
                   <nav className="flex flex-col gap-4">
                     <Link to="/" className="neu-btn p-4 flex items-center gap-4 text-sm font-bold">
@@ -142,35 +140,30 @@ export default function App() {
                 <CardGame t={t} />
                 <footer className="pt-8 pb-4 mt-16 text-center lg:text-left">
                   <div className="neu-pressed p-6 d-flex flex-column flex-lg-row justify-content-between align-items-center">
-
                     <div className="mb-4 mb-lg-0">
-                      <h3 className="font-bold text-lg text-accent mb-1">Ryan Beland</h3>
-                      <p className="text-sm text-textMuted mb-0">
+                      <h3 className="font-bold text-lg text-color-accent mb-1">Ryan Beland</h3>
+                      <p className="text-sm text-color-textMuted mb-0">
                         <span>{t.footerCourse}</span>
                       </p>
                     </div>
-
                     <div className="text-center lg:text-right d-flex flex-column gap-1">
-                      <p className="text-sm text-textMuted mb-0">
+                      <p className="text-sm text-color-textMuted mb-0">
                         &copy; 2026 Université d'Ottawa / University of Ottawa.
                       </p>
-
-                      <span className="text-xs text-textMuted opacity-80">
-                        Mis à jour / Updated: {import.meta.env.VITE_BUILD_TIME}
+                      <span className="text-xs text-color-textMuted opacity-80">
+                        {t.footerUpdateLabel} {import.meta.env.VITE_BUILD_TIME}
                       </span>
                     </div>
-
                   </div>
                 </footer>
               </main>
 
-              {/* Panneau Theme Desktop*/}
+              {/* Panneau Theme Desktop */}
               <aside className="col-lg-2 d-none d-lg-block" aria-label="Options theme">
                 <div className="sticky top-12 flex flex-col items-start gap-4">
                   <button onClick={toggleLang} className="neu-btn w-12 h-12 flex items-center justify-center font-bold" title={t.navThemeTitle}>
                     {lang.toUpperCase() === 'FR' ? 'EN' : 'FR'}
                   </button>
-
                   <div className="neu-panel p-2 flex flex-col gap-3 mt-4 rounded-full items-center">
                     {THEME_OPTIONS.map(tOpt => (
                       <button
@@ -179,11 +172,10 @@ export default function App() {
                         className="w-8 h-8 rounded-full border-2 transition-transform hover:scale-110"
                         style={{ backgroundColor: tOpt.color, borderColor: appTheme === tOpt.id ? 'var(--color-accent)' : 'transparent' }}
                         title={tOpt.label}
-                        aria-label={`Activer le thème ${tOpt.label}`}
+                        aria-label={`${t.navThemeLabel} ${tOpt.label}`}
                       />
                     ))}
                   </div>
-
                   <a href="#top" className="neu-btn w-12 h-12 flex items-center justify-center mt-8" title={t.navScrollTop}>
                     <i className="fas fa-arrow-up"></i>
                   </a>
