@@ -72,19 +72,19 @@ Jean veut naviguer sur une interface épurée et reposante afin de jouer à un j
 
 ## 3\. Scénarimage 1: 
 
-
+<img width="1650" height="1036" alt="maquette2" src="https://github.com/user-attachments/assets/fcbe11ab-baf9-4a40-b203-97e1b1eba092" />
 Maquette 1 du scénarimage 1  
 Pour cette maquette, je voulais vraiment piquer la curiosité de Saroul tout de suite. Comme je n'ai pas mis de page d'accueil, il tombe directement sur Password Swipe. Je me suis dit que le fonctionnement mystérieux du jeu allait lui donner envie de cliquer partout pour comprendre.
 
 Objectif de Saroul: Poussé par sa grande curiosité et son impatience, Saroul veut obtenir une gratification immédiate en lançant directement « un jeu intrigant », tout en étant récompensé par des animations dynamiques.
 
-
+<img width="1666" height="1014" alt="maquette1" src="https://github.com/user-attachments/assets/2e5d013e-3067-4cd1-bf88-ddad17fcce59" />
 Maquette 2 du scénarimage 1  
 Ici, je me suis concentré sur son besoin d'action immédiate. J'ai fait exprès de ne pas mettre de consignes à lire. Il peut lancer la partie en un seul clic et utiliser les boutons de la barre de navigation pour recommencer rapidement sans aucune friction.
 
 Objectif de Saroul: Poussé par sa grande curiosité et son impatience, Saroul veut « obtenir une gratification immédiate en lançant directement » un jeu intrigant, tout en étant récompensé par des animations dynamiques.
 
-
+<img width="1913" height="924" alt="maquette3" src="https://github.com/user-attachments/assets/79a7da86-3afb-4048-b1ed-626741a730b0" />
 Maquette 3 du scénarimage 1  
 Pour garder son attention, j'ai conçu cet écran de victoire qui s'affiche à la fin de la partie. Ça lui donne la récompense visuelle et l'animation dont il a besoin pour ne pas s'ennuyer.
 
@@ -92,19 +92,19 @@ Objectif de Saroul: Poussé par sa grande curiosité et son impatience, Saroul v
 
 ## 3\. Scénarimage 2: 
 
-
+<img width="1396" height="770" alt="maquette21" src="https://github.com/user-attachments/assets/96dde735-544d-4fbc-947c-c4143c39cfe4" />
 Maquette 1 du scénarimage 2  
 Pour Jean, je voulais qu'il ressente du calme dès qu'il arrive sur le site. J'ai choisi un design global très minimaliste. J'ai remplacé la page d'accueil classique par une barre de navigation discrète pour enlever tout ce qui pourrait le stresser visuellement.
 
 Objectif de Jean: Jean veut « naviguer sur une interface épurée et reposante » afin de jouer à un jeu de mémoire relaxant qui lui propose plusieurs thèmes zen pour l'aider à décompresser.
 
-
+<img width="1389" height="724" alt="maquette22" src="https://github.com/user-attachments/assets/c8472d6d-daab-48b2-b638-8032d9b12ea5" />
 Maquette 2 du scénarimage 2  
 Je voulais aussi qu'il puisse adapter le site à ses goûts pour se relaxer. J'ai donc ajouté un sélecteur de thèmes dans la barre pour qu'il puisse changer l'apparence visuelle facilement.
 
 Objectif de Jean: Jean veut naviguer sur une interface épurée et reposante afin de jouer à un jeu de mémoire relaxant qui lui propose « plusieurs thèmes zen » pour l'aider à décompresser.
 
-
+<img width="1396" height="866" alt="maquette23" src="https://github.com/user-attachments/assets/55048ec3-70df-42a8-a4cf-695cbabfa905" />
 Maquette 3 du scénarimage 2  
 Ici, j'ai illustré le jeu de Concentration avamt une partie. J'ai pensé l'activité pour qu'elle soit calme et axée sur la réflexion. J'ai enlevé tout ce qui pourrait le perturber ou lui mettre de la pression comme une minuterie.
 
