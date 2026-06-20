@@ -1,9 +1,9 @@
-.listmemorizer-route {
+.serialrecall-route {
   --accent: #b3f6f1;
 }
 
-.listmemorizer-route.light-mode {
-  --accent: #b3f6f1;
+.serialrecall-route.light-mode {
+  --accent: #119289;
 }
 
 @keyframes customShake {

@@ -1,8 +1,44 @@
 import { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 
-export function useSharedLogic(sectionIds) {
-  const [theme, setTheme] = useState(() => localStorage.getItem('portfolio-theme') || 'dark');
+const isThemeClassAvailable = (themeName) => {
+  if (!themeName || ['dark', 'light'].includes(themeName)) return true;
+
+  try {
+    for (const sheet of Array.from(document.styleSheets)) {
+      try {
+        const rules = sheet.cssRules || sheet.rules;
+        if (!rules) continue;
+
+        for (const rule of Array.from(rules)) {
+          if (rule.selectorText && rule.selectorText.includes(`.${themeName}`)) {
+            return true;
+          }
+        }
+      } catch (e) {
+        continue;
+      }
+    }
+  } catch (e) {
+    return false;
+  }
+  return false;
+};
+
+export function useSharedLogic(sectionIds = []) {
+  const location = useLocation();
+
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('portfolio-theme') || 'dark';
+  });
   const [lang, setLang] = useState(() => localStorage.getItem('portfolio-lang') || 'fr');
+
+  const [baseFallback, setBaseFallback] = useState(() => {
+    const saved = localStorage.getItem('portfolio-base-fallback');
+    if (saved) return saved;
+    return ['dark', 'light'].includes(theme) ? theme : 'dark';
+  });
+
   const [activeSection, setActiveSection] = useState(sectionIds[0]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -15,11 +51,41 @@ export function useSharedLogic(sectionIds) {
 
   useEffect(() => {
     const htmlElement = document.documentElement;
-    theme === 'light' ? htmlElement.classList.add('light-mode') : htmlElement.classList.remove('light-mode');
+    const bodyElement = document.body;
+
+    const isStandardTheme = ['dark', 'light'].includes(theme);
+    const themeExistsInCSS = isThemeClassAvailable(theme);
+
+    const isCustomThemeAllowedHere = location.pathname.includes('/memorygame');
+
+    if (!isStandardTheme && (!isCustomThemeAllowedHere || !themeExistsInCSS)) {
+      setTheme(baseFallback);
+      return;
+    }
+
+    if (isStandardTheme) {
+      setBaseFallback(theme);
+      localStorage.setItem('portfolio-base-fallback', theme);
+    }
+
+    const isLightMode = theme === 'light' || theme === 'theme-rust-light';
+    htmlElement.setAttribute('data-theme', isLightMode ? 'light' : 'dark');
     htmlElement.setAttribute('lang', lang);
+
+    const classesToRemove = Array.from(bodyElement.classList).filter(
+      c => c.startsWith('theme-') || c === 'light-mode'
+    );
+    bodyElement.classList.remove(...classesToRemove);
+
+    if (theme === 'light') {
+      bodyElement.classList.add('light-mode');
+    } else if (theme !== 'dark') {
+      bodyElement.classList.add(theme);
+    }
+
     localStorage.setItem('portfolio-theme', theme);
     localStorage.setItem('portfolio-lang', lang);
-  }, [theme, lang]);
+  }, [location.pathname, theme, lang, baseFallback]);
 
   useEffect(() => {
     lastScrollY.current = window.scrollY;
@@ -75,20 +141,21 @@ export function useSharedLogic(sectionIds) {
       let current = activeSection;
       let closestDistance = Infinity;
 
-      sectionIds.forEach(secId => {
-        const el = document.getElementById(secId);
-        if (el) {
-          const rect = el.getBoundingClientRect();
-          const distance = Math.abs(rect.top - (window.innerHeight / 3));
+      if (sectionIds && sectionIds.length > 0) {
+        sectionIds.forEach(secId => {
+          const el = document.getElementById(secId);
+          if (el) {
+            const rect = el.getBoundingClientRect();
+            const distance = Math.abs(rect.top - (window.innerHeight / 3));
 
-          if (distance < closestDistance) {
-            closestDistance = distance;
-            current = secId;
+            if (distance < closestDistance) {
+              closestDistance = distance;
+              current = secId;
+            }
           }
-        }
-      });
-
-      setActiveSection(current);
+        });
+        setActiveSection(current);
+      }
     };
 
     const handleGlobalClick = (e) => {
@@ -121,8 +188,7 @@ export function useSharedLogic(sectionIds) {
       window.removeEventListener('scroll', handleScroll);
       document.removeEventListener('click', handleGlobalClick);
     };
-
-  }, [sectionIds, isMobileMenuOpen]);
+  }, [sectionIds, isMobileMenuOpen, activeSection, location.pathname]);
 
   const handleScrollToSection = (id) => {
     setIsMobileMenuOpen(false);
@@ -142,16 +208,20 @@ export function useSharedLogic(sectionIds) {
   };
 
   return {
-    theme, setTheme,
-    lang, setLang,
+    theme,
+    setTheme,
+    appTheme: theme,
+    setAppTheme: setTheme,
+    lang,
+    setLang,
     activeSection,
     isMobileMenuOpen,
     menuRef,
     toggleRef,
     toggleMobileMenu: () => setIsMobileMenuOpen(prev => !prev),
     closeMobileMenu: () => setIsMobileMenuOpen(false),
-    toggleTheme: () => setTheme(t => t === 'dark' ? 'light' : 'dark'),
-    toggleLang: () => setLang(l => l === 'fr' || l === 'FR' ? 'en' : 'fr'),
+    toggleTheme: () => setTheme(t => t === 'light' ? 'dark' : 'light'),
+    toggleLang: () => setLang(l => l.toLowerCase() === 'fr' ? 'en' : 'fr'),
     handleScrollToSection
   };
 }

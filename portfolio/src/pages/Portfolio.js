@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
 import { useSharedLogic } from '../utilities/shared';
 import { TRANSLATIONS } from '../data/portfolioData';
 import '../App.css';
@@ -254,10 +255,10 @@ export default function Portfolio() {
               <div className="row row-cols-1 row-cols-md-2 g-5">
                 <div className="col">
                   <Link to="/uopets" className="neu-card block p-6 h-100 group">
-                    <div className={`${theme === 'light' ? 'light-mode' : ''} vet-route neu-pressed h-40 flex items-center justify-center mb-6`}>
+                    <div className={`${theme === 'light' ? 'light-mode' : ''} uopets-route neu-pressed h-40 flex items-center justify-center mb-6`}>
                       <i
                         className="fas fa-paw fa-3x opacity-80 group-hover:scale-110 transition-transform duration-500"
-                        style={{ color: 'var(--accent)' }}
+                        style={{ color: 'var(--color-accent)' }}
                       ></i>
                     </div>
                     <h5 className="font-bold text-lg text-[var(--text-main)] mb-3">
@@ -274,7 +275,7 @@ export default function Portfolio() {
                     <div className={`${theme === 'light' ? 'light-mode' : ''} game-route neu-pressed h-40 flex items-center justify-center mb-6`}>
                       <i
                         className="fas fa-brain fa-3x opacity-80 group-hover:scale-110 transition-transform duration-500"
-                        style={{ color: 'var(--accent)' }}
+                        style={{ color: 'var(--color-accent)' }}
                       ></i>
                     </div>
                     <h5 className="font-bold text-lg text-[var(--text-main)] mb-3">
@@ -385,9 +386,9 @@ export default function Portfolio() {
           <div className="col-lg-1 d-none d-lg-block">
             <div className="sticky top-12 flex flex-col items-center gap-4">
               <button onClick={toggleTheme} className="neu-btn w-12 h-12 flex items-center justify-center" title="Toggle Theme">
-                <i className="fas fa-sun theme-icon-sun text-lg" style={{ display: theme === 'dark' ? 'block' : 'none' }}></i>
-                <i className="fas fa-moon theme-icon-moon text-lg" style={{ display: theme === 'light' ? 'block' : 'none' }}></i>
+                {theme === 'dark' ? <i className="fas fa-sun text-xl"></i> : <i className="fas fa-moon text-xl"></i>}
               </button>
+
 
               <button onClick={toggleLang} className="neu-btn w-12 h-12 flex items-center justify-center font-bold" title="Toggle Language">
                 {lang === 'fr' ? 'EN' : 'FR'}

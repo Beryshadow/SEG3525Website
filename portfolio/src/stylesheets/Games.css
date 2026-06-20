@@ -1,53 +1,69 @@
 .game-route {
-  --accent: #d294ff;
+  --color-accent: #d294ff;
 }
 
-.game-route.light-mode {
-  --accent: #590ebd;
+.light-mode.game-route {
+  --color-accent: #590ebd;
 }
 
+.theme-rust-light.game-route,
 .theme-rust-light {
-  --bg-main: #ffffff;
-  --accent: #b7410e; 
-  --text-main: #000000;
-  --text-muted: #737373;
-  --shadow-d: rgba(0, 0, 0, 0.15);
-  --shadow-l: rgba(255, 255, 255, 0.8);
-  --grad-l: rgba(255, 255, 255, 0.4);
-  --grad-d: rgba(0, 0, 0, 0.05);
+  --color-bgMain: #ffffff;
+  --color-accent: #b7410e;
+  --color-textMuted: #737373;
+  --color-textMain: #000000;
+  --color-surface: #ffffff;
+  --color-shadowD: rgba(0, 0, 0, 0.15);
+  --color-shadowDStrong: var(--shadow-d-strong);
+  --color-shadowL: rgba(255, 255, 255, 0.8);
+  --color-borderD: var(--border-d);
+  --color-gradL: rgba(255, 255, 255, 0.4);
+  --color-gradD: rgba(0, 0, 0, 0.05);
 }
 
+.game-route.theme-rust-dark,
 .theme-rust-dark {
-  --bg-main: #353535;
-  --accent: #ff8c00; 
-  --text-main: #ffffff;
-  --text-muted: #a0a0a0;
-  --shadow-d: rgba(0, 0, 0, 0.5);
-  --shadow-l: rgba(255, 255, 255, 0.05);
-  --grad-l: rgba(255, 255, 255, 0.02);
-  --grad-d: rgba(0, 0, 0, 0.15);
+  --color-bgMain: #353535;
+  --color-accent: #ff8c00;
+  --color-textMuted: #a0a0a0;
+  --color-textMain: #ffffff;
+  --color-surface: #353535;
+  --color-shadowD: rgba(0, 0, 0, 0.5);
+  --color-shadowDStrong: var(--shadow-d-strong);
+  --color-shadowL: rgba(255, 255, 255, 0.05);
+  --color-borderD: var(--border-d);
+  --color-gradL: rgba(255, 255, 255, 0.02);
+  --color-gradD: rgba(0, 0, 0, 0.15);
 }
 
+.game-route.theme-ocean,
 .theme-ocean {
-  --bg-main: #0a192f;
-  --accent: #64ffda;
-  --text-main: #ccd6f6;
-  --text-muted: #8892b0;
-  --shadow-d: rgba(2, 12, 27, 0.8);
-  --shadow-l: rgba(25, 45, 75, 0.5);
-  --grad-l: rgba(255, 255, 255, 0.03);
-  --grad-d: rgba(0, 0, 0, 0.2);
+  --color-bgMain: #0a192f;
+  --color-accent: #64ffda;
+  --color-textMuted: #8892b0;
+  --color-textMain: #ccd6f6;
+  --color-surface: #0a192f;
+  --color-shadowD: rgba(2, 12, 27, 0.8);
+  --color-shadowDStrong: var(--shadow-d-strong);
+  --color-shadowL: rgba(25, 45, 75, 0.5);
+  --color-borderD: var(--border-d);
+  --color-gradL: rgba(255, 255, 255, 0.03);
+  --color-gradD: rgba(0, 0, 0, 0.2);
 }
 
+.game-route.theme-rust-ayu,
 .theme-rust-ayu {
-  --bg-main: #0f1419;
-  --accent: #ffb454;
-  --text-main: #e6e1cf;
-  --text-muted: #5c6773;
-  --shadow-d: rgba(0, 0, 0, 0.8);
-  --shadow-l: rgba(25, 30, 35, 0.5);
-  --grad-l: rgba(255, 255, 255, 0.01);
-  --grad-d: rgba(0, 0, 0, 0.3);
+  --color-bgMain: #0f1419;
+  --color-accent: #ffb454;
+  --color-textMuted: #5c6773;
+  --color-textMain: #e6e1cf;
+  --color-surface: #0f1419;
+  --color-shadowD: rgba(0, 0, 0, 0.8);
+  --color-shadowDStrong: var(--shadow-d-strong);
+  --color-shadowL: rgba(25, 30, 35, 0.5);
+  --color-borderD: var(--border-d);
+  --color-gradL: rgba(255, 255, 255, 0.01);
+  --color-gradD: rgba(0, 0, 0, 0.3);
 }
 
 /* 

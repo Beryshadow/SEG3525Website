@@ -3,10 +3,6 @@ import React from 'react';
 import { CardGame } from '../pages/gameFiles/CardGame';
 
 jest.mock('../utilities/GameContext', () => ({
-  useAppTheme: () => ({
-    appTheme: 'dark',
-    setAppTheme: jest.fn()
-  }),
   useLocalStorage: (key, initialValue) => {
     let value = initialValue;
     return [value, (newValue) => { value = newValue; }];

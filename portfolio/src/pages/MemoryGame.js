@@ -4,27 +4,36 @@ import { useSharedLogic } from '../utilities/shared';
 import CardGame from './gameFiles/CardGame.js';
 import SwipeGame from './gameFiles/PasswordGame.js';
 import { GAME_TRANSLATIONS } from '../data/gameData';
-import { GameContext, useLocalStorage } from '../utilities/GameContext';
+import { GameContext } from '../utilities/GameContext';
 import '../App.css';
 import '../stylesheets/Games.css';
 
 const THEME_OPTIONS = [
-  { id: 'rust-ayu', color: '#0f1419', label: 'Rust Ayu' },
+  { id: 'theme-rust-ayu', color: '#0f1419', label: 'Rust Ayu' },
   { id: 'dark', color: '#182429', label: 'Default Dark' },
-  { id: 'rust-dark', color: '#353535', label: 'Rust Dark' },
-  { id: 'ocean', color: '#0a192f', label: 'Dark Ocean' },
+  { id: 'theme-rust-dark', color: '#353535', label: 'Rust Dark' },
+  { id: 'theme-ocean', color: '#0a192f', label: 'Dark Ocean' },
   { id: 'light', color: '#e0e5ec', label: 'Default Light' },
-  { id: 'rust-light', color: '#ffffff', label: 'Rust Light' },
+  { id: 'theme-rust-light', color: '#ffffff', label: 'Rust Light' },
 ];
 
 export default function App() {
   const navigate = useNavigate();
+
   const {
-    lang, activeSection, isMobileMenuOpen, menuRef, toggleRef,
-    toggleMobileMenu, closeMobileMenu, toggleLang, handleScrollToSection
+    appTheme,
+    setAppTheme,
+    lang,
+    activeSection,
+    isMobileMenuOpen,
+    menuRef,
+    toggleRef,
+    toggleMobileMenu,
+    closeMobileMenu,
+    toggleLang,
+    handleScrollToSection
   } = useSharedLogic(['card-game', 'password-swipe']);
 
-  const [appTheme, setAppTheme] = useLocalStorage('app-custom-theme', 'dark');
   const t = GAME_TRANSLATIONS[lang.toUpperCase()] || GAME_TRANSLATIONS['FR'];
 
   useEffect(() => {
@@ -40,38 +49,12 @@ export default function App() {
     { id: 'card-game', icon: 'fa-layer-group', label: t.navCardGame },
   ];
 
-  const themeClass = appTheme === 'light' ? 'light-mode' : (appTheme === 'dark' ? '' : `theme-${appTheme}`);
-
-  useEffect(() => {
-    const htmlElement = document.documentElement;
-
-    htmlElement.classList.remove('light-mode', 'theme-rust-light', 'theme-rust-dark', 'theme-rust-ayu', 'theme-ocean');
-
-    if (themeClass) {
-      htmlElement.classList.add(themeClass);
-    }
-
-    document.body.style.backgroundColor = 'var(--bg-main)';
-    document.body.style.color = 'var(--text-main)';
-    document.body.style.transition = 'background-color 0.5s ease, color 0.5s ease';
-
-    return () => {
-      htmlElement.classList.remove('theme-rust-light', 'theme-rust-dark', 'theme-rust-ayu', 'theme-ocean');
-      document.body.style.backgroundColor = '';
-      document.body.style.color = '';
-    };
-  }, [themeClass]);
+  const themeClass = appTheme === 'light' ? 'light-mode' : (appTheme === 'dark' ? '' : `${appTheme}`);
 
   return (
     <GameContext.Provider value={{ appTheme, setAppTheme }}>
       <div
         className={`${themeClass} game-route`}
-        style={{
-          backgroundColor: 'var(--bg-main)',
-          color: 'var(--text-main)',
-          minHeight: '100vh',
-          transition: 'background-color 0.5s ease, color 0.5s ease'
-        }}
       >
         <div className="font-sans antialiased overflow-clip min-h-screen">
 
@@ -114,7 +97,13 @@ export default function App() {
 
                   <div className="flex gap-2 justify-center border-t border-gray-500 pt-4 opacity-80">
                     {THEME_OPTIONS.map(tOpt => (
-                      <button key={tOpt.id} onClick={() => setAppTheme(tOpt.id)} className="w-8 h-8 rounded-full border-2 hover:scale-110 transition-transform" style={{ backgroundColor: tOpt.color, borderColor: appTheme === tOpt.id ? 'var(--accent)' : 'transparent' }} aria-label={`Thème ${tOpt.label}`} />
+                      <button
+                        key={tOpt.id}
+                        onClick={() => setAppTheme(tOpt.id)}
+                        className="w-8 h-8 rounded-full border-2 hover:scale-110 transition-transform"
+                        style={{ backgroundColor: tOpt.color, borderColor: appTheme === tOpt.id ? 'var(--color-accent)' : 'transparent' }}
+                        aria-label={`Thème ${tOpt.label}`}
+                      />
                     ))}
                   </div>
                 </div>
@@ -126,7 +115,7 @@ export default function App() {
             <div className="row g-5">
 
               {/* Sidebar Desktop*/}
-              <aside className="col-lg-2 d-none d-lg-block" aria-label="Menu principal">
+              <aside className="col-lg-2 d-none d-lg-block" aria-label="navigation menu">
                 <div className="sticky top-12 flex flex-col gap-8">
                   <div id='info-card' aria-label='card-panel' className="neu-panel p-6 text-center">
                     <h1 className="font-extrabold text-xl tracking-wider text-accent block mb-2">RB</h1>
@@ -148,14 +137,36 @@ export default function App() {
               </aside>
 
               {/* Contenu Principal */}
-              <main className="col-lg-9">
+              <main className="col-lg-8">
                 <SwipeGame t={t} />
                 <CardGame t={t} />
+                <footer className="pt-8 pb-4 mt-16 text-center lg:text-left">
+                  <div className="neu-pressed p-6 d-flex flex-column flex-lg-row justify-content-between align-items-center">
+
+                    <div className="mb-4 mb-lg-0">
+                      <h3 className="font-bold text-lg text-accent mb-1">Ryan Beland</h3>
+                      <p className="text-sm text-textMuted mb-0">
+                        <span>{t.footerCourse}</span>
+                      </p>
+                    </div>
+
+                    <div className="text-center lg:text-right d-flex flex-column gap-1">
+                      <p className="text-sm text-textMuted mb-0">
+                        &copy; 2026 Université d'Ottawa / University of Ottawa.
+                      </p>
+
+                      <span className="text-xs text-textMuted opacity-80">
+                        Mis à jour / Updated: {import.meta.env.VITE_BUILD_TIME}
+                      </span>
+                    </div>
+
+                  </div>
+                </footer>
               </main>
 
               {/* Panneau Theme Desktop*/}
-              <aside className="col-lg-1 d-none d-lg-block" aria-label="Paramètres du thème">
-                <div className="sticky top-12 flex flex-col items-center gap-4">
+              <aside className="col-lg-2 d-none d-lg-block" aria-label="Options theme">
+                <div className="sticky top-12 flex flex-col items-start gap-4">
                   <button onClick={toggleLang} className="neu-btn w-12 h-12 flex items-center justify-center font-bold" title={t.navThemeTitle}>
                     {lang.toUpperCase() === 'FR' ? 'EN' : 'FR'}
                   </button>
@@ -166,7 +177,7 @@ export default function App() {
                         key={tOpt.id}
                         onClick={() => setAppTheme(tOpt.id)}
                         className="w-8 h-8 rounded-full border-2 transition-transform hover:scale-110"
-                        style={{ backgroundColor: tOpt.color, borderColor: appTheme === tOpt.id ? 'var(--accent)' : 'transparent' }}
+                        style={{ backgroundColor: tOpt.color, borderColor: appTheme === tOpt.id ? 'var(--color-accent)' : 'transparent' }}
                         title={tOpt.label}
                         aria-label={`Activer le thème ${tOpt.label}`}
                       />

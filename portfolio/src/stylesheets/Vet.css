@@ -1,9 +1,9 @@
-.vet-route {
-  --accent: #6fb58e;
+.uopets-route {
+  --color-accent: #6fb58e;
 }
 
-.vet-route.light-mode {
-  --accent: #1a6f54;
+.light-mode.uopets-route {
+  --color-accent: #1a6f54;
 }
 
 .animate-fade-in {
@@ -117,14 +117,12 @@
 
 @media (max-width: 767px) {
 
-  /* Stack the row elements vertically */
   .form-row-track {
     flex-direction: column;
     align-items: stretch;
     gap: 1rem;
   }
 
-  /* Force full width on mobile */
   .slide-item,
   .email-slide-container.is-active,
   .email-slide-container {
@@ -133,12 +131,10 @@
     margin: 0 !important;
   }
 
-  /* Ensure the checkbox stays centered or full-width on mobile */
   .slide-item.centered {
     margin: 0 !important;
   }
 
-  /* Reset padding on mobile for better alignment */
   .email-slide-container.is-active {
     padding-left: 0 !important;
   }

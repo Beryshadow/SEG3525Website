@@ -67,7 +67,7 @@ const levenshtein = (a, b) => {
 export default function ListMem() {
   const [view, setView] = useState("study"); // study, practice, manage
   const navigate = useNavigate();
-  const { theme, toggleTheme, lang } = useSharedLogic([]);
+  const { appTheme, theme, toggleTheme, lang } = useSharedLogic([]);
   const currentLang = (lang || 'en').toLowerCase();
 
   // Data State
@@ -205,8 +205,10 @@ export default function ListMem() {
     setLists(prev => prev.map(l => l.id === id ? { ...l, ...updates } : l));
   };
 
+  const themeClass = appTheme === 'light' ? 'light-mode' : (appTheme === 'dark' ? '' : `theme-${appTheme}`);
+
   return (
-    <div className={`min-h-screen relative font-sans transition-colors duration-300 ${theme === 'light' ? 'light-mode' : ''}`} style={{ backgroundColor: 'var(--bg-main)', color: 'var(--text-main)' }}>
+    <div className={`min-h-screen relative font-sans transition-colors duration-300 ${themeClass} serialrecall-route`} style={{ backgroundColor: 'var(--bg-main)', color: 'var(--text-main)' }}>
       {/* Header */}
       <nav className="sticky top-0 z-50 w-full px-4 pt-4 mb-8 flex flex-col items-center">
         <div className="neu-panel w-full max-w-5xl px-6 py-4 flex justify-between items-center gap-3">

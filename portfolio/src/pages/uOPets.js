@@ -34,13 +34,25 @@ export default function VetPortal() {
 
   const navigate = useNavigate();
   const {
-    theme, lang, activeSection,
-    isMobileMenuOpen, menuRef, toggleRef, toggleMobileMenu, closeMobileMenu,
-    toggleTheme, toggleLang, handleScrollToSection
+    theme,
+    appTheme,
+    setAppTheme,
+    lang,
+    activeSection,
+    isMobileMenuOpen,
+    menuRef,
+    toggleRef,
+    toggleMobileMenu,
+    closeMobileMenu,
+    toggleTheme,
+    toggleLang,
+    handleScrollToSection
   } = useSharedLogic(['about', 'team', 'services', 'booking', 'contact']);
 
   const currentLangKey = (lang || 'fr').toLowerCase() === 'fr' ? 'FR' : 'EN';
   const t = TRANSLATIONS[currentLangKey];
+
+  const themeClass = appTheme === 'light' ? 'light-mode' : (appTheme === 'dark' ? '' : `theme-${appTheme}`);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -137,7 +149,7 @@ export default function VetPortal() {
   ];
 
   return (
-    <div className={`${theme === 'light' ? 'light-mode' : ''} vet-route`}>
+    <div className={`${themeClass} uopets-route`}>
       <div className="min-h-screen font-sans text-[var(--text-main)] transition-colors duration-300 relative">
         {typeof document !== 'undefined' && createPortal(
           <a
@@ -160,16 +172,16 @@ export default function VetPortal() {
             >
               <SVG
                 src="/emergencyPhoneIcon.svg"
-                className="h-6 w-6 block mx-auto text-[#FF746C]"
+                className="h-6 w-6 block mx-auto text-[#FF545C]"
                 fill="currentColor"
               />
             </button>
 
-            <span className="d-none d-lg-block font-bold uppercase tracking-widest text-accent text-sm truncate" style={{ color: '#FF746C' }}>
-              <i className="fas fa-phone text-xl text-accent"></i> {t.emergencyLabel}
+            <span className="d-none d-lg-block font-bold uppercase tracking-widest text-accent text-sm truncate" style={{ color: '#FF545C' }}>
+              <i className="fas fa-phone text-xl"></i> {t.emergencyLabel}
             </span>
 
-            <span className="d-none d-lg-block font-bold uppercase tracking-widest text-accent text-sm truncate">|</span>
+            <span className="d-none d-lg-block font-bold uppercase tracking-widest text-sm truncate">|</span>
 
             <span className="d-none d-sm-flex d-lg-none align-items-center justify-content-center text-2xl lg:text-6xl font-black leading-none">
               {t.heroTitle}
@@ -280,10 +292,10 @@ export default function VetPortal() {
                       <span className="text-xs font-black uppercase tracking-widest text-accent bg-accent/10 px-4 py-2 rounded-full inline-block mb-4">
                         uOttawa — Ottawa
                       </span>
-                      <h1 className="text-5xl lg:text-6xl font-black mb-6 uppercase tracking-tighter leading-none text-textMain">
+                      <h1 className="text-5xl lg:text-6xl font-black mb-6 uppercase tracking-tighter leading-none">
                         {t.heroTitle}
                       </h1>
-                      <p className="text-lg text-textMuted leading-relaxed mb-8 max-w-xl">
+                      <p className="text-lg text-textMain leading-relaxed mb-8 max-w-xl">
                         {t.heroSubtitle}
                       </p>
                       <div className="flex flex-wrap gap-4">
@@ -294,7 +306,7 @@ export default function VetPortal() {
                         >
                           {t.admissionBtn}
                         </a>
-                        <a href="#services" className="neu-btn px-8 py-4 font-bold text-textMuted uppercase text-sm no-underline tracking-wider transition-transform hover:scale-[1.02] active:scale-95">
+                        <a href="#services" className="neu-btn px-8 py-4 font-bold uppercase text-sm no-underline tracking-wider transition-transform hover:scale-[1.02] active:scale-95">
                           {t.navServices}
                         </a>
                       </div>

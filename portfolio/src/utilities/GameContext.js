@@ -18,5 +18,3 @@ export function useLocalStorage(key, initialValue) {
 
   return [value, setValue];
 }
-
-export const useAppTheme = () => useContext(GameContext);

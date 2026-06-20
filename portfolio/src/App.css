@@ -1,220 +1,240 @@
 @layer theme, base, bootstrap, components, utilities;
 
 @import "bootstrap/dist/css/bootstrap.min.css" layer(bootstrap);
-
 @import "tailwindcss";
 
-:root {
-  --grad-angle: 145deg;
-  --shadow-x: 12px;
-  --shadow-y: 12px;
-  --light-x: -8px;
-  --light-y: -8px;
-
-  --bg-main: #182429;
-  --accent: #5AAADD;
-  --text-main: #BFBDB6;
-  --text-muted: #738290;
-  --shadow-d: rgba(0, 0, 0, 0.5);
-  --shadow-d-strong: rgba(0, 0, 0, 0.7);
-  --shadow-l: color-mix(in srgb, var(--bg-main) 95%, white);
-  --border-d: rgba(0, 0, 0, 0.4);
-  --grad-l: rgba(255, 255, 255, 0.02);
-  --grad-d: rgba(0, 0, 0, 0.07);
+@theme {
+  --color-bgMain: var(--bg-main);
+  --color-accent: var(--accent);
+  --color-textMuted: var(--text-muted); 
+  --color-textMain: var(--text-main); 
+  --color-surface: var(--bg-main); 
+  --color-shadowD: var(--shadow-d);
+  --color-shadowDStrong: var(--shadow-d-strong);
+  --color-shadowL: var(--shadow-l);
+  --color-borderD: var(--border-d);
+  --color-gradL: var(--grad-l);
+  --color-gradD: var(--grad-d);
 }
 
-.neu-image {
-  box-shadow: 18px 18px 30px var(--shadow-d),
-    -12px -12px 30px var(--shadow-l) !important;
+@layer base {
+  :root, [data-theme="dark"] {
+    --grad-angle: 145deg;
+    --shadow-x: 12px;
+    --shadow-y: 12px;
+    --light-x: -8px;
+    --light-y: -8px;
+
+    --bg-main: #182429;
+    --accent: #5AAADD;
+    --text-main: #BFBDB6;
+    --text-muted: #738290;
+    --shadow-d: rgba(0, 0, 0, 0.5);
+    --shadow-d-strong: rgba(0, 0, 0, 0.7);
+    --shadow-l: color-mix(in srgb, var(--bg-main) 95%, white);
+    --border-d: rgba(0, 0, 0, 0.4);
+    --grad-l: rgba(255, 255, 255, 0.02);
+    --grad-d: rgba(0, 0, 0, 0.07);
+  }
+
+  [data-theme="light"] {
+    --bg-main: #e0e5ec;
+    --accent: #1d6a96;
+    --text-main: #4a5568;
+    --text-muted: #718096;
+    --shadow-d: rgba(163, 177, 198, 0.6);
+    --shadow-d-strong: rgba(163, 177, 198, 0.8);
+    --shadow-l: rgba(255, 255, 255, 0.8);
+    --border-l: rgba(255, 255, 255, 0.5);
+    --border-d: rgba(163, 177, 198, 0.3);
+    --grad-l: rgba(255, 255, 255, 0.4);
+    --grad-d: rgba(163, 177, 198, 0.1);
+  }
+
 }
 
-.neu-image::before {
-  box-shadow: none !important;
+@layer components {
+  .neu-image {
+    box-shadow: 18px 18px 30px var(--color-shadowD),
+      -12px -12px 30px var(--color-shadowL) !important;
+  }
+
+  .neu-image::before {
+    box-shadow: none !important;
+  }
+
+  .neu-panel {
+    border-radius: 2rem;
+    background-color: var(--color-bgMain);
+    background-image: linear-gradient(var(--grad-angle), var(--color-gradL), var(--color-gradD));
+    box-shadow: var(--shadow-x) var(--shadow-y) 24px var(--color-shadowD),
+      var(--light-x) var(--light-y) 24px var(--color-shadowL);
+    transition: background-color 0.5s ease, box-shadow 0.5s ease, border-color 0.5s ease;
+  }
+
+  .neu-flat {
+    border-radius: 2rem;
+    background-color: var(--color-bgMain);
+    background-image: linear-gradient(var(--grad-angle), var(--color-gradL), var(--color-gradD));
+  }
+
+  .simply-flat {
+    border-radius: 2rem;
+    background-color: var(--color-bgMain);
+    background-image: linear-gradient(var(--grad-angle), var(--color-gradL), var(--color-gradD));
+    box-shadow: none !important;
+  }
+
+  .neu-pressed {
+    border-radius: 1.5rem;
+    background-color: var(--color-bgMain);
+    box-shadow: inset calc(var(--shadow-x) * 0.8) calc(var(--shadow-y) * 0.8) 20px var(--color-shadowD),
+      inset calc(var(--light-x) * 0.8) calc(var(--light-y) * 0.8) 20px var(--color-shadowL);
+    transition: background-color 0.5s ease, box-shadow 0.5s ease, border-color 0.5s ease;
+  }
+
+  .neu-btn {
+    position: relative;
+    border-radius: 1.25rem;
+    transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), color 0.4s ease, border-color 0.5s ease;
+    color: var(--color-textMain);
+    background: transparent;
+    z-index: 1;
+  }
+
+  .neu-btn > * {
+    position: relative;
+    z-index: 2;
+  }
+
+  .neu-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    z-index: -1;
+    background-color: var(--color-bgMain);
+    background-image: linear-gradient(var(--grad-angle), var(--color-gradL), var(--color-gradD));
+    box-shadow: calc(var(--shadow-x) * 0.6) calc(var(--shadow-y) * 0.6) 14px var(--color-shadowD),
+      calc(var(--light-x) * 0.6) calc(var(--light-y) * 0.6) 14px var(--color-shadowL);
+    transition: opacity 0.5s ease, background-color 0.5s ease, box-shadow 0.5s ease;
+  }
+
+  .neu-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    z-index: -1;
+    opacity: 0;
+    background-color: var(--color-bgMain);
+    box-shadow: inset calc(var(--shadow-x) * 0.4) calc(var(--shadow-y) * 0.4) 10px var(--color-shadowD),
+      inset calc(var(--light-x) * 0.4) calc(var(--light-y) * 0.4) 10px var(--color-shadowL);
+    transition: opacity 0.5s ease, background-color 0.5s ease, box-shadow 0.5s ease;
+  }
+
+  .neu-btn:hover,
+  .neu-btn.active {
+    color: color-mix(in srgb, var(--color-accent), var(--color-bgMain) 30%);
+    transform: translateY(2px) scale(0.98);
+  }
+
+  .neu-btn:hover::before,
+  .neu-btn.active::before {
+    opacity: 0;
+  }
+
+  .neu-btn:hover::after,
+  .neu-btn.active::after {
+    opacity: 1;
+  }
+
+  .neu-card {
+    position: relative;
+    border-radius: 2rem;
+    background: transparent;
+    transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.5s ease;
+    z-index: 1;
+  }
+
+  .neu-card > * {
+    position: relative;
+    z-index: 2;
+  }
+
+  .neu-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    z-index: -1;
+    background-color: var(--color-bgMain);
+    background-image: linear-gradient(var(--grad-angle), var(--color-gradL), var(--color-gradD));
+    box-shadow: var(--shadow-x) var(--shadow-y) 24px var(--color-shadowD),
+      var(--light-x) var(--light-y) 24px var(--color-shadowL);
+    transition: opacity 0.5s ease, background-color 0.5s ease, box-shadow 0.5s ease;
+  }
+
+  .neu-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    z-index: -1;
+    opacity: 0;
+    background-color: var(--color-bgMain);
+    background-image: linear-gradient(var(--grad-angle), var(--color-gradL), var(--color-gradD));
+    box-shadow: calc(var(--shadow-x) * 1.8) calc(var(--shadow-y) * 1.8) 40px var(--color-shadowDStrong),
+      calc(var(--light-x) * 1.8) calc(var(--light-y) * 1.8) 40px var(--color-shadowL);
+    transition: opacity 0.5s ease, background-color 0.5s ease, box-shadow 0.5s ease;
+  }
+
+  .neu-card:hover {
+    transform: translateY(-8px) scale(1.02);
+  }
+
+  .neu-card:hover::before {
+    opacity: 0;
+  }
+
+  .neu-card:hover::after {
+    opacity: 1;
+  }
 }
 
-.light-mode {
-  --bg-main: #e0e5ec;
-  --accent: #1d6a96;
-  --text-main: #4a5568;
-  --text-muted: #718096;
-  --shadow-d: rgba(163, 177, 198, 0.6);
-  --shadow-d-strong: rgba(163, 177, 198, 0.8);
-  --shadow-l: rgba(255, 255, 255, 0.8);
-  --border-l: rgba(255, 255, 255, 0.5);
-  --border-d: rgba(163, 177, 198, 0.3);
-  --grad-l: rgba(255, 255, 255, 0.4);
-  --grad-d: rgba(163, 177, 198, 0.1);
-}
+@layer utilities {
+  body {
+    background-color: var(--color-bgMain);
+    color: var(--color-textMain);
+    transition: background-color 0.5s ease, color 0.5s ease;
+  }
 
-html[lang="en"] .lang-fr {
-  display: none !important;
-}
+  h1, h2, h3, h4, h5, h6 {
+    margin-bottom: 1rem;
+    font-weight: 700;
+    color: var(--color-accent);
+    transition: color 0.5s ease;
+  }
 
-html[lang="fr"] .lang-en {
-  display: none !important;
-}
+  p {
+    margin-bottom: 1rem;
+    line-height: 1.6;
+    color: var(--color-textMain);
+  }
 
-body {
-  background-color: var(--bg-main);
-  color: var(--text-main);
-  transition: background-color 0.5s ease, color 0.5s ease;
-}
+  a {
+    text-decoration: none !important;
+  }
+  
+  html[lang="en"] .lang-fr {
+    display: none !important;
+  }
 
-h1, h2, h3, h4, h5, h6 {
-  margin-bottom: 1rem;
-  font-weight: 700;
-  color: var(--accent);
-  transition: color 0.5s ease;
-}
+  html[lang="fr"] .lang-en {
+    display: none !important;
+  }
 
-p {
-  margin-bottom: 1rem;
-  line-height: 1.6;
-  color: var(--text-main);
-}
-
-a {
-  text-decoration: none !important;
-}
-
-.neu-panel {
-  border-radius: 2rem;
-  background-color: var(--bg-main);
-  background-image: linear-gradient(var(--grad-angle), var(--grad-l), var(--grad-d));
-  box-shadow: var(--shadow-x) var(--shadow-y) 24px var(--shadow-d),
-    var(--light-x) var(--light-y) 24px var(--shadow-l);
-  transition: background-color 0.5s ease, box-shadow 0.5s ease, border-color 0.5s ease;
-}
-
-.neu-flat {
-  border-radius: 2rem;
-  background-color: var(--bg-main);
-  background-image: linear-gradient(var(--grad-angle), var(--grad-l), var(--grad-d));
-}
-
-.simply-flat {
-  border-radius: 2rem;
-  background-color: var(--bg-main);
-  background-image: linear-gradient(var(--grad-angle), var(--grad-l), var(--grad-d));
-  box-shadow: none !important;
-}
-
-.neu-pressed {
-  border-radius: 1.5rem;
-  background-color: var(--bg-main);
-  box-shadow: inset calc(var(--shadow-x) * 0.8) calc(var(--shadow-y) * 0.8) 20px var(--shadow-d),
-    inset calc(var(--light-x) * 0.8) calc(var(--light-y) * 0.8) 20px var(--shadow-l);
-  transition: background-color 0.5s ease, box-shadow 0.5s ease, border-color 0.5s ease;
-}
-
-.neu-btn {
-  position: relative;
-  border-radius: 1.25rem;
-  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), color 0.4s ease, border-color 0.5s ease;
-  color: var(--text-main);
-  background: transparent;
-  z-index: 1;
-}
-
-.neu-btn > * {
-  position: relative;
-  z-index: 2;
-}
-
-.neu-btn::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  z-index: -1;
-  background-color: var(--bg-main);
-  background-image: linear-gradient(var(--grad-angle), var(--grad-l), var(--grad-d));
-  box-shadow: calc(var(--shadow-x) * 0.6) calc(var(--shadow-y) * 0.6) 14px var(--shadow-d),
-    calc(var(--light-x) * 0.6) calc(var(--light-y) * 0.6) 14px var(--shadow-l);
-  transition: opacity 0.5s ease, background-color 0.5s ease, box-shadow 0.5s ease;
-}
-
-.neu-btn::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  z-index: -1;
-  opacity: 0;
-  background-color: var(--bg-main);
-  box-shadow: inset calc(var(--shadow-x) * 0.4) calc(var(--shadow-y) * 0.4) 10px var(--shadow-d),
-    inset calc(var(--light-x) * 0.4) calc(var(--light-y) * 0.4) 10px var(--shadow-l);
-  transition: opacity 0.5s ease, background-color 0.5s ease, box-shadow 0.5s ease;
-}
-
-.neu-btn:hover,
-.neu-btn.active {
-  color: color-mix(in srgb, var(--accent), var(--bg-main) 30%);
-  transform: translateY(2px) scale(0.98);
-}
-
-.neu-btn:hover::before,
-.neu-btn.active::before {
-  opacity: 0;
-}
-
-.neu-btn:hover::after,
-.neu-btn.active::after {
-  opacity: 1;
-}
-
-.neu-card {
-  position: relative;
-  border-radius: 2rem;
-  background: transparent;
-  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.5s ease;
-  z-index: 1;
-}
-
-.neu-card > * {
-  position: relative;
-  z-index: 2;
-}
-
-.neu-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  z-index: -1;
-  background-color: var(--bg-main);
-  background-image: linear-gradient(var(--grad-angle), var(--grad-l), var(--grad-d));
-  box-shadow: var(--shadow-x) var(--shadow-y) 24px var(--shadow-d),
-    var(--light-x) var(--light-y) 24px var(--shadow-l);
-  transition: opacity 0.5s ease, background-color 0.5s ease, box-shadow 0.5s ease;
-}
-
-.neu-card::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  z-index: -1;
-  opacity: 0;
-  background-color: var(--bg-main);
-  background-image: linear-gradient(var(--grad-angle), var(--grad-l), var(--grad-d));
-  box-shadow: calc(var(--shadow-x) * 1.8) calc(var(--shadow-y) * 1.8) 40px var(--shadow-d-strong),
-    calc(var(--light-x) * 1.8) calc(var(--light-y) * 1.8) 40px var(--shadow-l);
-  transition: opacity 0.5s ease, background-color 0.5s ease, box-shadow 0.5s ease;
-}
-
-.neu-card:hover {
-  transform: translateY(-8px) scale(1.02);
-}
-
-.neu-card:hover::before {
-  opacity: 0;
-}
-
-.neu-card:hover::after {
-  opacity: 1;
-}
-
-.collapse.show {
-  visibility: visible !important;
+  .collapse.show {
+    visibility: visible !important;
+  }
 }
