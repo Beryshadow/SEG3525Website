@@ -369,7 +369,7 @@ export const CardGame = ({ t }) => {
           display: 'grid',
           gridTemplateColumns: `repeat(${gridSize}, 1fr)`,
           gridTemplateRows: `repeat(${gridSize}, 1fr)`,
-          gap: 'clamp(0.25rem, 1.5vmin, 1rem)',
+          gap: 'clamp(2.0rem, 2.5vmin, 3.0rem)',
           width: '100%',
           maxWidth: 'min(100%, calc(100vh - 380px))',
           aspectRatio: '1 / 1'
