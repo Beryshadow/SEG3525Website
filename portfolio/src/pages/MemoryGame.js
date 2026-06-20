@@ -56,7 +56,6 @@ export default function App() {
       <div className={`${themeClass} game-route`}>
         <div className="font-sans antialiased overflow-clip min-h-screen">
 
-        <h1 className="font-extrabold text-xl tracking-wider text-color-accent block mb-2">RB</h1>
           {/* Navigation Mobile */}
           <nav className="navbar navbar-dark d-lg-none sticky-top z-50 w-full px-4 pt-4 mb-8">
             <div className="neu-panel w-100 px-4 py-3 flex justify-between items-center">
@@ -117,7 +116,7 @@ export default function App() {
               <aside className="col-lg-2 d-none d-lg-block" aria-label="navigation menu">
                 <div className="sticky top-12 flex flex-col gap-8">
                   <div id='info-card' aria-label='card-panel' className="neu-panel p-6 text-center">
-                    <h1 className="font-extrabold text-xl tracking-wider text-color-accent block mb-2">RB</h1>
+                    <div className="font-extrabold text-xl tracking-wider text-color-accent block mb-2">RB</div>
                     <span className="text-xs text-color-textMuted uppercase tracking-widest">{t.game ?? 'Jeux'}</span>
                   </div>
                   <nav className="flex flex-col gap-4">
@@ -137,6 +136,8 @@ export default function App() {
 
               {/* Contenu Principal */}
               <main className="col-lg-8">
+                <h1 className="sr-only visually-hidden">{t.game ?? 'Jeux'}</h1>
+                
                 <SwipeGame t={t} />
                 <CardGame t={t} />
                 <footer className="pt-8 pb-4 mt-16 text-center lg:text-left">
