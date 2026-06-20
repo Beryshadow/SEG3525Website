@@ -56,6 +56,7 @@ export default function App() {
       <div className={`${themeClass} game-route`}>
         <div className="font-sans antialiased overflow-clip min-h-screen">
 
+        <h1 className="font-extrabold text-xl tracking-wider text-color-accent block mb-2">RB</h1>
           {/* Navigation Mobile */}
           <nav className="navbar navbar-dark d-lg-none sticky-top z-50 w-full px-4 pt-4 mb-8">
             <div className="neu-panel w-100 px-4 py-3 flex justify-between items-center">
