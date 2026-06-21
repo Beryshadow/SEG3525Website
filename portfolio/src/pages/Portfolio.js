@@ -252,8 +252,8 @@ export default function Portfolio() {
                 <p className="text-textMuted">{t.casesSub}</p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                <div>
+              <div className="row g-5">
+                <div className="col-md-6">
                   <Link to="/uopets" className="neu-card block p-6 h-100 group">
                     <div className={`${theme === 'light' ? 'light-mode' : ''} uopets-route neu-pressed h-40 flex items-center justify-center mb-6`}>
                       <i
@@ -270,7 +270,7 @@ export default function Portfolio() {
                   </Link>
                 </div>
 
-                <div>
+                <div className="col-md-6">
                   <Link to="/memorygame" className="neu-card block p-6 h-100 group">
                     <div className={`${theme === 'light' ? 'light-mode' : ''} game-route neu-pressed h-40 flex items-center justify-center mb-6`}>
                       <i
@@ -287,7 +287,7 @@ export default function Portfolio() {
                   </Link>
                 </div>
 
-                <div>
+                <div className="col-md-6">
                   <Link to="/design3" className="neu-card block p-6 h-100 group">
                     <div className="neu-pressed h-40 flex items-center justify-center mb-6">
                       <i className="fas fa-store fa-3x text-[var(--text-muted)] opacity-80 group-hover:scale-110 transition-transform duration-500"></i>
@@ -304,7 +304,7 @@ export default function Portfolio() {
                   </Link>
                 </div>
 
-                <div>
+                <div className="col-md-6">
                   <Link to="/design4" className="neu-card block p-6 h-100 group">
                     <div className="neu-pressed h-40 flex items-center justify-center mb-6">
                       <i className="fas fa-mountain fa-3x text-[var(--text-muted)] opacity-80 group-hover:scale-110 transition-transform duration-500"></i>
@@ -321,7 +321,7 @@ export default function Portfolio() {
                   </Link>
                 </div>
 
-                <div>
+                <div className="col-md-6">
                   <Link to="/neurodeck" className="neu-card block p-6 h-100 group">
                     <div className={`${theme === 'light' ? 'light-mode' : ''} flashcard-route neu-pressed h-40 flex items-center justify-center mb-6`}>
                       <i
@@ -338,7 +338,7 @@ export default function Portfolio() {
                   </Link>
                 </div>
 
-                <div>
+                <div className="col-md-6">
                   <Link to="/serialrecall" className="neu-card block p-6 h-100 group">
                     <div className={`${theme === 'light' ? 'light-mode' : ''} serialrecall-route neu-pressed h-40 flex items-center justify-center mb-6`}>
                       <i
