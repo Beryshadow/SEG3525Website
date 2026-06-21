@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useSharedLogic } from '../utilities/shared';
-import CardGame from './gameFiles/CardGame.js';
-import SwipeGame from './gameFiles/PasswordGame.js';
+import CardGame from './gameFiles/CardGame';
+import SwipeGame from './gameFiles/PasswordGame';
 import { GAME_TRANSLATIONS } from '../data/gameData';
 import { GameContext } from '../utilities/GameContext';
 import '../App.css';

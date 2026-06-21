@@ -68,7 +68,7 @@
   .sticky-top { @apply sticky top-0 z-[1020]; }
   
   /* Navbar (simple mapping since full Bootstrap navbar is complex, but this covers the usage here) */
-  .navbar { @apply relative flex flex-wrap items-center justify-between; }
+  .navbar { @apply relative flex flex-wrap items-center justify-between max-w-7xl mx-auto; }
   .navbar-nav { @apply flex flex-col pl-0 mb-0 list-none; }
   .nav-link { @apply block text-inherit no-underline transition-colors duration-150; }
   
