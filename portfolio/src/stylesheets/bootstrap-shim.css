@@ -1,0 +1,81 @@
+@layer components {
+  /* Layout */
+  .container-fluid { @apply w-full px-4; }
+  
+  /* Grid Container */
+  .row { 
+    @apply flex flex-wrap; 
+    margin-right: calc(var(--bs-gutter-x, 1.5rem) * -0.5);
+    margin-left: calc(var(--bs-gutter-x, 1.5rem) * -0.5);
+  }
+  .row > * {
+    @apply max-w-full;
+    flex-shrink: 0;
+    width: 100%;
+    padding-right: calc(var(--bs-gutter-x, 1.5rem) * 0.5);
+    padding-left: calc(var(--bs-gutter-x, 1.5rem) * 0.5);
+    margin-top: var(--bs-gutter-y, 0);
+  }
+
+  /* Gutters */
+  .g-4 { --bs-gutter-x: 1.5rem; --bs-gutter-y: 1.5rem; }
+  .g-5 { --bs-gutter-x: 3rem; --bs-gutter-y: 3rem; }
+  
+  /* Columns */
+  .col { flex: 1 0 0%; }
+  
+  /* lg breakpoint: 992px in Bootstrap, 1024px in Tailwind. We'll map to Tailwind's lg */
+  .col-lg-1 { @apply lg:w-[8.33333333%]; }
+  .col-lg-2 { @apply lg:w-[16.66666667%]; }
+  .col-lg-4 { @apply lg:w-[33.33333333%]; }
+  .col-lg-5 { @apply lg:w-[41.66666667%]; }
+  .col-lg-6 { @apply lg:w-[50%]; }
+  .col-lg-7 { @apply lg:w-[58.33333333%]; }
+  .col-lg-8 { @apply lg:w-[66.66666667%]; }
+  .col-lg-9 { @apply lg:w-[75%]; }
+  
+  /* md breakpoint: 768px in Bootstrap, 768px in Tailwind. */
+  .col-md-6 { @apply md:w-[50%]; }
+  .col-md-12 { @apply md:w-[100%]; }
+
+  /* Display */
+  .d-none { @apply hidden; }
+  .d-flex { @apply flex; }
+  .d-inline-block { @apply inline-block; }
+  .d-sm-flex { @apply sm:flex; }
+  .d-lg-none { @apply lg:hidden; }
+  .d-lg-block { @apply lg:block; }
+
+  /* Flex Alignment */
+  .align-items-center { @apply items-center; }
+  .align-items-end { @apply items-end; }
+  
+  .justify-content-center { @apply justify-center; }
+  .justify-content-between { @apply justify-between; }
+  .justify-content-lg-end { @apply lg:justify-end; }
+
+  /* Order */
+  .order-1 { @apply order-1; }
+  .order-2 { @apply order-2; }
+  .order-lg-1 { @apply lg:order-1; }
+  .order-lg-2 { @apply lg:order-2; }
+
+  /* Sizing */
+  .w-100 { @apply w-full; }
+  .h-100 { @apply h-full; }
+
+  /* Misc */
+  .sticky-top { @apply sticky top-0 z-[1020]; }
+  
+  /* Navbar (simple mapping since full Bootstrap navbar is complex, but this covers the usage here) */
+  .navbar { @apply relative flex flex-wrap items-center justify-between; }
+  .navbar-nav { @apply flex flex-col pl-0 mb-0 list-none; }
+  .nav-link { @apply block text-inherit no-underline transition-colors duration-150; }
+  
+  /* Other Bootstrap utilities found */
+  .text-decoration-none { @apply no-underline; }
+  .mb-0 { @apply mb-0; }
+  .mb-4 { @apply mb-6; } /* Bootstrap 4 is 1.5rem, Tailwind 6 is 1.5rem */
+  .pt-4 { @apply pt-6; }
+  .pt-6 { @apply pt-10; }
+}
