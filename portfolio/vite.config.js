@@ -12,9 +12,13 @@ const transformJsxInJs = () => ({
 });
 
 export default defineConfig({
+  css: {
+    transformer: 'lightningcss',
+  },
   build: {
     outDir: 'build',
     chunkSizeWarningLimit: 1000,
+    cssMinify: 'lightningcss',
   },
   plugins: [
     transformJsxInJs(), 
