@@ -18,7 +18,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "init-tw": "tailwindcss init -p"
+    "init-tw": "tailwindcss init -p",
+    "postinstall": "node scripts/patch-bootstrap.js"
   },
   "eslintConfig": {
     "extends": [

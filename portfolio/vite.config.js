@@ -11,6 +11,16 @@ const transformJsxInJs = () => ({
   },
 });
 
+const stripCharsetPlugin = () => ({
+  name: 'strip-charset',
+  enforce: 'post',
+  transform(code, id) {
+    if (id.endsWith('.css')) {
+      return code.replace(/@charset\s+['"]UTF-8['"];?/gi, '');
+    }
+  }
+});
+
 export default defineConfig({
   css: {
     transformer: 'lightningcss',
@@ -21,6 +31,7 @@ export default defineConfig({
     cssMinify: 'lightningcss',
   },
   plugins: [
+    stripCharsetPlugin(),
     transformJsxInJs(), 
     tailwindcss(),
     react(),
