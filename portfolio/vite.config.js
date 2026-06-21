@@ -13,7 +13,8 @@ const transformJsxInJs = () => ({
 
 export default defineConfig({
   build: {
-    outDir: 'build', 
+    outDir: 'build',
+    chunkSizeWarningLimit: 1000,
   },
   plugins: [
     transformJsxInJs(), 
