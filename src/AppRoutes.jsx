@@ -8,6 +8,7 @@ import Design3 from './pages/Design3';
 import Design4 from './pages/Design4';
 import NeuroDeck from './pages/NeuroDeck';
 import SerialRecall from './pages/SerialRecall';
+import NotFound from './pages/NotFound';
 
 export const ROUTE_CONFIG = [
   { path: '/', element: <Portfolio />},
@@ -16,7 +17,8 @@ export const ROUTE_CONFIG = [
   { path: '/design3', element: <Design3 />},
   { path: '/design4', element: <Design4 />},
   { path: '/neurodeck', element: <NeuroDeck />},
-  { path: '/serialrecall', element: <SerialRecall />}
+  { path: '/serialrecall', element: <SerialRecall />},
+  { path: '*', element: <NotFound />}
 ];
 
 export default function AppRoutes() {

@@ -29,7 +29,7 @@ export default function Portfolio() {
     <div className="font-sans antialiased overflow-clip">
       <SEO 
         title="Ryan Beland - Web Developer Portfolio" 
-        description="Explore software projects, interactive layouts, and coding work by Ryan Beland."
+        description="Explore the web development portfolio of Ryan Beland. Discover interactive user interfaces, software engineering projects, cognitive tools, and responsive coding designs."
         canonicalUrl="https://ryanbeland.ca/"
       />
 
