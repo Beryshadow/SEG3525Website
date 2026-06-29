@@ -116,8 +116,8 @@ export default function Portfolio() {
           <div className="col-lg-9">
 
             {/* Hero */}
-            <header id="hero" className="min-h-screen flex items-center mb-24">
-              <div className="row align-items-center w-100 g-5">
+            <header id="hero" className="min-h-screen flex flex-col justify-center mb-24 w-full">
+              <div className="row align-items-center w-full g-5">
                 <div className="col-lg-8 order-2 order-lg-1 px-8">
                   <h1 className="text-4xl lg:text-5xl font-extrabold mb-6 leading-tight">
                     <span>{t.heroGreeting} <br /><span className="text-accent">Ryan Beland</span>.</span>
