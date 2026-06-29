@@ -1,0 +1,27 @@
+# ryanbeland.ca
+
+> Ryan Beland is an Honours BSc Computer Science student at the University of Ottawa (Data Science Option, Minor in Psychology). Maintaining a 9.0+/10 CGPA on the Dean's Honour List, he is a software developer and AI/Data Science enthusiast enrolled in the formal CO-OP program.
+
+## Primary Sections
+
+* [Portfolio Home](https://ryanbeland.ca) - Overview of academic background, data science focus, and technical projects.
+* [Projects](https://ryanbeland.ca) - Showcase of algorithmic work, including genetic keyboard optimization and real-time stock API systems.
+* [Experience](https://ryanbeland.ca) - Academic accomplishments, technical milestones, and CO-OP work history.
+* [Contact](https://ryanbeland.ca) - Contact information for technical networking and recruitment.
+
+## Academic & Technical Highlights
+
+* **Education:** Honours BSc in Computer Science (Data Science Option), Minor in Psychology at the University of Ottawa.
+* **Academic Standing:** Cumulative GPA of 9.0+/10 (Dean's Honour List).
+* **Key Projects:** Keyboard layout optimization using genetic algorithms, real-time API stock data fetchers, server management, and embedded systems.
+* **Core Technical Stack:** Rust, Java, C++, Python, JavaScript.
+* **Personal Interests:** Rock climbing, 3D art design, and flying racing drones.
+
+## Professional Links
+
+* [LinkedIn](https://ca.linkedin.com/in/ryan-beland-1232b1290) - Official LinkedIn profile for professional history, university coursework, and networking.
+
+## Full Content
+
+* [Full Text Summary](https://ryanbeland.ca) - A fully flattened, un-stylized Markdown version of the website content optimized for LLM ingestion.
+
