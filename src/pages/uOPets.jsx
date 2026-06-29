@@ -1,5 +1,6 @@
 import { createPortal } from 'react-dom';
 import { useState, useEffect } from 'react';
+import SEO from '../utilities/SEO';
 import '../App.css';
 import '../stylesheets/Vet.css';
 import { useSharedLogic } from '../utilities/shared';
@@ -150,6 +151,11 @@ export default function VetPortal() {
 
   return (
     <div className={`${themeClass} uopets-route`}>
+      <SEO 
+        title="uOPets Vet Portal" 
+        description="An interactive veterinary portal showcasing medical record tracking, pet profiles, and clinical dashboards."
+        canonicalUrl="https://ryanbeland.ca/uopets"
+      />
       <div className="min-h-screen font-sans text-[var(--text-main)] transition-colors duration-300 relative">
         {typeof document !== 'undefined' && createPortal(
           <a

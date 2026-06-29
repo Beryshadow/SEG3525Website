@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useSharedLogic } from '../utilities/shared';
 import { TRANSLATIONS } from '../data/portfolioData';
+import SEO from '../utilities/SEO';
 import '../App.css';
 import '../stylesheets/Vet.css';
 import '../stylesheets/Games.css';
@@ -26,6 +27,11 @@ export default function Portfolio() {
 
   return (
     <div className="font-sans antialiased overflow-clip">
+      <SEO 
+        title="Ryan Beland - Web Developer Portfolio" 
+        description="Explore software projects, interactive layouts, and coding work by Ryan Beland."
+        canonicalUrl="https://ryanbeland.ca/"
+      />
 
       {/* Mobile Navigation */}
       <nav className="navbar navbar-dark d-lg-none sticky-top z-50 w-full px-4 pt-4 mb-8">
