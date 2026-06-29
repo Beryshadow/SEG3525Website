@@ -117,7 +117,7 @@ export default function Portfolio() {
 
             {/* Hero */}
             <header id="hero" className="min-h-screen flex flex-col justify-center mb-24 w-full">
-              <div className="row align-items-center w-full g-5">
+              <div className="row align-items-center g-5">
                 <div className="col-lg-8 order-2 order-lg-1 px-8">
                   <h1 className="text-4xl lg:text-5xl font-extrabold mb-6 leading-tight">
                     <span>{t.heroGreeting} <br /><span className="text-accent">Ryan Beland</span>.</span>
@@ -129,7 +129,7 @@ export default function Portfolio() {
                     <span>{t.heroBtn}</span>
                   </a>
                 </div>
-                <div className="col-lg-4 order-1 order-lg-2 d-flex justify-content-center justify-content-lg-end">
+                <div className="col-lg-4 order-1 order-lg-2 flex justify-center lg:justify-end">
                   <a href="https://ryanbeland.dev/" className="neu-card p-3 block cursor-pointer" style={{ borderRadius: '9999px' }}>
                     <img src="image.jpg" alt="See my old portfolio" className="w-56 h-56 rounded-full object-cover" />
                   </a>
