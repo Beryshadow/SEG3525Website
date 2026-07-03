@@ -8,6 +8,7 @@ import '../stylesheets/Vet.css';
 import '../stylesheets/Games.css';
 import '../stylesheets/NeuroDeck.css';
 import '../stylesheets/ListMemorizer.css';
+import '../stylesheets/ArtShop.css';
 
 export default function Portfolio() {
   const {
@@ -295,8 +296,13 @@ export default function Portfolio() {
 
                 <div className="h-full">
                   <Link to="/design3" className="neu-card block p-6 h-100 group">
-                    <div className="neu-pressed h-40 flex items-center justify-center mb-6">
-                      <i className="fas fa-store fa-3x text-[var(--text-muted)] opacity-80 group-hover:scale-110 transition-transform duration-500"></i>
+                    <div className={`${theme === 'light' ? 'light-mode' : ''} neu-pressed h-40 flex items-center justify-center mb-6`}>
+                      <span className='artshop-route bg-transparent'>
+                      <i 
+                        className="fas fa-store fa-3x opacity-80 group-hover:scale-110 transition-transform duration-500"
+                        style={{ color: 'var(--color-accent)' }}
+                      ></i>
+                      </span>
                     </div>
                     <h5 className="font-bold text-lg text-[var(--text-main)] mb-3">
                       <span>{t.project3Title}</span>
@@ -304,9 +310,6 @@ export default function Portfolio() {
                     <p className="text-sm text-textMain mb-4">
                       <span>{t.project3Text}</span>
                     </p>
-                    <div className="neu-panel px-4 py-2 text-xs text-[var(--text-muted)] font-bold uppercase tracking-wider d-inline-block border-0">
-                      <span>{t.comingSoon}</span>
-                    </div>
                   </Link>
                 </div>
 
