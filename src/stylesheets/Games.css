@@ -214,6 +214,27 @@ select.neu-pressed {
   z-index: 10;
 }
 
+.neu-card {
+  transform-style: flat !important;
+}
+
+.neu-card::before,
+.neu-card::after {
+  transform: translateZ(-2px) !important;
+}
+
+.neu-card>* {
+  transform: translateZ(2px) !important;
+}
+
+.card-front {
+  transform: rotateY(0deg) translateZ(1px) !important;
+}
+
+.card-back {
+  transform: rotateY(180deg) translateZ(1px) !important;
+}
+
 
 /* ACCESSIBILITÉ : Réduction de mouvement
 */
