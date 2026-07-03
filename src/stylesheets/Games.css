@@ -70,9 +70,21 @@
 */
 
 @keyframes shake-card {
-  0%, 100% { transform: translateX(0) rotateY(180deg); }
-  20%, 60% { transform: translateX(-6px) rotateY(180deg); }
-  40%, 80% { transform: translateX(6px) rotateY(180deg); }
+
+  0%,
+  100% {
+    transform: translateX(0) rotateY(180deg);
+  }
+
+  20%,
+  60% {
+    transform: translateX(-6px) rotateY(180deg);
+  }
+
+  40%,
+  80% {
+    transform: translateX(6px) rotateY(180deg);
+  }
 }
 
 .animate-shake .card-flipper {
@@ -80,8 +92,15 @@
 }
 
 @keyframes win-pulse {
-  0%, 100% { box-shadow: var(--shadow-x) var(--shadow-y) 24px var(--color-shadowD), var(--light-x) var(--light-y) 24px var(--color-shadowL); }
-  50% { box-shadow: 0 0 40px var(--color-accent), var(--shadow-x) var(--shadow-y) 24px var(--color-shadowD); }
+
+  0%,
+  100% {
+    box-shadow: var(--shadow-x) var(--shadow-y) 24px var(--color-shadowD), var(--light-x) var(--light-y) 24px var(--color-shadowL);
+  }
+
+  50% {
+    box-shadow: 0 0 40px var(--color-accent), var(--shadow-x) var(--shadow-y) 24px var(--color-shadowD);
+  }
 }
 
 .board-won {
@@ -101,8 +120,15 @@
 }
 
 @keyframes confetti-fall {
-  0% { transform: translateY(-10vh) rotate(0deg) scale(1); opacity: 1; }
-  100% { transform: translateY(110vh) rotate(720deg) scale(0.5); opacity: 0; }
+  0% {
+    transform: translateY(-10vh) rotate(0deg) scale(1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(110vh) rotate(720deg) scale(0.5);
+    opacity: 0;
+  }
 }
 
 
@@ -128,6 +154,7 @@ select.neu-pressed {
 /* 3D Card Flip Implementation */
 .card-scene {
   perspective: 1000px;
+  transform-style: preserve-3d;
 }
 
 .card-flipper {
@@ -153,12 +180,12 @@ select.neu-pressed {
 }
 
 .card-front {
-  transform: rotateY(0deg);
+  transform: rotateY(0deg) translateZ(1px);
   cursor: pointer;
 }
 
 .card-back {
-  transform: rotateY(180deg);
+  transform: rotateY(180deg) translateZ(1px);
 }
 
 /* Success Animation */
@@ -191,7 +218,10 @@ select.neu-pressed {
 /* ACCESSIBILITÉ : Réduction de mouvement
 */
 @media (prefers-reduced-motion: reduce) {
-  *, ::before, ::after {
+
+  *,
+  ::before,
+  ::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;

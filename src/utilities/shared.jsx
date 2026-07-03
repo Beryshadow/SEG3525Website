@@ -118,8 +118,8 @@ export function useSharedLogic(sectionIds = []) {
 
       // 3D Parallax physics
       tilt: {
-        targetEdgeLift: 10, // Ideal pixels to lift the edge in 3D space
-        maxAngleDeg: 6,     // Absolute maximum rotation limit for tiny elements
+        targetEdgeLift: 8, // Ideal pixels to lift the edge in 3D space
+        maxAngleDeg: 5,     // Absolute maximum rotation limit for tiny elements
         perspective: 1000,   // Camera distance (lower = more fish-eye/dramatic)
       }
     };
