@@ -229,7 +229,7 @@ export default function Portfolio() {
                 </div>
                 <div className="col-lg-6">
                   <div className="flex flex-col gap-5">
-                    <a href="https://www.designcouncil.org.uk/resources/the-double-diamond/" target="_blank" rel="noreferrer" className="neu-card neu-pressed p-5 block">
+                    <a href="https://www.designcouncil.org.uk/resources/the-double-diamond/" target="_blank" rel="noreferrer" className="neu-card p-5 block">
                       <h5 className="font-bold text-xl text-accent mb-2">{t.step1Title}</h5>
                       <p className="text-lg text-textMain mb-0">{t.step1Text}</p>
                       <br />

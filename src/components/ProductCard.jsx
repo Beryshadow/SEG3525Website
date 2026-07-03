@@ -52,7 +52,7 @@ export default function ProductCard({ product, t, lang, onAddToCart, onSelectPro
 
   return (
     <div
-      className="neu-panel p-4 flex flex-col justify-between h-full relative neu-card cursor-pointer"
+      className="p-4 flex flex-col justify-between h-full relative neu-card cursor-pointer"
       onClick={() => onSelectProduct(product)}
     >
       {/* Stock indicator */}
@@ -64,7 +64,7 @@ export default function ProductCard({ product, t, lang, onAddToCart, onSelectPro
 
       {/* Image Container */}
       <div className="flex justify-center mb-4">
-        <div className="neu-pressed w-full aspect-square flex items-center justify-center rounded-xl overflow-hidden">
+        <div className="w-full aspect-square flex items-center justify-center rounded-xl overflow-hidden">
           <img src={generateArtImage(product)} alt={product.name} className="w-full h-full object-cover" />
         </div>
       </div>

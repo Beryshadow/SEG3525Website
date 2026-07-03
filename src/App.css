@@ -6,9 +6,9 @@
 @theme {
   --color-bgMain: var(--bg-main);
   --color-accent: var(--accent);
-  --color-textMuted: var(--text-muted); 
-  --color-textMain: var(--text-main); 
-  --color-surface: var(--bg-main); 
+  --color-textMuted: var(--text-muted);
+  --color-textMain: var(--text-main);
+  --color-surface: var(--bg-main);
   --color-shadowD: var(--shadow-d);
   --color-shadowDStrong: var(--shadow-d-strong);
   --color-shadowL: var(--shadow-l);
@@ -18,7 +18,9 @@
 }
 
 @layer base {
-  :root, [data-theme="dark"] {
+
+  :root,
+  [data-theme="dark"] {
     --grad-angle: 145deg;
     --shadow-x: 12px;
     --shadow-y: 12px;
@@ -69,7 +71,9 @@
     background-image: linear-gradient(var(--grad-angle), var(--color-gradL), var(--color-gradD));
     box-shadow: var(--shadow-x) var(--shadow-y) 24px var(--color-shadowD),
       var(--light-x) var(--light-y) 24px var(--color-shadowL);
-    transition: background-color 0.5s ease, box-shadow 0.5s ease, border-color 0.5s ease;
+    /* Removed box-shadow transition */
+    transition: background-color 0.5s ease, border-color 0.5s ease;
+    will-change: transform;
   }
 
   .neu-flat {
@@ -90,19 +94,23 @@
     background-color: var(--color-bgMain);
     box-shadow: inset calc(var(--shadow-x) * 0.8) calc(var(--shadow-y) * 0.8) 20px var(--color-shadowD),
       inset calc(var(--light-x) * 0.8) calc(var(--light-y) * 0.8) 20px var(--color-shadowL);
-    transition: background-color 0.5s ease, box-shadow 0.5s ease, border-color 0.5s ease;
+    /* Removed box-shadow transition */
+    transition: background-color 0.5s ease, border-color 0.5s ease;
+    will-change: transform;
   }
 
   .neu-btn {
     position: relative;
     border-radius: 1.25rem;
-    transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), color 0.4s ease, border-color 0.5s ease;
+    /* Replaced transform transition with translate and scale transitions */
+    transition: translate 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), scale 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), color 0.4s ease, border-color 0.5s ease;
     color: var(--color-textMain);
     background: transparent;
     z-index: 1;
+    will-change: transform;
   }
 
-  .neu-btn > * {
+  .neu-btn>* {
     position: relative;
     z-index: 2;
   }
@@ -117,7 +125,8 @@
     background-image: linear-gradient(var(--grad-angle), var(--color-gradL), var(--color-gradD));
     box-shadow: calc(var(--shadow-x) * 0.6) calc(var(--shadow-y) * 0.6) 14px var(--color-shadowD),
       calc(var(--light-x) * 0.6) calc(var(--light-y) * 0.6) 14px var(--color-shadowL);
-    transition: opacity 0.5s ease, background-color 0.5s ease, box-shadow 0.5s ease;
+    /* Removed box-shadow transition */
+    transition: opacity 0.5s ease, background-color 0.5s ease;
   }
 
   .neu-btn::after {
@@ -130,13 +139,16 @@
     background-color: var(--color-bgMain);
     box-shadow: inset calc(var(--shadow-x) * 0.4) calc(var(--shadow-y) * 0.4) 10px var(--color-shadowD),
       inset calc(var(--light-x) * 0.4) calc(var(--light-y) * 0.4) 10px var(--color-shadowL);
-    transition: opacity 0.5s ease, background-color 0.5s ease, box-shadow 0.5s ease;
+    /* Removed box-shadow transition */
+    transition: opacity 0.5s ease, background-color 0.5s ease;
   }
 
   .neu-btn:hover,
   .neu-btn.active {
     color: color-mix(in srgb, var(--color-accent), var(--color-bgMain) 30%);
-    transform: translateY(2px) scale(0.98);
+    /* Moved from transform to independent translate/scale properties */
+    translate: 0 2px;
+    scale: 0.98;
   }
 
   .neu-btn:hover::before,
@@ -153,11 +165,13 @@
     position: relative;
     border-radius: 2rem;
     background: transparent;
-    transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.5s ease;
+    /* Replaced transform transition with translate and scale transitions */
+    transition: translate 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), scale 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.5s ease;
     z-index: 1;
+    will-change: transform;
   }
 
-  .neu-card > * {
+  .neu-card>* {
     position: relative;
     z-index: 2;
   }
@@ -172,7 +186,8 @@
     background-image: linear-gradient(var(--grad-angle), var(--color-gradL), var(--color-gradD));
     box-shadow: var(--shadow-x) var(--shadow-y) 24px var(--color-shadowD),
       var(--light-x) var(--light-y) 24px var(--color-shadowL);
-    transition: opacity 0.5s ease, background-color 0.5s ease, box-shadow 0.5s ease;
+    /* Removed box-shadow transition */
+    transition: opacity 0.5s ease, background-color 0.5s ease;
   }
 
   .neu-card::after {
@@ -186,11 +201,14 @@
     background-image: linear-gradient(var(--grad-angle), var(--color-gradL), var(--color-gradD));
     box-shadow: calc(var(--shadow-x) * 1.8) calc(var(--shadow-y) * 1.8) 40px var(--color-shadowDStrong),
       calc(var(--light-x) * 1.8) calc(var(--light-y) * 1.8) 40px var(--color-shadowL);
-    transition: opacity 0.5s ease, background-color 0.5s ease, box-shadow 0.5s ease;
+    /* Removed box-shadow transition */
+    transition: opacity 0.5s ease, background-color 0.5s ease;
   }
 
   .neu-card:hover {
-    transform: translateY(-8px) scale(1.02);
+    /* Moved from transform to independent translate/scale properties */
+    translate: 0 -8px;
+    scale: 1.02;
   }
 
   .neu-card:hover::before {
@@ -209,7 +227,12 @@
     transition: background-color 0.5s ease, color 0.5s ease;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     margin-bottom: 1rem;
     font-weight: 700;
     color: var(--color-accent);
@@ -225,7 +248,7 @@
   a {
     text-decoration: none !important;
   }
-  
+
   html[lang="en"] .lang-fr {
     display: none !important;
   }

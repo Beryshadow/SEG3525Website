@@ -5,15 +5,15 @@
   --color-bgMain: #353535;
   --color-surface: #353535;
   --color-textMain: #e8e3df;
-  --color-textMuted: #a89f97;
+  --color-textMuted: #aaa2a3;
 
   --color-shadowD: #282828;
   --color-shadowDStrong: #1f1f1f;
-  --color-shadowL: #3f3f3f;
+  --color-shadowL: #424242;
 
   --color-borderD: #4a4a4a;
 
-  --color-gradL: #3f3f3f;
+  --color-gradL: #393939;
   --color-gradD: #303030;
 
   background-color: var(--color-bgMain);
@@ -27,14 +27,14 @@
   --color-textMain: #3d3935;
   --color-textMuted: #8b7f77;
 
-  --color-shadowD: #e0d9d0;
+  --color-shadowD: #b8b5b2;
   --color-shadowDStrong: #d4ccc1;
   --color-shadowL: #ffffff;
 
   --color-borderD: #ede7e0;
 
-  --color-gradL: #ffffff;
-  --color-gradD: #f9f5f1;
+  --color-gradL: #fffffe;
+  --color-gradD: #ddd9d5;
 
   background-color: var(--color-bgMain);
   color: var(--color-textMain);

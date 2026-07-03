@@ -53,7 +53,7 @@ export default function ProductModal({ product, t, lang, onClose, onAddToCart })
   return (
     <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={onClose}>
       <div className="neu-flat max-w-2xl w-full p-6 relative max-h-[90vh] overflow-y-auto rounded-2xl" onClick={e => e.stopPropagation()}>
-        <div className="flex justify-between items-start mb-4 gap-4">
+        <div className="flex justify-between items-start">
           <h2 className="text-2xl font-extrabold text-textMain flex-1 min-w-0">{product.name}</h2>
           <button onClick={onClose} className="neu-btn w-10 h-10 flex items-center justify-center flex-shrink-0">
             <i className="fas fa-times"></i>
