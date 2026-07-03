@@ -128,7 +128,7 @@ export default function Design3() {
   const [callToActionShown, setCallToActionShown] = useState(false);
 
   const PAGE_SIZE = 12;
-  const [rawPoolSize, setRawPoolSize] = useState(60);
+  const [rawPoolSize, setRawPoolSize] = useState(600);
   const [currentPage, setCurrentPage] = useState(0);
   const [chunkHeights, setChunkHeights] = useState({});
   const [showFilters, setShowFilters] = useState(false);
@@ -260,7 +260,7 @@ export default function Design3() {
     if (currentPage >= totalPages - 3) {
       setRawPoolSize(prev => {
         const nextPoolSize = prev + 120;
-        return nextPoolSize > 5000 ? 5000 : nextPoolSize;
+        return nextPoolSize > 10000 ? 10000 : nextPoolSize;
       });
     }
   }, [currentPage, chunks.length]);
