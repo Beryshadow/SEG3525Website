@@ -242,7 +242,7 @@ export default function PaymentModal({ t, onClose, onConfirm, cartItems, cartTot
             <div className="absolute top-4 right-4 text-accent">
               <i className="fab fa-cc-visa text-3xl"></i>
             </div>
-            <div className="mt-8">
+            <div className="p-4 pb-6">
               <div className="text-textMain font-mono text-lg tracking-wider">
                 {cardNumber || '•••• •••• •••• ••••'}
               </div>
