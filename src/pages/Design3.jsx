@@ -129,6 +129,13 @@ export default function Design3() {
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
   const [paymentData, setPaymentData] = useState(null);
 
+  // Auto-switch back to cart view when items are added after payment
+  useEffect(() => {
+    if (paymentConfirmed && cart.length > 0) {
+      setPaymentConfirmed(false);
+    }
+  }, [cart, paymentConfirmed]);
+
   const PAGE_SIZE = 12;
   const [rawPoolSize, setRawPoolSize] = useState(600);
   const [currentPage, setCurrentPage] = useState(0);
