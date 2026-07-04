@@ -14,8 +14,8 @@ export const ROUTE_CONFIG = [
   { path: '/', element: <Portfolio />},
   { path: '/uopets', element: <VetPortal />},
   { path: '/memorygame', element: <Design2 />},
-  { path: '/design3', element: <Design3 />},
-  { path: '/design4', element: <Design4 />},
+  { path: '/vividly-minimal', element: <Design3 />},
+  { path: '/aura-analytics', element: <Design4 />},
   { path: '/neurodeck', element: <NeuroDeck />},
   { path: '/serialrecall', element: <SerialRecall />},
   { path: '*', element: <NotFound />}

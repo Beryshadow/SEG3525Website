@@ -74,7 +74,6 @@ export default function FeedbackForm({ t, onClose, onConfirm, prefillData }) {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Name */}
           <div>
             <label className="text-xs text-textMuted mb-1 block">{t.name || 'Name'}</label>
             <div className={`neu-pressed rounded-lg p-3 ${errors.name ? 'outline outline-2 outline-red-500' : ''}`}>
@@ -91,7 +90,6 @@ export default function FeedbackForm({ t, onClose, onConfirm, prefillData }) {
             )}
           </div>
 
-          {/* Email */}
           <div>
             <label className="text-xs text-textMuted mb-1 block">{t.email || 'Email'}</label>
             <div className={`neu-pressed rounded-lg p-3 ${errors.email ? 'outline outline-2 outline-red-500' : ''}`}>
@@ -108,7 +106,6 @@ export default function FeedbackForm({ t, onClose, onConfirm, prefillData }) {
             )}
           </div>
 
-          {/* Rating */}
           <div>
             <label className="text-xs text-textMuted mb-2 block">{t.rating || 'Rating'}</label>
             <div className={`flex gap-2 ${errors.rating ? 'outline outline-2 outline-red-500 rounded-lg p-2' : ''}`}>
@@ -132,7 +129,6 @@ export default function FeedbackForm({ t, onClose, onConfirm, prefillData }) {
             )}
           </div>
 
-          {/* Message */}
           <div>
             <label className="text-xs text-textMuted mb-1 block">{t.message || 'Message'}</label>
             <div className="neu-pressed rounded-lg p-3">
@@ -146,7 +142,6 @@ export default function FeedbackForm({ t, onClose, onConfirm, prefillData }) {
             </div>
           </div>
 
-          {/* Submit Button */}
           <button
             type="submit"
             className="neu-btn w-full py-3 font-bold mt-4"

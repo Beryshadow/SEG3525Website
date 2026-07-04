@@ -80,7 +80,11 @@ export default function ProductModal({ product, t, lang, onClose, onAddToCart })
                 </div>
                 <div><span className="text-accent font-bold">{t.framed}: </span>{product.framed ? t.yes : t.no}</div>
                 <div><span className="text-accent font-bold">{t.signed}: </span>{product.signed ? t.yes : t.no}</div>
-                <div><span className="text-accent font-bold">{t.stock}: </span>{product.stock} {t.unitsAvailable}</div>
+                <div>
+                  <span className="text-accent font-bold">{t.stock}: </span>
+                  {product.stock} {t.unitsAvailable}
+                  {product.soldUnits > 0 && ` (${t.originallyCreated} ${product.stock + product.soldUnits})`}
+                </div>
               </div>
               <div className="text-accent text-2xl font-black mb-4">${product.price.toFixed(2)}</div>
             </div>

@@ -25,7 +25,7 @@ export default function FilterSection({ title, defaultOpen = true, children, onR
           <i className={`fas fa-chevron-down transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}></i>
         </div>
       </button>
-      {isOpen && <div className="max-h-60">{children}</div>}
+      {isOpen && <div className="max-h-60 overflow-y-auto pb-2">{children}</div>}
     </div>
   );
 }

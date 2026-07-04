@@ -1,0 +1,231 @@
+/* Neumorphic & Glassmorphic Dashboard Styles */
+
+/* Route-specific CSS Custom Property Overrides */
+.dashboard-route {
+  --accent: #eab308; /* Premium yellow/gold accent */
+  --color-accent: #eab308;
+}
+
+.light-mode.dashboard-route {
+  --accent: #d97706; /* Darker amber yellow for accessible contrast in light mode */
+  --color-accent: #d97706;
+}
+
+/* Page container layout */
+.dashboard-route .dashboard-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* SVG Chart Elements */
+.dashboard-route .chart-svg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.dashboard-route .chart-grid-line {
+  stroke: var(--color-borderD);
+  stroke-dasharray: 4 4;
+  stroke-width: 1px;
+}
+
+.dashboard-route .chart-axis-line {
+  stroke: var(--color-textMuted);
+  stroke-width: 1.5px;
+}
+
+.dashboard-route .chart-axis-text {
+  fill: var(--color-textMain);
+  font-size: 11px;
+  font-family: inherit;
+  user-select: none;
+}
+
+.dashboard-route .chart-line-path {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 3.5px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  /* Animate path coordinates changes smoothly */
+  transition: d 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.dashboard-route .chart-area-path {
+  fill: url(#chartAreaGradient);
+  stroke: none;
+  /* Animate path coordinates changes smoothly */
+  transition: d 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.dashboard-route .chart-point-marker {
+  fill: var(--color-bgMain);
+  stroke: var(--color-accent);
+  stroke-width: 2.5px;
+  cursor: pointer;
+  /* Coordinate transitions synchronized with the line path animation */
+  transition: cx 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), 
+              cy 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), 
+              r 0.2s ease, 
+              stroke-width 0.2s ease;
+}
+
+.dashboard-route .chart-point-marker:hover,
+.dashboard-route .chart-point-marker.active {
+  r: 7px;
+  stroke-width: 4px;
+}
+
+/* Bar Chart specific */
+.dashboard-route .chart-bar-rect {
+  fill: url(#chartBarGradient);
+  cursor: pointer;
+  rx: 6px;
+  ry: 6px;
+  /* Transition dimensions and offsets for smooth updates */
+  transition: x 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), 
+              y 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), 
+              width 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), 
+              height 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), 
+              opacity 0.25s ease;
+}
+
+.dashboard-route .chart-bar-rect:hover {
+  opacity: 0.85;
+}
+
+/* Custom Interactive Tooltip */
+.dashboard-route .chart-tooltip-portal {
+  position: absolute;
+  pointer-events: none;
+  background: color-mix(in srgb, var(--color-surface) 80%, black);
+  border: 1px solid var(--color-borderD);
+  padding: 0.75rem 1rem;
+  border-radius: 1rem;
+  box-shadow: 0 8px 32px var(--color-shadowDStrong);
+  backdrop-filter: blur(12px);
+  z-index: 9999;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  font-family: inherit;
+}
+
+.light-mode.dashboard-route .chart-tooltip-portal {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.dashboard-route .chart-tooltip-title {
+  font-weight: 700;
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+  color: var(--color-textMain);
+}
+
+.dashboard-route .chart-tooltip-value {
+  font-size: 0.8rem;
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+.dashboard-route .chart-tooltip-count {
+  font-size: 0.75rem;
+  color: var(--color-textMuted);
+}
+
+/* Interactive Line Guide */
+.dashboard-route .chart-guide-line {
+  stroke: var(--color-textMuted);
+  stroke-width: 1px;
+  stroke-dasharray: 2 2;
+  pointer-events: none;
+}
+
+/* Selector buttons */
+.dashboard-route .dashboard-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+
+
+.dashboard-route select option {
+  background-color: var(--bg-main) !important;
+  color: var(--text-main) !important;
+}
+
+/* Empty State Neumorphic Styling */
+.dashboard-route .chart-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 250px;
+  color: var(--color-textMuted);
+  text-align: center;
+  padding: 2rem;
+}
+
+
+/* Dual Range Slider Styling (Reused from ArtShop.css, namespaced under dashboard-route) */
+.dashboard-route .dual-range-slider {
+  position: relative;
+  height: 24px;
+  display: flex;
+  align-items: center;
+}
+
+.dashboard-route .dual-range-track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 5px;
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--color-bgMain) 75%, black 25%);
+}
+
+.dashboard-route .dual-range-fill {
+  position: absolute;
+  height: 5px;
+  border-radius: 5px;
+  background: var(--color-accent);
+}
+
+.dashboard-route .dual-range-input {
+  position: absolute;
+  width: 100%;
+  height: 24px;
+  background: transparent;
+  pointer-events: none;
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+
+.dashboard-route .dual-range-input::-webkit-slider-thumb {
+  pointer-events: auto;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  background: var(--color-accent);
+  border-radius: 50%;
+  cursor: pointer;
+  position: relative;
+  z-index: 2;
+}
+
+.dashboard-route .dual-range-input::-moz-range-thumb {
+  pointer-events: auto;
+  width: 20px;
+  height: 20px;
+  background: var(--color-accent);
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+}
+
+.dashboard-route .dual-range-input::-webkit-slider-runnable-track,
+.dashboard-route .dual-range-input::-moz-range-track {
+  background: transparent;
+}
