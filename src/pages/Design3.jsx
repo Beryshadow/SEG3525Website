@@ -157,15 +157,40 @@ export default function Design3() {
     setShowNoResults(false);
   };
 
+  // Show CallToAction after 5 seconds of user inactivity
   useEffect(() => {
-    if (!callToActionShown) {
-      const timer = setTimeout(() => {
+    if (callToActionShown) return;
+
+    let inactivityTimer;
+
+    const resetTimer = () => {
+      clearTimeout(inactivityTimer);
+      inactivityTimer = setTimeout(() => {
         setShowCallToAction(true);
         setCallToActionShown(true);
-      }, 1500);
+      }, 5000);
+    };
 
-      return () => clearTimeout(timer);
-    }
+    const handleUserActivity = () => {
+      resetTimer();
+    };
+
+    // Start the timer
+    resetTimer();
+
+    // Listen for user activity events
+    window.addEventListener('mousemove', handleUserActivity);
+    window.addEventListener('keydown', handleUserActivity);
+    window.addEventListener('scroll', handleUserActivity);
+    window.addEventListener('click', handleUserActivity);
+
+    return () => {
+      clearTimeout(inactivityTimer);
+      window.removeEventListener('mousemove', handleUserActivity);
+      window.removeEventListener('keydown', handleUserActivity);
+      window.removeEventListener('scroll', handleUserActivity);
+      window.removeEventListener('click', handleUserActivity);
+    };
   }, [callToActionShown]);
 
   useEffect(() => {
