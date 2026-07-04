@@ -97,7 +97,7 @@ export default function PaymentModal({ t, onClose, onConfirm, cartItems, cartTot
   const handleSubmit = (e) => {
     e.preventDefault();
     if (validateAll()) {
-      onConfirm();
+      onConfirm({ cardName, email });
     }
   };
 
@@ -236,7 +236,7 @@ export default function PaymentModal({ t, onClose, onConfirm, cartItems, cartTot
                 </div>
               </div>
 
-              <div className="neu-panel rounded-xl p-4 h-40 relative overflow-hidden">
+              <div className="neu-panel rounded-xl p-4 h-40 mt-6 relative overflow-hidden">
                 <div className="absolute top-4 right-4 text-accent">
                   <i className="fab fa-cc-visa text-3xl"></i>
                 </div>

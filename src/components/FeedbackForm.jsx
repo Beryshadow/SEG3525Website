@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-export default function FeedbackForm({ t, onClose, onConfirm }) {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+export default function FeedbackForm({ t, onClose, onConfirm, prefillData }) {
+  const [name, setName] = useState(prefillData?.name || '');
+  const [email, setEmail] = useState(prefillData?.email || '');
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [message, setMessage] = useState('');
@@ -27,10 +27,6 @@ export default function FeedbackForm({ t, onClose, onConfirm }) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
   };
 
-  const validateMessage = (value) => {
-    return value.trim().length >= 10;
-  };
-
   const validateAll = () => {
     const newErrors = {};
     
@@ -44,10 +40,6 @@ export default function FeedbackForm({ t, onClose, onConfirm }) {
     
     if (rating === 0) {
       newErrors.rating = t.ratingError || 'Please select a rating';
-    }
-    
-    if (!validateMessage(message)) {
-      newErrors.message = t.messageError || 'Message must be at least 10 characters';
     }
     
     setErrors(newErrors);
@@ -143,7 +135,7 @@ export default function FeedbackForm({ t, onClose, onConfirm }) {
           {/* Message */}
           <div>
             <label className="text-xs text-textMuted mb-1 block">{t.message || 'Message'}</label>
-            <div className={`neu-pressed rounded-lg p-3 ${errors.message ? 'ring-2 ring-red-500' : ''}`}>
+            <div className="neu-pressed rounded-lg p-3">
               <textarea
                 value={message}
                 onChange={e => setMessage(e.target.value)}
@@ -152,9 +144,6 @@ export default function FeedbackForm({ t, onClose, onConfirm }) {
                 className="w-full bg-transparent text-textMain placeholder-textMuted/50 outline-none resize-none"
               />
             </div>
-            {errors.message && (
-              <p className="text-xs text-red-500 mt-1">{errors.message}</p>
-            )}
           </div>
 
           {/* Submit Button */}

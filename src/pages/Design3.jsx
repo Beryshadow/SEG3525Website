@@ -127,6 +127,7 @@ export default function Design3() {
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [callToActionShown, setCallToActionShown] = useState(false);
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
+  const [paymentData, setPaymentData] = useState(null);
 
   const PAGE_SIZE = 12;
   const [rawPoolSize, setRawPoolSize] = useState(600);
@@ -322,7 +323,8 @@ export default function Design3() {
     setShowPaymentModal(true);
   };
 
-  const handlePaymentConfirm = () => {
+  const handlePaymentConfirm = (paymentData) => {
+    setPaymentData(paymentData);
     setShowPaymentModal(false);
     setCart([]);
     setPaymentConfirmed(true);
@@ -621,6 +623,7 @@ export default function Design3() {
           t={t}
           onClose={handleFeedbackClose}
           onConfirm={handleFeedbackConfirm}
+          prefillData={paymentData}
         />
       )}
 
