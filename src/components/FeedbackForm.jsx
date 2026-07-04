@@ -77,7 +77,7 @@ export default function FeedbackForm({ t, onClose, onConfirm, prefillData }) {
           {/* Name */}
           <div>
             <label className="text-xs text-textMuted mb-1 block">{t.name || 'Name'}</label>
-            <div className={`neu-pressed rounded-lg p-3 ${errors.name ? 'ring-2 ring-red-500' : ''}`}>
+            <div className={`neu-pressed rounded-lg p-3 ${errors.name ? 'outline outline-2 outline-red-500' : ''}`}>
               <input
                 type="text"
                 value={name}
@@ -94,7 +94,7 @@ export default function FeedbackForm({ t, onClose, onConfirm, prefillData }) {
           {/* Email */}
           <div>
             <label className="text-xs text-textMuted mb-1 block">{t.email || 'Email'}</label>
-            <div className={`neu-pressed rounded-lg p-3 ${errors.email ? 'ring-2 ring-red-500' : ''}`}>
+            <div className={`neu-pressed rounded-lg p-3 ${errors.email ? 'outline outline-2 outline-red-500' : ''}`}>
               <input
                 type="email"
                 value={email}
@@ -111,7 +111,7 @@ export default function FeedbackForm({ t, onClose, onConfirm, prefillData }) {
           {/* Rating */}
           <div>
             <label className="text-xs text-textMuted mb-2 block">{t.rating || 'Rating'}</label>
-            <div className={`flex gap-2 ${errors.rating ? 'ring-2 ring-red-500 rounded-lg p-2' : ''}`}>
+            <div className={`flex gap-2 ${errors.rating ? 'outline outline-2 outline-red-500 rounded-lg p-2' : ''}`}>
               {Array.from({ length: 5 }).map((_, i) => (
                 <button
                   key={i}
