@@ -61,7 +61,7 @@ export const TRANSLATIONS = {
     namePlaceholder: "Votre nom",
     email: "E-mail",
     emailPlaceholder: "votre@email.com",
-    rating: "Évaluation",
+    rating: "Comment trouvez-vous notre service?",
     message: "Message",
     messagePlaceholder: "Vos commentaires (optionnel)...",
     submitFeedback: "Soumettre les commentaires",
@@ -102,7 +102,8 @@ export const TRANSLATIONS = {
     cardNumberError: "Veuillez entrer un numéro de carte valide à 16 chiffres",
     cardNameError: "Veuillez entrer un nom valide",
     expiryError: "Veuillez entrer une date d'expiration valide (MM/AA)",
-    cvcError: "Veuillez entrer un CVC valide à 3 chiffres"
+    nameError: "Veuillez entrer un nom valide",
+    ratingError: "Veuillez sélectionner une évaluation"
   },
   en: {
     back: "Go Back",
@@ -166,7 +167,7 @@ export const TRANSLATIONS = {
     namePlaceholder: "Your name",
     email: "Email",
     emailPlaceholder: "your@email.com",
-    rating: "Rating",
+    rating: "How do you find our service?",
     message: "Message",
     messagePlaceholder: "Your feedback (optional)...",
     submitFeedback: "Submit Feedback",
@@ -207,7 +208,8 @@ export const TRANSLATIONS = {
     cardNumberError: "Please enter a valid 16-digit card number",
     cardNameError: "Please enter a valid name",
     expiryError: "Please enter a valid expiry date (MM/YY)",
-    cvcError: "Please enter a valid 3-digit CVC"
+    nameError: "Please enter a valid name",
+    ratingError: "Please select a rating"
   }
 };
 
