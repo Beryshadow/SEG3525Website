@@ -98,7 +98,11 @@ export const TRANSLATIONS = {
     contemporary: "Contemporain",
     realist: "Réaliste",
     expressionist: "Expressionniste",
-    cubist: "Cubiste"
+    cubist: "Cubiste",
+    cardNumberError: "Veuillez entrer un numéro de carte valide à 16 chiffres",
+    cardNameError: "Veuillez entrer un nom valide",
+    expiryError: "Veuillez entrer une date d'expiration valide (MM/AA)",
+    cvcError: "Veuillez entrer un CVC valide à 3 chiffres"
   },
   en: {
     back: "Go Back",
@@ -199,7 +203,11 @@ export const TRANSLATIONS = {
     contemporary: "Contemporary",
     realist: "Realist",
     expressionist: "Expressionist",
-    cubist: "Cubist"
+    cubist: "Cubist",
+    cardNumberError: "Please enter a valid 16-digit card number",
+    cardNameError: "Please enter a valid name",
+    expiryError: "Please enter a valid expiry date (MM/YY)",
+    cvcError: "Please enter a valid 3-digit CVC"
   }
 };
 
