@@ -97,7 +97,7 @@ export default function PaymentModal({ t, onClose, onConfirm, cartItems, cartTot
   const handleSubmit = (e) => {
     e.preventDefault();
     if (validateAll()) {
-      onConfirm({ cardName, email });
+      onConfirm({ name: cardName, email });
     }
   };
 
