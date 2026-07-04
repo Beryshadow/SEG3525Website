@@ -111,7 +111,7 @@ export default function FeedbackForm({ t, onClose, onConfirm, prefillData }) {
           {/* Rating */}
           <div>
             <label className="text-xs text-textMuted mb-2 block">{t.rating || 'Rating'}</label>
-            <div className={`flex gap-2 ${errors.rating ? 'ring-2 ring-red-500 rounded-lg p-2 inline-block' : ''}`}>
+            <div className={`flex gap-2 ${errors.rating ? 'ring-2 ring-red-500 rounded-lg p-2' : ''}`}>
               {Array.from({ length: 5 }).map((_, i) => (
                 <button
                   key={i}
