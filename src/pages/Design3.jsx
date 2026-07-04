@@ -126,6 +126,7 @@ export default function Design3() {
   const [showCallToAction, setShowCallToAction] = useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [callToActionShown, setCallToActionShown] = useState(false);
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
 
   const PAGE_SIZE = 12;
   const [rawPoolSize, setRawPoolSize] = useState(600);
@@ -204,6 +205,16 @@ export default function Design3() {
       document.body.style.overflow = 'unset';
     };
   }, [navigate, showCart, showFilters, selectedProduct]);
+
+  // Auto-open feedback form 2 seconds after payment confirmation
+  useEffect(() => {
+    if (paymentConfirmed && !feedbackSubmitted) {
+      const timer = setTimeout(() => {
+        setShowFeedbackModal(true);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [paymentConfirmed, feedbackSubmitted]);
 
   const rawProducts = useMemo(
     () => generateProducts(rawPoolSize),
@@ -315,6 +326,15 @@ export default function Design3() {
     setShowPaymentModal(false);
     setCart([]);
     setPaymentConfirmed(true);
+  };
+
+  const handleFeedbackClose = () => {
+    setShowFeedbackModal(false);
+  };
+
+  const handleFeedbackConfirm = () => {
+    setShowFeedbackModal(false);
+    setFeedbackSubmitted(true);
   };
 
   const cartTotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
@@ -530,9 +550,7 @@ export default function Design3() {
                   {['all', 'yes', 'no'].map(option => (
                     <button key={option} onClick={() => setFramedFilter(option)}
                       className={`filter-chip ${framedFilter === option ? 'neu-pressed text-accent' : 'neu-btn'}`}
-                    >
-                      {t[option]}
-                    </button>
+                    >{t[option]}</button>
                   ))}
                 </div>
               </FilterSection>
@@ -542,9 +560,7 @@ export default function Design3() {
                   {['all', 'yes', 'no'].map(option => (
                     <button key={option} onClick={() => setSignedFilter(option)}
                       className={`filter-chip ${signedFilter === option ? 'neu-pressed text-accent' : 'neu-btn'}`}
-                    >
-                      {t[option]}
-                    </button>
+                    >{t[option]}</button>
                   ))}
                 </div>
               </FilterSection>
@@ -603,7 +619,8 @@ export default function Design3() {
       {showFeedbackModal && (
         <FeedbackForm
           t={t}
-          onClose={() => setShowFeedbackModal(false)}
+          onClose={handleFeedbackClose}
+          onConfirm={handleFeedbackConfirm}
         />
       )}
 
@@ -915,6 +932,9 @@ export default function Design3() {
                 >
                   <i className="fas fa-comment me-2"></i>
                   <span>{t.feedback || 'Feedback'}</span>
+                  {paymentConfirmed && !feedbackSubmitted && (
+                    <span className="absolute top-2 right-2 w-3 h-3 bg-red-500 rounded-full"></span>
+                  )}
                 </button>
 
                 <a href="#top" className="neu-btn w-full py-3 flex items-center justify-center" title={t.navScrollTop || 'Back to Top'}>

@@ -140,7 +140,7 @@ export default function PaymentModal({ t, onClose, onConfirm, cartItems, cartTot
         </div>
 
         <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0">
-          <div className="flex-1 overflow-y-auto px-1 -mx-1">
+          <div className="flex-1 px-1 -mx-1">
             <div className="space-y-4 px-2">
               <div>
                 <label className="text-xs text-textMuted mb-1 block">{t.cardNumber || 'Card Number'}</label>
