@@ -139,12 +139,12 @@ export default function PaymentModal({ t, onClose, onConfirm, cartItems, cartTot
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0 overflow-y-auto">
-          <div className="flex-1 px-1 -mx-1">
+        <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0">
+          <div className="flex-1 overflow-y-auto px-1 -mx-1">
             <div className="space-y-4 px-2">
               <div>
                 <label className="text-xs text-textMuted mb-1 block">{t.cardNumber || 'Card Number'}</label>
-                <div className={`neu-pressed rounded-lg p-3 ${errors.cardNumber ? 'ring-2 ring-red-500' : ''}`}>
+                <div className={`neu-pressed rounded-lg p-3 ${errors.cardNumber ? 'outline outline-2 outline-red-500' : ''}`}>
                   <input
                     type="text"
                     value={cardNumber}
@@ -163,7 +163,7 @@ export default function PaymentModal({ t, onClose, onConfirm, cartItems, cartTot
 
               <div>
                 <label className="text-xs text-textMuted mb-1 block">{t.cardName || 'Name on Card'}</label>
-                <div className={`neu-pressed rounded-lg p-3 ${errors.cardName ? 'ring-2 ring-red-500' : ''}`}>
+                <div className={`neu-pressed rounded-lg p-3 ${errors.cardName ? 'outline outline-2 outline-red-500' : ''}`}>
                   <input
                     type="text"
                     value={cardName}
@@ -181,7 +181,7 @@ export default function PaymentModal({ t, onClose, onConfirm, cartItems, cartTot
 
               <div>
                 <label className="text-xs text-textMuted mb-1 block">{t.email || 'Email'}</label>
-                <div className={`neu-pressed rounded-lg p-3 ${errors.email ? 'ring-2 ring-red-500' : ''}`}>
+                <div className={`neu-pressed rounded-lg p-3 ${errors.email ? 'outline outline-2 outline-red-500' : ''}`}>
                   <input
                     type="email"
                     value={email}
@@ -200,7 +200,7 @@ export default function PaymentModal({ t, onClose, onConfirm, cartItems, cartTot
               <div className="flex gap-4">
                 <div className="flex-1">
                   <label className="text-xs text-textMuted mb-1 block">{t.expiry || 'Expiry'}</label>
-                  <div className={`neu-pressed rounded-lg p-3 ${errors.expiry ? 'ring-2 ring-red-500' : ''}`}>
+                  <div className={`neu-pressed rounded-lg p-3 ${errors.expiry ? 'outline outline-2 outline-red-500' : ''}`}>
                     <input
                       type="text"
                       value={expiry}
@@ -218,7 +218,7 @@ export default function PaymentModal({ t, onClose, onConfirm, cartItems, cartTot
                 </div>
                 <div className="flex-1">
                   <label className="text-xs text-textMuted mb-1 block">{t.cvc || 'CVC'}</label>
-                  <div className={`neu-pressed rounded-lg p-3 ${errors.cvc ? 'ring-2 ring-red-500' : ''}`}>
+                  <div className={`neu-pressed rounded-lg p-3 ${errors.cvc ? 'outline outline-2 outline-red-500' : ''}`}>
                     <input
                       type="text"
                       value={cvc}
@@ -235,25 +235,25 @@ export default function PaymentModal({ t, onClose, onConfirm, cartItems, cartTot
                   )}
                 </div>
               </div>
+            </div>
+          </div>
 
-              <div className="neu-panel rounded-xl p-4 h-40 mt-6 relative overflow-hidden">
-                <div className="absolute top-4 right-4 text-accent">
-                  <i className="fab fa-cc-visa text-3xl"></i>
+          <div className="neu-panel rounded-xl p-4 h-40 mt-4 relative overflow-hidden">
+            <div className="absolute top-4 right-4 text-accent">
+              <i className="fab fa-cc-visa text-3xl"></i>
+            </div>
+            <div className="mt-8">
+              <div className="text-textMain font-mono text-lg tracking-wider">
+                {cardNumber || '•••• •••• •••• ••••'}
+              </div>
+              <div className="flex justify-between mt-4">
+                <div>
+                  <div className="text-xs text-textMuted">{t.cardName || 'CARDHOLDER'}</div>
+                  <div className="text-sm text-textMain font-medium">{cardName || 'John Smith'}</div>
                 </div>
-                <div className="mt-8">
-                  <div className="text-textMain font-mono text-lg tracking-wider">
-                    {cardNumber || '•••• •••• •••• ••••'}
-                  </div>
-                  <div className="flex justify-between mt-4">
-                    <div>
-                      <div className="text-xs text-textMuted">{t.cardName || 'CARDHOLDER'}</div>
-                      <div className="text-sm text-textMain font-medium">{cardName || 'John Smith'}</div>
-                    </div>
-                    <div>
-                      <div className="text-xs text-textMuted">{t.expiry || 'EXPIRES'}</div>
-                      <div className="text-sm text-textMain font-medium">{expiry || 'MM/YY'}</div>
-                    </div>
-                  </div>
+                <div>
+                  <div className="text-xs text-textMuted">{t.expiry || 'EXPIRES'}</div>
+                  <div className="text-sm text-textMain font-medium">{expiry || 'MM/YY'}</div>
                 </div>
               </div>
             </div>
