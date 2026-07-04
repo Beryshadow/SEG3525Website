@@ -139,7 +139,7 @@ export default function PaymentModal({ t, onClose, onConfirm, cartItems, cartTot
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0">
+        <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0 overflow-y-auto">
           <div className="flex-1 px-1 -mx-1">
             <div className="space-y-4 px-2">
               <div>
@@ -259,12 +259,14 @@ export default function PaymentModal({ t, onClose, onConfirm, cartItems, cartTot
             </div>
           </div>
 
-          <button
-            type="submit"
-            className="neu-btn w-full py-3 font-bold mt-4"
-          >
-            {t.confirmPayment || 'Confirm Payment'}
-          </button>
+          <div className="pt-4 pb-2 px-2">
+            <button
+              type="submit"
+              className="neu-btn w-full py-3 font-bold"
+            >
+              {t.confirmPayment || 'Confirm Payment'}
+            </button>
+          </div>
         </form>
       </div>
     </div>
