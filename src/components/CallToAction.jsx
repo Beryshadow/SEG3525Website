@@ -23,8 +23,11 @@ export default function CallToAction({ t, onClose }) {
         className="neu-flat w-full max-w-md p-6 rounded-2xl"
         onClick={e => e.stopPropagation()}
       >
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-bold text-textMain">{t.callToActionTitle || 'Invest in Happiness'}</h3>
+        <div className="flex justify-between items-start mb-6">
+          <div className="flex items-center gap-3">
+            <i className="fas fa-palette text-accent text-4xl"></i>
+            <h3 className="text-2xl font-bold text-textMain">{t.callToActionTitle || 'Invest in Happiness'}</h3>
+          </div>
           <button 
             onClick={onClose}
             className="neu-btn w-8 h-8 flex items-center justify-center"
@@ -35,8 +38,7 @@ export default function CallToAction({ t, onClose }) {
 
         <div className="space-y-4">
           <div className="neu-panel rounded-xl p-4">
-            <i className="fas fa-palette text-accent text-4xl mb-4 block text-center"></i>
-            <p className="text-textMain text-center leading-relaxed">
+            <p className="text-textMain text-lg text-center leading-relaxed">
               {t.callToActionMessage || 'By purchasing art, you are making an investment in your happiness and potentially creating generational wealth.'}
             </p>
           </div>

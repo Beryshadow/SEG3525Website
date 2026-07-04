@@ -61,9 +61,9 @@ export const TRANSLATIONS = {
     namePlaceholder: "Votre nom",
     email: "E-mail",
     emailPlaceholder: "votre@email.com",
-    rating: "Évaluation",
+    rating: "Comment trouvez-vous notre service?",
     message: "Message",
-    messagePlaceholder: "Vos commentaires...",
+    messagePlaceholder: "Vos commentaires (optionnel)...",
     submitFeedback: "Soumettre les commentaires",
     callToActionTitle: "Investir dans le bonheur",
     callToActionMessage: "En achetant de l'art, vous investissez dans votre bonheur et créez potentiellement un patrimoine générationnel.",
@@ -98,7 +98,12 @@ export const TRANSLATIONS = {
     contemporary: "Contemporain",
     realist: "Réaliste",
     expressionist: "Expressionniste",
-    cubist: "Cubiste"
+    cubist: "Cubiste",
+    cardNumberError: "Veuillez entrer un numéro de carte valide à 16 chiffres",
+    cardNameError: "Veuillez entrer un nom valide",
+    expiryError: "Veuillez entrer une date d'expiration valide (MM/AA)",
+    nameError: "Veuillez entrer un nom valide",
+    ratingError: "Veuillez sélectionner une évaluation"
   },
   en: {
     back: "Go Back",
@@ -162,9 +167,9 @@ export const TRANSLATIONS = {
     namePlaceholder: "Your name",
     email: "Email",
     emailPlaceholder: "your@email.com",
-    rating: "Rating",
+    rating: "How do you find our service?",
     message: "Message",
-    messagePlaceholder: "Your feedback...",
+    messagePlaceholder: "Your feedback (optional)...",
     submitFeedback: "Submit Feedback",
     callToActionTitle: "Invest in Happiness",
     callToActionMessage: "By purchasing art, you are making an investment in your happiness and potentially creating generational wealth.",
@@ -199,7 +204,12 @@ export const TRANSLATIONS = {
     contemporary: "Contemporary",
     realist: "Realist",
     expressionist: "Expressionist",
-    cubist: "Cubist"
+    cubist: "Cubist",
+    cardNumberError: "Please enter a valid 16-digit card number",
+    cardNameError: "Please enter a valid name",
+    expiryError: "Please enter a valid expiry date (MM/YY)",
+    nameError: "Please enter a valid name",
+    ratingError: "Please select a rating"
   }
 };
 

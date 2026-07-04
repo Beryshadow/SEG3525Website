@@ -95,7 +95,7 @@ export default function ProductCard({ product, t, lang, onAddToCart, onSelectPro
         }}
         disabled={currentStock === 0}
         className={`neu-btn w-full py-2 text-center text-sm font-bold transition-transform ${
-          currentStock === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'
+          currentStock === 0 ? 'opacity-50 cursor-not-allowed' : ''
         }`}
       >
         {currentStock === 0 ? t.outOfStock : `${t.addToCart} (${currentStock})`}
