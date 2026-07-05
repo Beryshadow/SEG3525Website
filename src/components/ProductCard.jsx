@@ -55,21 +55,18 @@ export default function ProductCard({ product, t, lang, onAddToCart, onSelectPro
       className="p-4 flex flex-col justify-between h-full relative neu-card cursor-pointer"
       onClick={() => onSelectProduct(product)}
     >
-      {/* Stock indicator */}
       {currentStock === 0 && (
         <div className="absolute top-4 right-4 bg-red-500 text-white text-xs px-2 py-1 rounded-full z-10">
           {t.outOfStock}
         </div>
       )}
 
-      {/* Image Container */}
       <div className="flex justify-center mb-4">
         <div className="w-full aspect-square flex items-center justify-center rounded-xl overflow-hidden">
           <img src={generateArtImage(product)} alt={product.name} className="w-full h-full object-cover" />
         </div>
       </div>
 
-      {/* Product Details Block */}
       <div className="mb-4 flex-grow">
         <h5 className="font-bold text-base mb-2 text-textMain">{product.name}</h5>
         <p className="text-sm text-textMuted mb-2 whitespace-pre-line">{generateDescription(product, lang, false)}</p>
@@ -87,7 +84,6 @@ export default function ProductCard({ product, t, lang, onAddToCart, onSelectPro
         </div>
       </div>
 
-      {/* Action Button */}
       <button
         onClick={(e) => {
           e.stopPropagation();

@@ -11,6 +11,10 @@ import RangeSlider from '../components/RangeSlider';
 import { TRANSLATIONS, CATEGORIES, MEDIUMS, CITIES, STYLES } from '../data/ecommerceData';
 import { CITY_POOL, ARTIST_POOL, MEDIUM_POOL, STYLE_POOL, generateProducts } from '../utilities/productGenerator';
 import FilterSection from '../components/FilterSection';
+import ArtShopFilters from '../components/ArtShopFilters';
+import ArtShopCart from '../components/ArtShopCart';
+import ActiveFiltersDisplay from '../components/ActiveFiltersDisplay';
+import SEO from '../utilities/SEO';
 import '../App.css';
 
 const PageChunk = memo(({
@@ -110,7 +114,7 @@ export default function Design3() {
   const [showCart, setShowCart] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [priceRange, setPriceRange] = useState([0, 1000]);
-  const [stockRange, setStockRange] = useState([0, 5]);
+  const [stockRange, setStockRange] = useState([0, 25]);
   const [selectedMediums, setSelectedMediums] = useState([]);
   const [selectedStyles, setSelectedStyles] = useState([]);
   const [yearRange, setYearRange] = useState([1990, 2026]);
@@ -129,6 +133,19 @@ export default function Design3() {
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
   const [paymentData, setPaymentData] = useState(null);
 
+  const hasActiveFilters = 
+    selectedCategories.length > 0 ||
+    priceRange[0] > 0 || priceRange[1] < 1000 ||
+    selectedMediums.length > 0 ||
+    selectedStyles.length > 0 ||
+    yearRange[0] > 1990 || yearRange[1] < 2026 ||
+    framedFilter !== 'all' ||
+    signedFilter !== 'all' ||
+    selectedCities.length > 0 ||
+    selectedArtists.length > 0 ||
+    searchQuery !== '' ||
+    stockRange[0] > 0 || stockRange[1] < 5;
+
   // Auto-switch back to cart view when items are added after payment
   useEffect(() => {
     if (paymentConfirmed && cart.length > 0) {
@@ -137,7 +154,7 @@ export default function Design3() {
   }, [cart, paymentConfirmed]);
 
   const PAGE_SIZE = 12;
-  const [rawPoolSize, setRawPoolSize] = useState(600);
+  const [rawPoolSize] = useState(10000);
   const [currentPage, setCurrentPage] = useState(0);
   const [chunkHeights, setChunkHeights] = useState({});
   const [showFilters, setShowFilters] = useState(false);
@@ -153,19 +170,44 @@ export default function Design3() {
     setSelectedCities([]);
     setSelectedArtists([]);
     setSearchQuery('');
-    setStockRange([0, 5]);
+    setStockRange([0, 25]);
     setShowNoResults(false);
   };
 
+  // Show CallToAction after 5 seconds of user inactivity
   useEffect(() => {
-    if (!callToActionShown) {
-      const timer = setTimeout(() => {
+    if (callToActionShown) return;
+
+    let inactivityTimer;
+
+    const resetTimer = () => {
+      clearTimeout(inactivityTimer);
+      inactivityTimer = setTimeout(() => {
         setShowCallToAction(true);
         setCallToActionShown(true);
-      }, 1500);
+      }, 5000);
+    };
 
-      return () => clearTimeout(timer);
-    }
+    const handleUserActivity = () => {
+      resetTimer();
+    };
+
+    // Start the timer
+    resetTimer();
+
+    // Listen for user activity events
+    window.addEventListener('mousemove', handleUserActivity);
+    window.addEventListener('keydown', handleUserActivity);
+    window.addEventListener('scroll', handleUserActivity);
+    window.addEventListener('click', handleUserActivity);
+
+    return () => {
+      clearTimeout(inactivityTimer);
+      window.removeEventListener('mousemove', handleUserActivity);
+      window.removeEventListener('keydown', handleUserActivity);
+      window.removeEventListener('scroll', handleUserActivity);
+      window.removeEventListener('click', handleUserActivity);
+    };
   }, [callToActionShown]);
 
   useEffect(() => {
@@ -275,16 +317,6 @@ export default function Design3() {
   }, []);
 
   useEffect(() => {
-    const totalPages = chunks.length;
-    if (currentPage >= totalPages - 3) {
-      setRawPoolSize(prev => {
-        const nextPoolSize = prev + 120;
-        return nextPoolSize > 10000 ? 10000 : nextPoolSize;
-      });
-    }
-  }, [currentPage, chunks.length]);
-
-  useEffect(() => {
     if (chunks.length > 0 && currentPage >= chunks.length) {
       setCurrentPage(0);
     }
@@ -350,6 +382,11 @@ export default function Design3() {
 
   return (
     <div className={`font-sans antialiased overflow-clip min-h-screen flex flex-col artshop-route ${themeClass}`}>
+      <SEO 
+        title={currentLang === 'fr' ? "Vividement minimal & Co" : "Vividly Minimal & Co"}
+        description={currentLang === 'fr' ? "Découvrez une collection d'art et d'artisanat unique. Achetez des peintures originales, des sculptures contemporaines et des photographies de collection en édition limitée." : "Browse a collection of unique, handcrafted art creations. Purchase original paintings, contemporary sculptures, and limited edition fine art photography."}
+        canonicalUrl="https://ryanbeland.ca/vividly-minimal"
+      />
       <nav className="navbar navbar-dark d-lg-none sticky-top pt-4 px-4 z-50">
         <div className="neu-panel w-100 px-4 py-3 d-flex justify-content-between align-items-center">
           <Link className="font-bold tracking-wider text-accent" to="/"><i className="fas fa-arrow-left"></i></Link>
@@ -401,62 +438,16 @@ export default function Design3() {
               </button>
             </div>
 
-            {paymentConfirmed ? (
-              <div className="text-center py-8">
-                <i className="fas fa-check-circle text-accent text-5xl mb-4 block"></i>
-                <h4 className="text-lg font-bold mb-2">{t.thankYou}</h4>
-                <p className="text-sm text-textMuted mb-6">{t.paymentProcessed}</p>
-                <button
-                  onClick={() => {
-                    setPaymentConfirmed(false);
-                    setShowCart(false);
-                  }}
-                  className="neu-btn w-full py-3 font-bold"
-                >
-                  {t.close || 'Close'}
-                </button>
-              </div>
-            ) : (
-              <>
-                {cart.length === 0 ? (
-                  <p className="text-sm text-textMuted italic">{t.cartEmpty}</p>
-                ) : (
-                  <div className="space-y-3 max-h-[50vh] overflow-y-auto">
-                    {cart.map(item => (
-                      <div key={item.id} className="flex justify-between items-center p-3 neu-pressed rounded-lg">
-                        <div className="flex-1">
-                          <div className="font-bold text-sm">{item.name}</div>
-                          <div className="text-xs text-textMuted">${item.price.toFixed(2)} × {item.quantity}</div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-sm">${(item.price * item.quantity).toFixed(2)}</span>
-                          <button
-                            onClick={() => removeFromCart(item.id)}
-                            className="neu-btn w-8 h-8 flex items-center justify-center"
-                          >
-                            <i className="fas fa-times text-xs"></i>
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                <div className="mt-4 border-t pt-4">
-                  <div className="flex justify-between font-bold">
-                    <span>{t.cartTotal}</span>
-                    <span>${cartTotal.toFixed(2)}</span>
-                  </div>
-                  <button
-                    onClick={handlePayment}
-                    disabled={cartTotal === 0}
-                    className="neu-btn w-full mt-4 py-3 font-bold disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {cartTotal === 0 ? t.addArtFirst || 'Add art first' : t.bookInstantly}
-                  </button>
-                </div>
-              </>
-            )}
+            <ArtShopCart 
+              t={t}
+              cart={cart}
+              cartTotal={cartTotal}
+              removeFromCart={removeFromCart}
+              handlePayment={handlePayment}
+              paymentConfirmed={paymentConfirmed}
+              setPaymentConfirmed={setPaymentConfirmed}
+              onClose={() => setShowCart(false)}
+            />
           </div>
         </div>
       )}
@@ -464,143 +455,28 @@ export default function Design3() {
       {showFilters && (
         <div className="fixed inset-0 z-50 bg-black/50 lg:hidden flex items-center justify-center p-4" onClick={() => setShowFilters(false)}>
           <div className="neu-flat w-full max-w-md max-h-[90vh] p-6 rounded-2xl overflow-y-auto" onClick={e => e.stopPropagation()}>
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-bold">{t.filterTitle}</h3>
-              <button onClick={() => setShowFilters(false)} className="neu-btn w-8 h-8 flex items-center justify-center">
-                <i className="fas fa-times"></i>
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              <button
-                onClick={resetFilters}
-                className="neu-btn w-full mb-4 py-2 flex items-center justify-center gap-2 text-sm"
-              >
-                <i className="fas fa-undo"></i>
-                <span>{t.resetFilters}</span>
-              </button>
-
-              <FilterSection title={t.artist}>
-                <div className="flex flex-wrap gap-2">
-                  {ARTIST_POOL.map(artist => (
-                    <button
-                      key={artist}
-                      onClick={() => setSelectedArtists(prev =>
-                        prev.includes(artist) ? prev.filter(a => a !== artist) : [...prev, artist]
-                      )}
-                      className={`filter-chip ${selectedArtists.includes(artist) ? 'neu-pressed text-accent' : 'neu-btn'}`}
-                    >
-                      {artist}
-                    </button>
-                  ))}
-                </div>
-              </FilterSection>
-
-              <FilterSection title={t.priceRange}>
-                <div className="flex gap-3 mb-2">
-                  <div className="flex-1">
-                    <label className="text-xs text-textMuted mb-1 block">{t.minPrice}</label>
-                    <input type="number" min="0" max={priceRange[1]} value={priceRange[0]}
-                      onChange={e => setPriceRange([parseInt(e.target.value) || 0, priceRange[1]])}
-                      className="neu-pressed w-full p-2 rounded-lg text-sm" />
-                  </div>
-                  <div className="flex-1">
-                    <label className="text-xs text-textMuted mb-1 block">{t.maxPrice}</label>
-                    <input type="number" min={priceRange[0]} max="1000" value={priceRange[1]}
-                      onChange={e => setPriceRange([priceRange[0], parseInt(e.target.value) || 0])}
-                      className="neu-pressed w-full p-2 rounded-lg text-sm" />
-                  </div>
-                </div>
-                <RangeSlider min={0} max={1000} step={10} value={priceRange} onChange={setPriceRange} />
-              </FilterSection>
-
-              <FilterSection title={t.city}>
-                <div className="flex flex-wrap gap-2">
-                  {CITIES.map(item => (
-                    <button key={item.id}
-                      onClick={() => setSelectedCities(prev => prev.includes(item.label) ? prev.filter(c => c !== item.label) : [...prev, item.label])}
-                      className={`filter-chip ${selectedCities.includes(item.label) ? 'neu-pressed text-accent' : 'neu-btn'}`}
-                    >{t[item.id] || item.label}</button>
-                  ))}
-                </div>
-              </FilterSection>
-
-              <FilterSection title={t.medium}>
-                <div className="flex flex-wrap gap-2">
-                  {MEDIUMS.map(item => (
-                    <button key={item.id}
-                      onClick={() => setSelectedMediums(prev => prev.includes(item.label) ? prev.filter(m => m !== item.label) : [...prev, item.label])}
-                      className={`filter-chip ${selectedMediums.includes(item.label) ? 'neu-pressed text-accent' : 'neu-btn'}`}
-                    >{t[item.id] || item.label}</button>
-                  ))}
-                </div>
-              </FilterSection>
-
-              <FilterSection title={t.style} defaultOpen={false}>
-                <div className="flex flex-wrap gap-2">
-                  {STYLES.map(item => (
-                    <button key={item.id}
-                      onClick={() => setSelectedStyles(prev => prev.includes(item.label) ? prev.filter(s => s !== item.label) : [...prev, item.label])}
-                      className={`filter-chip ${selectedStyles.includes(item.label) ? 'neu-pressed text-accent' : 'neu-btn'}`}
-                    >{t[item.id] || item.label}</button>
-                  ))}
-                </div>
-              </FilterSection>
-
-              <FilterSection title={t.year} defaultOpen={false}>
-                <div className="flex justify-between text-xs text-textMuted mb-2">
-                  <span>{yearRange[0]}</span><span>{yearRange[1]}</span>
-                </div>
-                <RangeSlider min={1990} max={2026} step={1} value={yearRange} onChange={setYearRange} />
-              </FilterSection>
-
-              <FilterSection title={t.framed} defaultOpen={false}>
-                <div className="flex flex-wrap gap-2">
-                  {['all', 'yes', 'no'].map(option => (
-                    <button key={option} onClick={() => setFramedFilter(option)}
-                      className={`filter-chip ${framedFilter === option ? 'neu-pressed text-accent' : 'neu-btn'}`}
-                    >{t[option]}</button>
-                  ))}
-                </div>
-              </FilterSection>
-
-              <FilterSection title={t.signed} defaultOpen={false}>
-                <div className="flex flex-wrap gap-2">
-                  {['all', 'yes', 'no'].map(option => (
-                    <button key={option} onClick={() => setSignedFilter(option)}
-                      className={`filter-chip ${signedFilter === option ? 'neu-pressed text-accent' : 'neu-btn'}`}
-                    >{t[option]}</button>
-                  ))}
-                </div>
-              </FilterSection>
-
-              <FilterSection title={t.stock} defaultOpen={false}>
-                <div className="flex justify-between text-xs text-textMuted mb-2">
-                  <span>{stockRange[0]}</span><span>{stockRange[1]}</span>
-                </div>
-                <RangeSlider min={0} max={5} step={1} value={stockRange} onChange={setStockRange} />
-              </FilterSection>
-
-              <FilterSection title={t.category} defaultOpen={false}>
-                <div className="flex flex-wrap gap-2">
-                  {CATEGORIES.filter(cat => cat.id !== 'all').map(cat => (
-                    <button key={cat.id}
-                      onClick={() => setSelectedCategories(prev => prev.includes(cat.id) ? prev.filter(id => id !== cat.id) : [...prev, cat.id])}
-                      className={`filter-chip ${selectedCategories.includes(cat.id) ? 'neu-pressed text-accent' : 'neu-btn'}`}
-                    >{t[cat.id]}</button>
-                  ))}
-                </div>
-              </FilterSection>
-
-              <FilterSection title={t.sort} defaultOpen={false}>
-                <select value={sortOption} onChange={e => setSortOption(e.target.value)}
-                  className="neu-pressed w-full p-3 rounded-lg text-sm">
-                  <option value="newest">{t.newest}</option>
-                  <option value="priceLow">{t.priceLow}</option>
-                  <option value="priceHigh">{t.priceHigh}</option>
-                </select>
-              </FilterSection>
-            </div>
+            <ArtShopFilters
+              t={t}
+              resetFilters={resetFilters}
+              hasActiveFilters={hasActiveFilters}
+              selectedCategories={selectedCategories} setSelectedCategories={setSelectedCategories}
+              priceRange={priceRange} setPriceRange={setPriceRange}
+              selectedMediums={selectedMediums} setSelectedMediums={setSelectedMediums}
+              selectedStyles={selectedStyles} setSelectedStyles={setSelectedStyles}
+              yearRange={yearRange} setYearRange={setYearRange}
+              framedFilter={framedFilter} setFramedFilter={setFramedFilter}
+              signedFilter={signedFilter} setSignedFilter={setSignedFilter}
+              selectedCities={selectedCities} setSelectedCities={setSelectedCities}
+              selectedArtists={selectedArtists} setSelectedArtists={setSelectedArtists}
+              stockRange={stockRange} setStockRange={setStockRange}
+              sortOption={sortOption} setSortOption={setSortOption}
+              filteredProductsCount={filteredProducts.length}
+              ARTIST_POOL={ARTIST_POOL}
+              CITIES={CITIES}
+              MEDIUMS={MEDIUMS}
+              STYLES={STYLES}
+              CATEGORIES={CATEGORIES}
+            />
           </div>
         </div>
       )}
@@ -658,137 +534,29 @@ export default function Design3() {
                 </Link>
               </nav>
 
-              <div className="art-filter-section neu-panel">
-                <h4 className="font-bold mb-4 text-textMain">{t.filterTitle}</h4>
-                <button
-                  onClick={resetFilters}
-                  className="neu-btn w-full mb-4 py-2 flex items-center justify-center gap-2 text-sm"
-                >
-                  <i className="fas fa-undo"></i>
-                  <span>{t.resetFilters}</span>
-                </button>
-
-
-                <FilterSection title={t.artist}>
-                  <div className="flex flex-wrap gap-2">
-                    {ARTIST_POOL.map(artist => (
-                      <button
-                        key={artist}
-                        onClick={() => setSelectedArtists(prev =>
-                          prev.includes(artist) ? prev.filter(a => a !== artist) : [...prev, artist]
-                        )}
-                        className={`filter-chip ${selectedArtists.includes(artist) ? 'neu-pressed text-accent' : 'neu-btn'}`}
-                      >
-                        {artist}
-                      </button>
-                    ))}
-                  </div>
-                </FilterSection>
-
-                <FilterSection title={t.priceRange}>
-                  <div className="flex gap-3 mb-2">
-                    <div className="flex-1">
-                      <label className="text-xs text-textMuted mb-1 block">{t.minPrice}</label>
-                      <input type="number" min="0" max={priceRange[1]} value={priceRange[0]}
-                        onChange={e => setPriceRange([parseInt(e.target.value), priceRange[1]])}
-                        className="neu-pressed w-full p-2 rounded-lg text-sm" />
-                    </div>
-                    <div className="flex-1">
-                      <label className="text-xs text-textMuted mb-1 block">{t.maxPrice}</label>
-                      <input type="number" min={priceRange[0]} max="1000" value={priceRange[1]}
-                        onChange={e => setPriceRange([priceRange[0], parseInt(e.target.value)])}
-                        className="neu-pressed w-full p-2 rounded-lg text-sm" />
-                    </div>
-                  </div>
-                  <RangeSlider min={0} max={1000} step={10} value={priceRange} onChange={setPriceRange} />
-                </FilterSection>
-
-                <FilterSection title={t.city}>
-                  <div className="flex flex-wrap gap-2">
-                    {CITIES.map(item => (
-                      <button key={item.id}
-                        onClick={() => setSelectedCities(prev => prev.includes(item.label) ? prev.filter(c => c !== item.label) : [...prev, item.label])}
-                        className={`filter-chip ${selectedCities.includes(item.label) ? 'neu-pressed text-accent' : 'neu-btn'}`}
-                      >{t[item.id] || item.label}</button>
-                    ))}
-                  </div>
-                </FilterSection>
-
-                <FilterSection title={t.medium}>
-                  <div className="flex flex-wrap gap-2">
-                    {MEDIUMS.map(item => (
-                      <button key={item.id}
-                        onClick={() => setSelectedMediums(prev => prev.includes(item.label) ? prev.filter(m => m !== item.label) : [...prev, item.label])}
-                        className={`filter-chip ${selectedMediums.includes(item.label) ? 'neu-pressed text-accent' : 'neu-btn'}`}
-                      >{t[item.id] || item.label}</button>
-                    ))}
-                  </div>
-                </FilterSection>
-
-                <FilterSection title={t.style} defaultOpen={false}>
-                  <div className="flex flex-wrap gap-2">
-                    {STYLES.map(item => (
-                      <button key={item.id}
-                        onClick={() => setSelectedStyles(prev => prev.includes(item.label) ? prev.filter(s => s !== item.label) : [...prev, item.label])}
-                        className={`filter-chip ${selectedStyles.includes(item.label) ? 'neu-pressed text-accent' : 'neu-btn'}`}
-                      >{t[item.id] || item.label}</button>
-                    ))}
-                  </div>
-                </FilterSection>
-
-                <FilterSection title={t.year} defaultOpen={false}>
-                  <div className="flex justify-between text-xs text-textMuted mb-2">
-                    <span>{yearRange[0]}</span><span>{yearRange[1]}</span>
-                  </div>
-                  <RangeSlider min={1990} max={2026} step={1} value={yearRange} onChange={setYearRange} />
-                </FilterSection>
-
-                <FilterSection title={t.framed} defaultOpen={false}>
-                  <div className="flex flex-wrap gap-2">
-                    {['all', 'yes', 'no'].map(option => (
-                      <button key={option} onClick={() => setFramedFilter(option)}
-                        className={`filter-chip ${framedFilter === option ? 'neu-pressed text-accent' : 'neu-btn'}`}
-                      >{t[option]}</button>
-                    ))}
-                  </div>
-                </FilterSection>
-
-                <FilterSection title={t.signed} defaultOpen={false}>
-                  <div className="flex flex-wrap gap-2">
-                    {['all', 'yes', 'no'].map(option => (
-                      <button key={option} onClick={() => setSignedFilter(option)}
-                        className={`filter-chip ${signedFilter === option ? 'neu-pressed text-accent' : 'neu-btn'}`}
-                      >{t[option]}</button>
-                    ))}
-                  </div>
-                </FilterSection>
-
-                <FilterSection title={t.stock} defaultOpen={false}>
-                  <div className="flex justify-between text-xs text-textMuted mb-2">
-                    <span>{stockRange[0]}</span><span>{stockRange[1]}</span>
-                  </div>
-                  <RangeSlider min={0} max={5} step={1} value={stockRange} onChange={setStockRange} />
-                </FilterSection>
-
-                <FilterSection title={t.category} defaultOpen={false}>
-                  <div className="flex flex-wrap gap-2">
-                    {CATEGORIES.filter(cat => cat.id !== 'all').map(cat => (
-                      <button key={cat.id}
-                        onClick={() => setSelectedCategories(prev => prev.includes(cat.id) ? prev.filter(id => id !== cat.id) : [...prev, cat.id])}
-                        className={`filter-chip ${selectedCategories.includes(cat.id) ? 'neu-pressed text-accent' : 'neu-btn'}`}
-                      >{t[cat.id]}</button>
-                    ))}
-                  </div>
-                </FilterSection>
-
-                <FilterSection title={t.sort} defaultOpen={false}>
-                  <select value={sortOption} onChange={e => setSortOption(e.target.value)}
-                    className="neu-pressed w-full p-3 rounded-lg text-sm">
-                    <option value="newest">{t.newest}</option>
-                    <option value="priceLow">{t.priceLow}</option>
-                    <option value="priceHigh">{t.priceHigh}</option>
-                  </select>
-                </FilterSection>
+              <div className="neu-panel p-6">
+                <ArtShopFilters
+                  t={t}
+                  resetFilters={resetFilters}
+                  hasActiveFilters={hasActiveFilters}
+                  selectedCategories={selectedCategories} setSelectedCategories={setSelectedCategories}
+                  priceRange={priceRange} setPriceRange={setPriceRange}
+                  selectedMediums={selectedMediums} setSelectedMediums={setSelectedMediums}
+                  selectedStyles={selectedStyles} setSelectedStyles={setSelectedStyles}
+                  yearRange={yearRange} setYearRange={setYearRange}
+                  framedFilter={framedFilter} setFramedFilter={setFramedFilter}
+                  signedFilter={signedFilter} setSignedFilter={setSignedFilter}
+                  selectedCities={selectedCities} setSelectedCities={setSelectedCities}
+                  selectedArtists={selectedArtists} setSelectedArtists={setSelectedArtists}
+                  stockRange={stockRange} setStockRange={setStockRange}
+                  sortOption={sortOption} setSortOption={setSortOption}
+                  filteredProductsCount={filteredProducts.length}
+                  ARTIST_POOL={ARTIST_POOL}
+                  CITIES={CITIES}
+                  MEDIUMS={MEDIUMS}
+                  STYLES={STYLES}
+                  CATEGORIES={CATEGORIES}
+                />
               </div>
             </div>
           </div>
@@ -832,7 +600,25 @@ export default function Design3() {
             {showNoResults && (
               <div className="text-center py-12 px-6 neu-panel rounded-2xl">
                 <i className="fas fa-filter text-accent text-4xl mb-4 block"></i>
-                <p className="text-textMuted mb-4">{t.noResults}</p>
+                <p className="text-textMuted mb-2">{t.noResults}</p>
+                
+                <div className="mb-6">
+                  <ActiveFiltersDisplay
+                    t={t}
+                    selectedCategories={selectedCategories} setSelectedCategories={setSelectedCategories}
+                    priceRange={priceRange} setPriceRange={setPriceRange}
+                    selectedMediums={selectedMediums} setSelectedMediums={setSelectedMediums}
+                    selectedStyles={selectedStyles} setSelectedStyles={setSelectedStyles}
+                    yearRange={yearRange} setYearRange={setYearRange}
+                    framedFilter={framedFilter} setFramedFilter={setFramedFilter}
+                    signedFilter={signedFilter} setSignedFilter={setSignedFilter}
+                    selectedCities={selectedCities} setSelectedCities={setSelectedCities}
+                    selectedArtists={selectedArtists} setSelectedArtists={setSelectedArtists}
+                    searchQuery={searchQuery} setSearchQuery={setSearchQuery}
+                    stockRange={stockRange} setStockRange={setStockRange}
+                  />
+                </div>
+
                 <button
                   onClick={resetFilters}
                   className="neu-btn px-6 py-3 font-bold flex items-center gap-2 mx-auto"
@@ -866,64 +652,19 @@ export default function Design3() {
           <div className="col-12 col-lg-3 d-none d-lg-block">
             <div className="sticky top-12 flex flex-col gap-8 max-h-[calc(100vh-6rem)] overflow-y-auto p-8 -mx-8 sticky-scroll">
               <div className="neu-panel p-6">
-                {paymentConfirmed ? (
-                  <div className="text-center py-8">
-                    <i className="fas fa-check-circle text-accent text-5xl mb-4 block"></i>
-                    <h4 className="text-lg font-bold mb-2">{t.thankYou}</h4>
-                    <p className="text-sm text-textMuted mb-6">{t.paymentProcessed}</p>
-                    <button
-                      onClick={() => setPaymentConfirmed(false)}
-                      className="neu-btn w-full py-3 font-bold"
-                    >
-                      {t.close || 'Close'}
-                    </button>
-                  </div>
-                ) : (
-                  <>
-                    <h4 className="font-bold mb-4 flex items-center gap-2 text-textMain">
-                      <i className="fas fa-shopping-cart"></i>
-                      {t.cartTitle}
-                    </h4>
-
-                    {cart.length === 0 ? (
-                      <p className="text-sm text-textMuted italic">{t.cartEmpty}</p>
-                    ) : (
-                      <div className="space-y-3 max-h-[50vh] overflow-y-auto">
-                        {cart.map(item => (
-                          <div key={item.id} className="flex justify-between items-center p-3 neu-pressed rounded-lg">
-                            <div className="flex-1">
-                              <div className="font-bold text-sm">{item.name}</div>
-                              <div className="text-xs text-textMuted">${item.price.toFixed(2)} × {item.quantity}</div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-bold text-sm">${(item.price * item.quantity).toFixed(2)}</span>
-                              <button
-                                onClick={() => removeFromCart(item.id)}
-                                className="neu-btn w-8 h-8 flex items-center justify-center"
-                              >
-                                <i className="fas fa-times text-xs"></i>
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                    <div className="mt-4 border-t pt-4">
-                      <div className="flex justify-between font-bold mb-4">
-                        <span>{t.cartTotal}</span>
-                        <span>${cartTotal.toFixed(2)}</span>
-                      </div>
-                      <button
-                        onClick={handlePayment}
-                        disabled={cartTotal === 0}
-                        className="neu-btn w-full py-3 font-bold disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {cartTotal === 0 ? t.addArtFirst || 'Add art first' : t.bookInstantly}
-                      </button>
-                    </div>
-                  </>
-                )}
+                <h4 className="font-bold mb-4 flex items-center gap-2 text-textMain">
+                  <i className="fas fa-shopping-cart"></i>
+                  {t.cartTitle}
+                </h4>
+                <ArtShopCart 
+                  t={t}
+                  cart={cart}
+                  cartTotal={cartTotal}
+                  removeFromCart={removeFromCart}
+                  handlePayment={handlePayment}
+                  paymentConfirmed={paymentConfirmed}
+                  setPaymentConfirmed={setPaymentConfirmed}
+                />
               </div>
 
               <div className="flex flex-col gap-4">
