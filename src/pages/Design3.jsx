@@ -146,15 +146,12 @@ export default function Design3() {
     searchQuery !== '' ||
     stockRange[0] > 0 || stockRange[1] < 5;
 
-  // Auto-switch back to cart view when items are added after payment
-  useEffect(() => {
-    if (paymentConfirmed && cart.length > 0) {
-      setPaymentConfirmed(false);
-    }
-  }, [cart, paymentConfirmed]);
-
   const PAGE_SIZE = 12;
-  const [rawPoolSize] = useState(10000);
+  const BATCH_SIZE = 1000;
+  const MAX_PRODUCTS = 10000;
+
+  const [rawProducts, setRawProducts] = useState(() => generateProducts(BATCH_SIZE));
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [chunkHeights, setChunkHeights] = useState({});
   const [showFilters, setShowFilters] = useState(false);
@@ -174,6 +171,13 @@ export default function Design3() {
     setShowNoResults(false);
   };
 
+  // Auto-switch back to cart view when items are added after payment
+  useEffect(() => {
+    if (paymentConfirmed && cart.length > 0) {
+      setPaymentConfirmed(false);
+    }
+  }, [cart, paymentConfirmed]);
+
   // Show CallToAction after 5 seconds of user inactivity
   useEffect(() => {
     if (callToActionShown) return;
@@ -192,10 +196,8 @@ export default function Design3() {
       resetTimer();
     };
 
-    // Start the timer
     resetTimer();
 
-    // Listen for user activity events
     window.addEventListener('mousemove', handleUserActivity);
     window.addEventListener('keydown', handleUserActivity);
     window.addEventListener('scroll', handleUserActivity);
@@ -256,7 +258,6 @@ export default function Design3() {
     };
   }, [navigate, showCart, showFilters, selectedProduct]);
 
-  // Auto-open feedback form 2 seconds after payment confirmation
   useEffect(() => {
     if (paymentConfirmed && !feedbackSubmitted) {
       const timer = setTimeout(() => {
@@ -266,10 +267,26 @@ export default function Design3() {
     }
   }, [paymentConfirmed, feedbackSubmitted]);
 
-  const rawProducts = useMemo(
-    () => generateProducts(rawPoolSize),
-    [rawPoolSize]
-  );
+  const loadMoreProducts = useCallback(() => {
+    if (isLoadingMore || rawProducts.length >= MAX_PRODUCTS) return;
+
+    setIsLoadingMore(true);
+
+    setTimeout(() => {
+      setRawProducts(prev => {
+        const amountToGenerate = Math.min(BATCH_SIZE, MAX_PRODUCTS - prev.length);
+        const newBatch = generateProducts(amountToGenerate);
+
+        const uniqueBatch = newBatch.map((p, i) => ({
+          ...p,
+          id: `async-${prev.length}-${p.id || i}`
+        }));
+
+        return [...prev, ...uniqueBatch];
+      });
+      setIsLoadingMore(false);
+    }, 600);
+  }, [isLoadingMore, rawProducts.length]);
 
   const filteredProducts = useMemo(() => rawProducts
     .filter(product =>
@@ -307,6 +324,23 @@ export default function Design3() {
     }
     return result;
   }, [filteredProducts]);
+
+  useEffect(() => {
+    if (chunks.length > 0 && currentPage >= chunks.length - 3) {
+      loadMoreProducts();
+    }
+  }, [currentPage, chunks.length, loadMoreProducts]);
+
+  useEffect(() => {
+    if (
+      hasActiveFilters && 
+      filteredProducts.length < PAGE_SIZE * 2 && 
+      rawProducts.length < MAX_PRODUCTS && 
+      !isLoadingMore
+    ) {
+      loadMoreProducts();
+    }
+  }, [hasActiveFilters, filteredProducts.length, rawProducts.length, isLoadingMore, loadMoreProducts]);
 
   const registerHeight = useCallback((index, height) => {
     setChunkHeights(prev => prev[index] === height ? prev : { ...prev, [index]: height });
@@ -646,6 +680,13 @@ export default function Design3() {
                   productStock={productStock}
                 />
               ))}
+
+              {/* Loading Indicator */}
+              {isLoadingMore && (
+                <div className="w-full flex justify-center py-8 opacity-50">
+                  <i className="fas fa-spinner fa-spin text-3xl text-accent"></i>
+                </div>
+              )}
             </div>
           </div>
 
