@@ -15,7 +15,10 @@ export default function FilterSection({ title, defaultOpen = true, children, onR
           {onReset && (
             <button
               type="button"
-              onClick={onReset}
+              onClick={(e) => {
+                e.stopPropagation();
+                onReset();
+              }}
               className="neu-btn w-6 h-6 flex items-center justify-center text-xs"
               title="Reset filters"
             >
@@ -25,7 +28,7 @@ export default function FilterSection({ title, defaultOpen = true, children, onR
           <i className={`fas fa-chevron-down transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}></i>
         </div>
       </button>
-      {isOpen && <div className="max-h-60 overflow-y-auto pb-2">{children}</div>}
+      {isOpen && <div className="pt-1 pb-2">{children}</div>}
     </div>
   );
 }
