@@ -171,12 +171,14 @@ export default function Design3() {
     setShowNoResults(false);
   };
 
+  // Auto-switch back to cart view when items are added after payment
   useEffect(() => {
     if (paymentConfirmed && cart.length > 0) {
       setPaymentConfirmed(false);
     }
   }, [cart, paymentConfirmed]);
 
+  // Show CallToAction after 5 seconds of user inactivity
   useEffect(() => {
     if (callToActionShown) return;
 
