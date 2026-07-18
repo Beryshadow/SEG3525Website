@@ -55,5 +55,11 @@ J'ai réutilisé l'esthétique minimaliste et le neumorphisme développés dans 
 [https://github.com/Beryshadow/SEG3525Website](https://github.com/Beryshadow/SEG3525Website)
 
 ## 6. Reconnaissance de l'IA générative
-* **Génération de code :** J'ai utilisé un assistant IA pour m'aider à extraire et refactoriser les composants React, à écrire les algorithmes de filtrage complexes (`useMemo` croisés) et à générer les graphiques interactifs (SVG) à partir des données synthétiques.
-* **Rédaction du rapport :** Ce rapport a été structuré avec l'aide de l'IA à partir des directives du cours. J'ai également utilisé un outil de correction pour la vérification linguistique.
+Pour la programmation, j’ai utilisé un modèle local d'autocomplétion pendant l’écriture ; vous pouvez consulter la configuration de mon IDE ici : [https://github.com/Beryshadow/SEG3525Website/blob/master/.helix/languages.toml](https://github.com/Beryshadow/SEG3525Website/blob/master/.helix/languages.toml). 
+
+J'ai utilisé Google de manière approfondie pour trouver des solutions aux défis techniques rencontrés lors du développement. Par conséquent, les résultats de recherche m'ont parfois fourni des extraits de code que j'ai adaptés et intégrés. Une partie de la logique de mon code s'inspire donc de ressources en ligne.
+
+Cependant, je tiens à souligner que toutes les décisions relatives au design, à l'esthétique générale et à la mise en page (layout) du site sont entièrement les miennes.
+
+Ce rapport a aussi été corrigé avec Grammarly.
+
