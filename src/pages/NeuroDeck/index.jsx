@@ -658,15 +658,15 @@ export default function NeuroDeck() {
   return (
     <div className={`min-h-screen relative font-sans transition-colors duration-300 ${themeClass} neurodeck-route`} style={{ backgroundColor: 'var(--bg-main)', color: 'var(--text-main)' }}>
       
-      <nav className="sticky top-0 z-50 w-full px-4 pt-4 mb-8 flex flex-col items-center">
-        <div className="neu-panel w-full max-w-6xl px-6 py-4 flex justify-between items-center gap-3">
+      <nav className="sticky top-0 z-50 w-full px-2 sm:px-4 pt-2 sm:pt-4 mb-4 sm:mb-8 flex flex-col items-center">
+        <div className="neu-panel w-full max-w-6xl px-4 py-3 sm:px-6 sm:py-4 flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-0">
           
           <div className="flex items-center space-x-3 text-[var(--accent)] font-bold text-xl cursor-pointer" onClick={() => setView("study")}>
             <BrainIcon />
-            <span className="uppercase tracking-widest text-sm whitespace-nowrap hidden sm:inline">NeuroDeck</span>
+            <span className="uppercase tracking-widest text-sm whitespace-nowrap">NeuroDeck</span>
           </div>
 
-          <div className="flex items-center space-x-2 sm:space-x-4">
+          <div className="flex flex-wrap justify-center items-center gap-2 sm:gap-4">
             
             <div className="hidden lg:flex items-center space-x-2 text-xs px-4 py-2 neu-pressed text-[var(--text-muted)] relative overflow-hidden">
               <div className="relative flex items-center space-x-2 z-10 font-bold">
@@ -698,12 +698,12 @@ export default function NeuroDeck() {
             </div>
 
             <button onClick={toggleLang} className="neu-btn w-10 h-10 flex items-center justify-center rounded-full font-black text-xs text-[var(--text-main)] uppercase" title="Toggle Language">
-              {lang}
+              {lang === 'en' ? 'fr' : 'en'}
             </button>
             <button onClick={toggleTheme} className="neu-btn w-10 h-10 flex items-center justify-center rounded-full text-[var(--text-main)]">
               {theme === 'dark' ? <i className="fas fa-sun"></i> : <i className="fas fa-moon"></i>}
             </button>
-            <button onClick={() => setView("study")} className={`neu-btn w-10 h-10 hidden sm:flex items-center justify-center rounded-full ${view === "study" ? "text-[var(--accent)]" : "text-[var(--text-main)]"}`} title={t.navStudy || "Study"}>
+            <button onClick={() => setView("study")} className={`neu-btn w-10 h-10 flex items-center justify-center rounded-full ${view === "study" ? "text-[var(--accent)]" : "text-[var(--text-main)]"}`} title={t.navStudy || "Study"}>
               <BrainIcon />
             </button>
             <button onClick={() => setView("dashboard")} className={`neu-btn w-10 h-10 flex items-center justify-center rounded-full ${view === "dashboard" ? "text-[var(--accent)]" : "text-[var(--text-main)]"}`} title={t.navDashboard || "Dashboard"}>
@@ -718,6 +718,7 @@ export default function NeuroDeck() {
 
           </div>
         </div>
+
       </nav>
 
       <main className="flex flex-col items-center p-4 w-full max-w-5xl mx-auto mb-12">
