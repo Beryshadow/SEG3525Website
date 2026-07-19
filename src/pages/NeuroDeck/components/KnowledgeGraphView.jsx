@@ -4,7 +4,7 @@ import { ActivityIcon, RefreshIcon } from './Icons';
 
 export const KnowledgeGraphView = ({ deck, cardEmbeddings, t }) => {
   const canvasRef = useRef(null);
-  const containerRef = useRef(null);
+  const wrapperRef = useRef(null);
   const animationRef = useRef(null);
   
   const [hoveredNode, setHoveredNode] = useState(null);
@@ -70,10 +70,10 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t }) => {
 
   useEffect(() => {
     const handleResize = () => {
-      if (containerRef.current) {
+      if (wrapperRef.current) {
         setDimensions({
-          width: containerRef.current.clientWidth,
-          height: containerRef.current.clientHeight
+          width: wrapperRef.current.clientWidth,
+          height: wrapperRef.current.clientHeight
         });
       }
     };
@@ -179,9 +179,9 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t }) => {
         ctx.arc(n.x, n.y, n.radius, 0, 2 * Math.PI);
         
         let color = themeColors.accent; 
-        if (n.score === 10) color = '#10b981'; 
-        else if (n.score <= 3) color = '#ef4444'; 
-        else if (n.score <= 7) color = '#f97316'; 
+        if (n.score === 10) color = '#34d399'; // Premium mint green
+        else if (n.score <= 3) color = '#f43f5e'; // Premium ruby red
+        else if (n.score <= 7) color = '#fb923c'; // Soft orange 
 
         ctx.fillStyle = color;
         ctx.fill();
@@ -221,7 +221,7 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t }) => {
 
   return (
     <div className="w-full h-full min-h-[700px] animate-fade-in flex flex-col">
-      <div className="neu-panel p-4 sm:p-8 flex-1 flex flex-col relative" ref={containerRef}>
+      <div className="neu-panel p-4 sm:p-8 flex-1 flex flex-col relative">
         <div className="flex justify-between items-center mb-4 z-10 relative pointer-events-none">
           <h2 className="text-lg sm:text-2xl font-black text-[var(--text-main)] flex items-center uppercase tracking-widest">
             <ActivityIcon className="mr-2 sm:mr-4 text-[var(--accent)] text-lg sm:text-2xl" /> 
@@ -235,7 +235,7 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t }) => {
           </button>
         </div>
 
-        <div className="absolute inset-0 top-16 bottom-4 left-4 right-4 rounded-xl overflow-hidden cursor-crosshair">
+        <div ref={wrapperRef} className="absolute inset-0 top-16 bottom-4 left-4 right-4 rounded-xl overflow-hidden cursor-crosshair">
           <canvas
             ref={canvasRef}
             width={dimensions.width}
@@ -255,7 +255,7 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t }) => {
             >
               <div className="text-[10px] font-black uppercase tracking-widest mb-2 text-[var(--text-muted)] flex items-center justify-between">
                  <span>{t.cardLabel || "Card"}</span>
-                 <span style={{ color: hoveredNode.score === 10 ? '#10b981' : hoveredNode.score <= 3 ? '#ef4444' : hoveredNode.score <= 7 ? '#f97316' : themeColors.accent }}>
+                 <span style={{ color: hoveredNode.score === 10 ? '#34d399' : hoveredNode.score <= 3 ? '#f43f5e' : hoveredNode.score <= 7 ? '#fb923c' : themeColors.accent }}>
                     {hoveredNode.score}/10
                  </span>
               </div>
