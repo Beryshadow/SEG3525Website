@@ -430,7 +430,7 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
   };
 
   return (
-    <div className="w-full h-[calc(100dvh-120px)] animate-fade-in flex flex-col">
+    <div className="w-full h-[calc(100dvh-200px)] animate-fade-in flex flex-col">
       <div className="neu-panel p-4 sm:p-8 flex-1 flex flex-col relative">
         <div className="flex justify-between items-center mb-4 z-10 relative pointer-events-none">
           <h2 className="text-lg sm:text-2xl font-black text-[var(--text-main)] flex items-center uppercase tracking-widest">
@@ -458,9 +458,9 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
                  if (onRecalculate) onRecalculate();
                  initSimulation();
                }} 
-               className="neu-btn px-4 py-2 text-xs font-bold uppercase tracking-widest text-[var(--accent)] rounded-lg flex items-center"
+               className="neu-btn p-2 sm:px-4 sm:py-2 text-xs font-bold uppercase tracking-widest text-[var(--accent)] rounded-lg flex items-center"
             >
-              <RefreshIcon className="mr-2" /> {t.recenter || "Recalculate"}
+              <RefreshIcon className="sm:mr-2" /> <span className="hidden sm:inline">{t.recenter || "Recalculate"}</span>
             </button>
           </div>
         </div>
