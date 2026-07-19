@@ -2,7 +2,9 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSharedLogic } from '../../utilities/shared';
 import { useNLIModel } from '../../hooks/useNLIModel';
+import { useEmbeddingModel } from '../../hooks/useEmbeddingModel';
 import { TRANSLATIONS, DEFAULT_DECK } from '../../data/flashcardData';
+import { cosineSimilarity } from '../../utilities/shared';
 
 import { SettingsView } from './components/SettingsView';
 import { DashboardView } from './components/DashboardView';
@@ -57,6 +59,27 @@ export default function NeuroDeck() {
   const { model, modelStatus, backendUsed, modelError, progressPercent } = useNLIModel(selectedModel);
 
   const [cardOrderMode, setCardOrderMode] = useState("random");
+  
+  const { getEmbeddings, modelStatus: embeddingStatus, backendUsed: embeddingBackend, progressPercent: embeddingProgress } = useEmbeddingModel();
+  const [cardEmbeddings, setCardEmbeddings] = useState({});
+
+  useEffect(() => {
+    if (!currentDeck || !getEmbeddings || embeddingStatus !== 'ready') return;
+    const toEmbed = currentDeck.filter(q => !cardEmbeddings[q.id]);
+    if (toEmbed.length === 0) return;
+
+    const texts = toEmbed.map(q => q.question);
+    getEmbeddings(texts).then(res => {
+       if (res && res.length === toEmbed.length) {
+          setCardEmbeddings(prev => {
+             const next = { ...prev };
+             for(let i=0; i<toEmbed.length; i++) next[toEmbed[i].id] = res[i];
+             return next;
+          });
+       }
+    }).catch(console.error);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentDeck, getEmbeddings, embeddingStatus]); 
 
   const [streak, setStreak] = useState(() => {
     try { return parseInt(localStorage.getItem('neurodeck-streak')) || 0; } catch (e) { return 0; }
@@ -127,10 +150,37 @@ export default function NeuroDeck() {
     if (cardOrderMode === 'random') {
       const selected = lowestScoreCards[Math.floor(Math.random() * lowestScoreCards.length)];
       return deck.findIndex(q => q.id === selected.id);
+    } else if (cardOrderMode === 'semantic') {
+      let attempted = deck.filter(q => q.attempts > 0 && !q.isMastered);
+      let targetEmbeddings = [];
+      if (attempted.length > 0) {
+         attempted.sort((a,b) => a.score - b.score);
+         const lowestAttemptedScore = attempted[0].score;
+         const weakestCards = attempted.filter(q => q.score === lowestAttemptedScore);
+         targetEmbeddings = weakestCards.map(q => cardEmbeddings[q.id]).filter(Boolean);
+      }
+      
+      if (targetEmbeddings.length > 0) {
+          const weaknessVector = new Array(targetEmbeddings[0].length).fill(0);
+          for(const emb of targetEmbeddings) {
+             for(let i=0; i<emb.length; i++) weaknessVector[i] += emb[i];
+          }
+          for(let i=0; i<weaknessVector.length; i++) weaknessVector[i] /= targetEmbeddings.length;
+
+          const sortedBySimilarity = [...lowestScoreCards].sort((a, b) => {
+             const simA = cardEmbeddings[a.id] ? cosineSimilarity(cardEmbeddings[a.id], weaknessVector) : 0;
+             const simB = cardEmbeddings[b.id] ? cosineSimilarity(cardEmbeddings[b.id], weaknessVector) : 0;
+             return simB - simA; 
+          });
+          return deck.findIndex(q => q.id === sortedBySimilarity[0].id);
+      } else {
+          const selected = lowestScoreCards[Math.floor(Math.random() * lowestScoreCards.length)];
+          return deck.findIndex(q => q.id === selected.id);
+      }
     } else {
       return deck.findIndex(q => q.id === lowestScoreCards[0].id);
     }
-  }, [cardOrderMode]);
+  }, [cardOrderMode, cardEmbeddings]);
 
   const updateCardStats = useCallback((id, newScore, firstTry, skipped) => {
     setCurrentDeck(prev => {
@@ -413,6 +463,8 @@ export default function NeuroDeck() {
             onGoToCard={(idx) => { setCurrentIndex(idx); setView("study"); }}
             onUpdateCards={handleUpdateCards}
             onDeleteCards={handleDeleteCards}
+            cardEmbeddings={cardEmbeddings}
+            getEmbeddings={getEmbeddings}
           />
         )}
 

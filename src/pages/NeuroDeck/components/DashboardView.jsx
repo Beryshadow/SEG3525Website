@@ -1,17 +1,49 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { ActivityIcon, RefreshIcon, TrashIcon } from './Icons';
+import { cosineSimilarity } from '../../../utilities/shared';
 
-export const DashboardView = ({ deck, t, onGoToCard, onUpdateCards, onDeleteCards }) => {
+export const DashboardView = ({ deck, t, onGoToCard, onUpdateCards, onDeleteCards, cardEmbeddings, getEmbeddings }) => {
   const averageScore = deck.length > 0 ? (deck.reduce((acc, q) => acc + (q.isMastered ? 10 : q.score), 0) / deck.length).toFixed(1) : 0;
   
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [deleteConfirmState, setDeleteConfirmState] = useState(false);
 
+  const [searchQuery, setSearchQuery] = useState("");
+  const [queryEmbedding, setQueryEmbedding] = useState(null);
+  const [isSearching, setIsSearching] = useState(false);
+
+  useEffect(() => {
+    if (!searchQuery.trim() || !getEmbeddings) {
+      setQueryEmbedding(null);
+      return;
+    }
+    const handler = setTimeout(() => {
+      setIsSearching(true);
+      getEmbeddings([searchQuery.trim()]).then(res => {
+         if (res && res.length > 0) setQueryEmbedding(res[0]);
+         setIsSearching(false);
+      }).catch(err => {
+         console.error(err);
+         setIsSearching(false);
+      });
+    }, 500); 
+    return () => clearTimeout(handler);
+  }, [searchQuery, getEmbeddings]);
+
+  const displayedDeck = useMemo(() => {
+    if (!queryEmbedding || !searchQuery.trim()) return deck;
+    return [...deck].sort((a, b) => {
+       const simA = cardEmbeddings && cardEmbeddings[a.id] ? cosineSimilarity(cardEmbeddings[a.id], queryEmbedding) : 0;
+       const simB = cardEmbeddings && cardEmbeddings[b.id] ? cosineSimilarity(cardEmbeddings[b.id], queryEmbedding) : 0;
+       return simB - simA;
+    });
+  }, [deck, queryEmbedding, cardEmbeddings, searchQuery]);
+
   const toggleSelectAll = (e) => {
-    if (selectedIds.size === deck.length) {
+    if (selectedIds.size === displayedDeck.length) {
       setSelectedIds(new Set());
     } else {
-      setSelectedIds(new Set(deck.map(q => q.id)));
+      setSelectedIds(new Set(displayedDeck.map(q => q.id)));
     }
   };
 
@@ -69,12 +101,27 @@ export const DashboardView = ({ deck, t, onGoToCard, onUpdateCards, onDeleteCard
           </div>
         </div>
 
+        <div className="mb-6 relative">
+          <input 
+            type="text" 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Semantic Search (e.g. 'mitochondria' will find 'cell power')..."
+            className="w-full neu-pressed px-4 sm:px-6 py-3 sm:py-4 rounded-xl text-xs sm:text-sm outline-none font-medium placeholder-[var(--text-muted)] text-[var(--text-main)] focus:ring-2 focus:ring-[var(--accent)] transition-all bg-transparent"
+          />
+          {isSearching && (
+             <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
+                <div className="w-4 h-4 border-2 border-[var(--accent)] border-t-transparent rounded-full animate-spin"></div>
+             </div>
+          )}
+        </div>
+
         <div className="overflow-x-auto neu-pressed rounded-xl sm:rounded-3xl p-1 sm:p-2">
           <table className="w-full text-left border-collapse min-w-[600px]">
             <thead>
               <tr className="text-[var(--text-muted)] text-[9px] sm:text-xs uppercase tracking-widest border-b border-white/5">
-                <th className="py-2 px-2 sm:py-5 sm:px-6 w-10 text-center">
-                   <input type="checkbox" checked={selectedIds.size === deck.length && deck.length > 0} onChange={toggleSelectAll} className="cursor-pointer" />
+                 <th className="py-2 px-2 sm:py-5 sm:px-6 w-10 text-center">
+                   <input type="checkbox" checked={selectedIds.size === displayedDeck.length && displayedDeck.length > 0} onChange={toggleSelectAll} className="cursor-pointer" />
                 </th>
                 <th className="py-2 px-2 sm:py-5 sm:px-6 font-black">{t.questionCol}</th>
                 <th className="py-2 px-2 sm:py-5 sm:px-6 font-black text-center w-16 sm:w-24">{t.attemptsCol}</th>
@@ -83,7 +130,7 @@ export const DashboardView = ({ deck, t, onGoToCard, onUpdateCards, onDeleteCard
               </tr>
             </thead>
             <tbody>
-              {deck.map((q, i) => (
+              {displayedDeck.map((q, i) => (
                 <tr key={i} onClick={() => onGoToCard(i)} className="border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors cursor-pointer group">
                   <td className="py-2 px-2 sm:py-5 sm:px-6 text-center" onClick={e => e.stopPropagation()}>
                     <input type="checkbox" checked={selectedIds.has(q.id)} onChange={(e) => toggleSelect(q.id, e)} className="cursor-pointer" />
@@ -140,7 +187,7 @@ export const DashboardView = ({ deck, t, onGoToCard, onUpdateCards, onDeleteCard
                   </td>
                 </tr>
               ))}
-              {deck.length === 0 && (
+              {displayedDeck.length === 0 && (
                 <tr>
                    <td colSpan="5" className="py-8 text-center text-[var(--text-muted)] font-medium text-xs sm:text-sm">
                       Deck is completely empty. Import some cards!

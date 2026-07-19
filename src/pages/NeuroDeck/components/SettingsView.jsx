@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { SaveIcon, ClockIcon, RandomIcon, SeqIcon, DownloadIcon, UploadIcon, SparklesIcon, CpuIcon, CheckIcon, EditIcon, CopyIcon } from './Icons';
+import { SaveIcon, ClockIcon, RandomIcon, SeqIcon, DownloadIcon, UploadIcon, SparklesIcon, CpuIcon, CheckIcon, EditIcon, CopyIcon, BrainIcon } from './Icons';
 
 export const SettingsView = ({
   currentDeck, onImport, selectedModel, onModelChange,
@@ -280,7 +280,8 @@ export const SettingsView = ({
         <div className="flex flex-col gap-3 sm:gap-4">
           {[
             { id: "random", name: t.orderRandom || "Randomised (Recommended)", icon: RandomIcon },
-            { id: "sequential", name: t.orderSequential || "Sequential", icon: SeqIcon }
+            { id: "sequential", name: t.orderSequential || "Sequential", icon: SeqIcon },
+            { id: "semantic", name: t.orderSemantic || "Semantic Weakness Target", icon: BrainIcon }
           ].map(mode => (
             <label key={mode.id} className={`p-4 sm:p-6 rounded-xl sm:rounded-2xl cursor-pointer flex items-center text-left transition-all duration-300 ${cardOrderMode === mode.id ? "neu-pressed text-[var(--accent)]" : "neu-btn text-[var(--text-main)]"}`}>
               <input type="radio" value={mode.id} checked={cardOrderMode === mode.id} onChange={(e) => onCardOrderChange(e.target.value)} className="hidden" />
