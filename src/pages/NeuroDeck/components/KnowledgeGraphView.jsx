@@ -10,6 +10,7 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
   const [hoveredNode, setHoveredNode] = useState(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
   const [isSimulating, setIsSimulating] = useState(true);
+  const [clusterThreshold, setClusterThreshold] = useState(0.85);
 
   const REPULSION = 300;
   const SPRING_LENGTH = 150;
@@ -70,10 +71,10 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
       
       // Filter edges using the globally normalized ranking:
       // 1. Guaranteed Connectivity: Always keep the top 2 semantic neighbors
-      // 2. Cluster Preservation: Keep any edge that falls into the top 15% of the graph's global variance (normalizedWeight >= 0.85)
+      // 2. Cluster Preservation: Keep any edge that falls into the user-defined top % of the graph's global variance
       const topEdges = nodeEdges.filter((e, idx) => {
          if (idx < 2) return true;
-         return e.weight >= 0.85;
+         return e.weight >= clusterThreshold;
       });
       
       topEdges.forEach(e => {
@@ -104,7 +105,7 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
 
   useEffect(() => {
     initSimulation();
-  }, [deck, cardEmbeddings, dimensions]);
+  }, [deck, cardEmbeddings, dimensions, clusterThreshold]);
 
   useEffect(() => {
     const style = getComputedStyle(document.documentElement);
@@ -336,15 +337,32 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
             <ActivityIcon className="mr-2 sm:mr-4 text-[var(--accent)] text-lg sm:text-2xl" /> 
             {t.knowledgeGraphTitle || "Neuro-Map"}
           </h2>
-          <button 
-             onClick={() => {
-               if (onRecalculate) onRecalculate();
-               initSimulation();
-             }} 
-             className="neu-btn px-4 py-2 pointer-events-auto text-xs font-bold uppercase tracking-widest text-[var(--accent)] rounded-lg flex items-center"
-          >
-            <RefreshIcon className="mr-2" /> {t.recenter || "Recalculate"}
-          </button>
+          <div className="flex items-center space-x-4 pointer-events-auto">
+            <div className="hidden sm:flex flex-col items-end">
+               <label className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mb-1">
+                 Clustering: Top {Math.round((1 - clusterThreshold) * 100)}%
+               </label>
+               <input 
+                 type="range" 
+                 min="0.50" 
+                 max="0.98" 
+                 step="0.01" 
+                 value={clusterThreshold} 
+                 onChange={(e) => setClusterThreshold(parseFloat(e.target.value))}
+                 className="w-32 accent-[var(--accent)] opacity-80 hover:opacity-100 transition-opacity cursor-pointer"
+                 title={`Set the threshold for semantic clustering. Currently keeping the top ${Math.round((1 - clusterThreshold) * 100)}% of links.`}
+               />
+            </div>
+            <button 
+               onClick={() => {
+                 if (onRecalculate) onRecalculate();
+                 initSimulation();
+               }} 
+               className="neu-btn px-4 py-2 text-xs font-bold uppercase tracking-widest text-[var(--accent)] rounded-lg flex items-center"
+            >
+              <RefreshIcon className="mr-2" /> {t.recenter || "Recalculate"}
+            </button>
+          </div>
         </div>
 
         <div ref={wrapperRef} className="absolute inset-0 top-16 bottom-4 left-4 right-4 rounded-xl overflow-hidden cursor-crosshair">
@@ -359,7 +377,7 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
               </p>
               <div className="w-64 h-3 bg-black/20 dark:bg-white/10 rounded-full overflow-hidden relative border border-white/5 shadow-inner">
                  <div 
-                   className={`absolute left-0 top-0 bottom-0 bg-[var(--accent)] transition-all duration-300 rounded-full ${embeddingStatus === "ready" ? "w-full animate-pulse opacity-70" : ""}`}
+                   className={`absolute left-0 top-0 bottom-0 bg-[var(--accent)] rounded-full ${embeddingStatus === "ready" ? "w-full animate-indeterminate opacity-80" : "transition-all duration-300"}`}
                    style={embeddingStatus === "loading" ? { width: `${embeddingProgress || 0}%` } : {}}
                  ></div>
                  <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent"></div>
