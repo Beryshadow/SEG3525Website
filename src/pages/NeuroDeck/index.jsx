@@ -78,7 +78,7 @@ export default function NeuroDeck() {
   useEffect(() => {
     localStorage.setItem('neurodeck-embedding-model', selectedEmbeddingModel);
   }, [selectedEmbeddingModel]);
-  const { getEmbeddings, modelStatus: embeddingStatus, backendUsed: embeddingBackend, progressPercent: embeddingProgress } = useEmbeddingModel(selectedEmbeddingModel);
+  const { getEmbeddings, modelStatus: embeddingStatus, backendUsed: embeddingBackend, modelError: embeddingError, progressPercent: embeddingProgress } = useEmbeddingModel(selectedEmbeddingModel);
   const [cardEmbeddings, setCardEmbeddings] = useState({});
 
   useEffect(() => {
@@ -428,6 +428,18 @@ export default function NeuroDeck() {
               </div>
               {modelStatus === "loading" && (
                 <div className="absolute left-0 top-0 bottom-0 bg-[var(--accent)] opacity-20 transition-all" style={{ width: `${progressPercent}%` }}></div>
+              )}
+            </div>
+
+            <div className="hidden lg:flex items-center space-x-2 text-xs px-4 py-2 neu-pressed text-[var(--text-muted)] relative overflow-hidden">
+              <div className="relative flex items-center space-x-2 z-10 font-bold">
+                <NetworkIcon />
+                <span className="truncate max-w-[150px]" title={embeddingError}>
+                  {embeddingStatus === "loading" ? `Embeddings ${embeddingProgress}%` : embeddingStatus === "ready" ? `Embeddings (${embeddingBackend})` : embeddingStatus === "error" ? "Model Error" : "Waiting..."}
+                </span>
+              </div>
+              {embeddingStatus === "loading" && (
+                <div className="absolute left-0 top-0 bottom-0 bg-[var(--accent)] opacity-20 transition-all" style={{ width: `${embeddingProgress}%` }}></div>
               )}
             </div>
 
