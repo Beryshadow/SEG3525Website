@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { LightbulbIcon, SparklesIcon, CheckIcon, XIcon, PlayIcon } from './Icons';
 import { escapeRegExp, getCorrectAnswers, shuffleArray } from '../utils/helpers';
-import { cosineSimilarity } from '../../../utilities/shared';
+import { useAIEvaluation } from '../hooks/useAIEvaluation';
+
 export const StudyView = ({
   question, currentIndex, totalCards, model, modelStatus, modelError, progressPercent, onComplete,
   onNavigate, t, showToast, currentLangKey, getEmbeddings
@@ -139,48 +140,10 @@ export const StudyView = ({
     onComplete(question.id, newScore, true, true);
   };
 
-  const getEntailmentScores = (output, debugContext = "") => {
-    const classes = Array.isArray(output) && Array.isArray(output[0]) ? output[0] : (Array.isArray(output) ? output : [output]);
-    if (!classes || classes.length === 0 || !classes[0].label) {
-      return { entailment: 0, isEntailment: false };
-    }
-    
-    let entailmentScore = 0;
-    let topLabel = "";
-    let maxScore = -1;
-
-    for (const c of classes) {
-      const labelStr = c.label.toUpperCase();
-      if (c.score > maxScore) {
-        maxScore = c.score;
-        topLabel = labelStr;
-      }
-      if (labelStr.includes('ENTAIL') || labelStr === 'LABEL_1' || labelStr === 'LABEL_0') {
-         if (labelStr.includes('ENTAIL')) {
-             entailmentScore = c.score;
-         } else if (entailmentScore === 0) {
-             entailmentScore = c.score; 
-         }
-      }
-    }
-    
-    const isEntailment = topLabel.includes('ENTAIL') || topLabel === 'LABEL_1' || topLabel === 'LABEL_0';
-    return { entailment: entailmentScore, isEntailment };
-  };
+  const { evaluateInput } = useAIEvaluation({ model, getEmbeddings, t, currentLangKey });
 
   const handleEvaluateInput = async () => {
     if (!userInput.trim()) return;
-    
-    const cleanInput = userInput.trim().toLowerCase();
-    const isPerfectSingleAnswer = correctAnswersArray.length === 1 && cleanInput === correctAnswersArray[0].trim().toLowerCase();
-    
-    if (isPerfectSingleAnswer) {
-        setTempSimScore(10.0);
-        setEvalMethod("text");
-        setPhase("success");
-        setCalculatedScore(calculateNewScore("text"));
-        return;
-    }
 
     if (!model) {
       showToast(t.alertLoading || "Engine is loading...");
@@ -189,165 +152,63 @@ export const StudyView = ({
     setPhase("evaluating");
     setFeedback(null);
 
-    try {
-      const truthTexts = correctAnswersArray;
-      const incorrectTexts = question.choices.filter(c => !correctAnswersArray.includes(c));
-      const sepToken = model?.tokenizer?.sep_token || "[SEP]";
-      const questionContext = currentLangKey === 'FR' ? `Question: ${question.question} Réponse:` : `Question: ${question.question} Answer:`;
-      const statementUser = `${questionContext} ${userInput.trim()}`;
-      
-      const compositeDistractor = incorrectTexts.join(". ");
-      const distractorField = [...incorrectTexts, compositeDistractor].filter(d => d.trim());
-      const validTruths = truthTexts.filter(t => t.trim());
+    const result = await evaluateInput(userInput, question, correctAnswersArray);
 
-      const pairsToEvaluate = [];
-      const mapping = []; 
+    if (!result) {
+      setPhase("input");
+      return;
+    }
 
-      let hits = 0;
-      let totalEntailment = 0;
-
-      for (const dist of distractorField) {
-        const statementChoice = `${questionContext} ${dist.trim()}`;
-        pairsToEvaluate.push(`${statementUser} ${sepToken} ${statementChoice}`);
-        mapping.push({ type: 'distractor', dir: 'forward', text: dist });
-        pairsToEvaluate.push(`${statementChoice} ${sepToken} ${statementUser}`);
-        mapping.push({ type: 'distractor', dir: 'backward', text: dist });
-      }
-
-      for (const truth of validTruths) {
-        const cleanTruth = truth.trim().toLowerCase();
-        if (cleanInput === cleanTruth) {
-          totalEntailment += 1.0;
-          hits++;
-          continue; 
-        }
-        const statementChoice = `${questionContext} ${truth.trim()}`;
-        pairsToEvaluate.push(`${statementUser} ${sepToken} ${statementChoice}`);
-        mapping.push({ type: 'truth', dir: 'forward', text: truth });
-        pairsToEvaluate.push(`${statementChoice} ${sepToken} ${statementUser}`);
-        mapping.push({ type: 'truth', dir: 'backward', text: truth });
-      }
-
-      let maxDistractorScore = 0;
-      let closestIncorrectText = null;
-
-      if (pairsToEvaluate.length > 0) {
-        const batchedOutputs = await model(pairsToEvaluate, { top_k: 5, topk: 5 });
-        const normalizedOutputs = Array.isArray(batchedOutputs) && batchedOutputs.length > 0 && !Array.isArray(batchedOutputs[0])
-            ? [batchedOutputs]
-            : batchedOutputs;
-
-        const resultsByOriginal = { distractor: {}, truth: {} };
-        
-        for (let i = 0; i < normalizedOutputs.length; i++) {
-          const map = mapping[i];
-          const out = normalizedOutputs[i];
-          const scores = getEntailmentScores(out, `${map.type} (${map.dir})`);
-          
-          if (!resultsByOriginal[map.type][map.text]) {
-             resultsByOriginal[map.type][map.text] = { forward: null, backward: null };
-          }
-          resultsByOriginal[map.type][map.text][map.dir] = scores;
-        }
-
-        for (const dist of distractorField) {
-           const resInfo = resultsByOriginal.distractor[dist];
-           if (resInfo && resInfo.forward && resInfo.backward) {
-              const avgEnt = (resInfo.forward.entailment + resInfo.backward.entailment) / 2;
-              if (avgEnt > maxDistractorScore) {
-                  maxDistractorScore = avgEnt;
-                  closestIncorrectText = dist === compositeDistractor ? "Composite Distractor" : dist;
-              }
-           }
-        }
-
-        for (const truth of validTruths) {
-           const cleanTruth = truth.trim().toLowerCase();
-           if (cleanInput === cleanTruth) continue; 
-           const resInfo = resultsByOriginal.truth[truth];
-           if (resInfo && resInfo.forward && resInfo.backward) {
-              const avgEnt = (resInfo.forward.entailment + resInfo.backward.entailment) / 2;
-              const isEnt = resInfo.forward.isEntailment || resInfo.backward.isEntailment;
-              totalEntailment += avgEnt;
-              if (avgEnt > maxDistractorScore && isEnt) {
-                 hits++;
-              }
-           }
-        }
-      }
-
-      const avgEntailment = validTruths.length > 0 ? totalEntailment / validTruths.length : 0;
-      
-      let mappedScore10 = 0;
-      if (hits === validTruths.length && validTruths.length > 0) {
-          mappedScore10 = 5 + ((avgEntailment - maxDistractorScore) / Math.max(0.01, 1 - maxDistractorScore)) * 5;
-          if (avgEntailment >= 0.90) mappedScore10 = 10.0;
-      } else if (hits > 0) {
-          const hitRatio = hits / validTruths.length;
-          mappedScore10 = 5.0 + (hitRatio * 4.9);
-      } else {
-          const ratio = maxDistractorScore > 0 ? (avgEntailment / Math.max(0.01, maxDistractorScore)) : avgEntailment;
-          mappedScore10 = ratio * 4.9;
-          mappedScore10 = Math.min(4.9, mappedScore10);
-      }
-
-      mappedScore10 = Math.max(0, Math.min(10, mappedScore10)); 
-      
-      setTempSimScore(mappedScore10);
-      setEvalMethod("text");
-
-      let maxEmbeddingSim = 0;
-      if (getEmbeddings && validTruths.length > 0) {
-        try {
-           const textsToEmbed = [userInput.trim(), ...validTruths];
-           const embs = await getEmbeddings(textsToEmbed);
-           if (embs && embs.length === textsToEmbed.length) {
-              const inputEmb = embs[0];
-              for(let i=1; i<embs.length; i++){
-                 const sim = cosineSimilarity(inputEmb, embs[i]);
-                 if(sim > maxEmbeddingSim) maxEmbeddingSim = sim;
-              }
-           }
-        } catch (e) {
-           console.error("Embedding gamification failed", e);
-        }
-      }
-
-      if (hits === validTruths.length && validTruths.length > 0) {
-        setPhase("success");
-        setCalculatedScore(calculateNewScore("text"));
-      } else if (hits > 0) {
-        setPhase("input");
-        setFeedback({
-          type: "close",
-          sim: mappedScore10,
-          hotColdScore: maxEmbeddingSim,
-          overridden: false,
-          customMessage: `${t.partialMatch || "Partial Match!"} ${hits}/${validTruths.length} ${t.correctConcepts || "correct concepts identified. Keep going!"}`
-        });
-      } else {
-        setPhase("input");
-        if (maxDistractorScore > avgEntailment) {
-          setFeedback({
-            type: "leaning_wrong",
-            sim: mappedScore10,
-            hotColdScore: maxEmbeddingSim,
-            wrongSim: maxDistractorScore,
-            wrongTarget: closestIncorrectText,
-            overridden: false
-          });
-        } else {
-          setFeedback({
-            type: "wrong",
-            sim: mappedScore10,
-            hotColdScore: maxEmbeddingSim,
-            overridden: false,
-          });
-        }
-      }
-    } catch (err) {
+    if (result.status === "error") {
       showToast(t.alertError || "Error evaluating input.");
       setPhase("input");
+      return;
+    }
+
+    if (result.status === "loading") {
+      showToast(t.alertLoading || "Engine is loading...");
+      setPhase("input");
+      return;
+    }
+
+    if (result.status === "success") {
+      setTempSimScore(result.score);
+      setEvalMethod("text");
+      setPhase("success");
+      setCalculatedScore(calculateNewScore("text"));
+    } else if (result.status === "close") {
+      setTempSimScore(result.score);
+      setEvalMethod("text");
+      setPhase("input");
+      setFeedback({
+        type: "close",
+        sim: result.score,
+        hotColdScore: result.hotColdScore,
+        overridden: false,
+        customMessage: result.customMessage
+      });
+    } else if (result.status === "leaning_wrong") {
+      setTempSimScore(result.score);
+      setEvalMethod("text");
+      setPhase("input");
+      setFeedback({
+        type: "leaning_wrong",
+        sim: result.score,
+        hotColdScore: result.hotColdScore,
+        wrongSim: result.wrongSim,
+        wrongTarget: result.wrongTarget,
+        overridden: false
+      });
+    } else if (result.status === "wrong") {
+      setTempSimScore(result.score);
+      setEvalMethod("text");
+      setPhase("input");
+      setFeedback({
+        type: "wrong",
+        sim: result.score,
+        hotColdScore: result.hotColdScore,
+        overridden: false,
+      });
     }
   };
 
