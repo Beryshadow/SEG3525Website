@@ -12,6 +12,19 @@ export const DashboardView = ({ deck, t, onGoToCard, onUpdateCards, onDeleteCard
   const [queryEmbedding, setQueryEmbedding] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
 
+  const [sortField, setSortField] = useState(null);
+  const [sortDirection, setSortDirection] = useState('asc');
+
+  const handleSort = (field) => {
+    if (sortField === field) {
+      if (sortDirection === 'asc') setSortDirection('desc');
+      else { setSortField(null); setSortDirection('asc'); }
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
   useEffect(() => {
     if (!searchQuery.trim() || !getEmbeddings) {
       setQueryEmbedding(null);
@@ -31,13 +44,25 @@ export const DashboardView = ({ deck, t, onGoToCard, onUpdateCards, onDeleteCard
   }, [searchQuery, getEmbeddings]);
 
   const displayedDeck = useMemo(() => {
-    if (!queryEmbedding || !searchQuery.trim()) return deck;
-    return [...deck].sort((a, b) => {
-       const simA = cardEmbeddings && cardEmbeddings[a.id] ? cosineSimilarity(cardEmbeddings[a.id], queryEmbedding) : 0;
-       const simB = cardEmbeddings && cardEmbeddings[b.id] ? cosineSimilarity(cardEmbeddings[b.id], queryEmbedding) : 0;
-       return simB - simA;
-    });
-  }, [deck, queryEmbedding, cardEmbeddings, searchQuery]);
+    let result = [...deck];
+    if (queryEmbedding && searchQuery.trim()) {
+      result.sort((a, b) => {
+         const simA = cardEmbeddings && cardEmbeddings[a.id] ? cosineSimilarity(cardEmbeddings[a.id], queryEmbedding) : 0;
+         const simB = cardEmbeddings && cardEmbeddings[b.id] ? cosineSimilarity(cardEmbeddings[b.id], queryEmbedding) : 0;
+         return simB - simA;
+      });
+    } else if (sortField) {
+      result.sort((a, b) => {
+         if (sortField === 'attempts') {
+            return sortDirection === 'asc' ? a.attempts - b.attempts : b.attempts - a.attempts;
+         } else if (sortField === 'score') {
+            return sortDirection === 'asc' ? a.score - b.score : b.score - a.score;
+         }
+         return 0;
+      });
+    }
+    return result;
+  }, [deck, queryEmbedding, cardEmbeddings, searchQuery, sortField, sortDirection]);
 
   const toggleSelectAll = (e) => {
     if (selectedIds.size === displayedDeck.length) {
@@ -124,8 +149,28 @@ export const DashboardView = ({ deck, t, onGoToCard, onUpdateCards, onDeleteCard
                    <input type="checkbox" checked={selectedIds.size === displayedDeck.length && displayedDeck.length > 0} onChange={toggleSelectAll} className="cursor-pointer" />
                 </th>
                 <th className="py-2 px-2 sm:py-5 sm:px-6 font-black">{t.questionCol}</th>
-                <th className="py-2 px-2 sm:py-5 sm:px-6 font-black text-center w-16 sm:w-24">{t.attemptsCol}</th>
-                <th className="py-2 px-2 sm:py-5 sm:px-6 font-black text-center w-24 sm:w-32">{t.scoreCol}</th>
+                <th 
+                  className="py-2 px-2 sm:py-5 sm:px-6 font-black text-center w-16 sm:w-24 cursor-pointer hover:text-[var(--accent)] transition-colors select-none"
+                  onClick={() => handleSort('attempts')}
+                >
+                  <div className="flex items-center justify-center gap-1">
+                    {t.attemptsCol}
+                    <span className="text-[10px] w-3 flex justify-center opacity-70">
+                      {sortField === 'attempts' ? (sortDirection === 'asc' ? '▲' : '▼') : '↕'}
+                    </span>
+                  </div>
+                </th>
+                <th 
+                  className="py-2 px-2 sm:py-5 sm:px-6 font-black text-center w-24 sm:w-32 cursor-pointer hover:text-[var(--accent)] transition-colors select-none"
+                  onClick={() => handleSort('score')}
+                >
+                  <div className="flex items-center justify-center gap-1">
+                    {t.scoreCol}
+                    <span className="text-[10px] w-3 flex justify-center opacity-70">
+                      {sortField === 'score' ? (sortDirection === 'asc' ? '▲' : '▼') : '↕'}
+                    </span>
+                  </div>
+                </th>
                 <th className="py-2 px-2 sm:py-5 sm:px-6 font-black text-center w-24 sm:w-32">Actions</th>
               </tr>
             </thead>
