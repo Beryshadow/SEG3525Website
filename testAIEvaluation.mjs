@@ -13,34 +13,27 @@ const cosineSimilarity = (vecA, vecB) => {
   return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
 };
 
-const getEntailmentScores = (output) => {
-  const classes = Array.isArray(output) && Array.isArray(output[0]) ? output[0] : (Array.isArray(output) ? output : [output]);
-  if (!classes || classes.length === 0 || !classes[0].label) {
-    return { entailment: 0, isEntailment: false, isContradiction: false };
-  }
-  
-  let entailmentScore = 0;
-  let topLabel = "";
-  let maxScore = -1;
-
-  for (const c of classes) {
-    const labelStr = c.label.toUpperCase();
-    if (c.score > maxScore) {
-      maxScore = c.score;
-      topLabel = labelStr;
+const getEntailmentScores = (outputArr) => {
+    let ent = 0; let cont = 0; let neut = 0;
+    if (Array.isArray(outputArr)) {
+        for (const item of outputArr) {
+            const label = item.label.toLowerCase();
+            if (label === 'entailment' || label.includes('entail') || label === 'label_1' || label === 'label_0') ent = item.score;
+            else if (label === 'contradiction' || label.includes('contradiction') || label === 'label_2') cont = item.score;
+            else if (label === 'neutral') neut = item.score;
+        }
+    } else if (outputArr && typeof outputArr === 'object') {
+        const label = outputArr.label.toLowerCase();
+        if (label === 'entailment' || label.includes('entail') || label === 'label_1' || label === 'label_0') ent = outputArr.score;
+        else if (label === 'contradiction' || label.includes('contradiction') || label === 'label_2') cont = outputArr.score;
+        else if (label === 'neutral') neut = outputArr.score;
     }
-    if (labelStr.includes('ENTAIL') || labelStr === 'LABEL_1' || labelStr === 'LABEL_0') {
-       if (labelStr.includes('ENTAIL')) {
-           entailmentScore = c.score;
-       } else if (entailmentScore === 0) {
-           entailmentScore = c.score; 
-       }
-    }
-  }
-  
-  const isEntailment = topLabel.includes('ENTAIL') || topLabel === 'LABEL_1' || topLabel === 'LABEL_0';
-  const isContradiction = topLabel.includes('CONTRADICTION') || topLabel === 'LABEL_2';
-  return { entailment: entailmentScore, isEntailment, isContradiction };
+    const maxScore = Math.max(ent, cont, neut);
+    return {
+        entailment: ent,
+        isEntailment: ent === maxScore && ent > 0,
+        isContradiction: cont === maxScore && cont > 0
+    };
 };
 
 const evaluateInput = async (userInput, question, correctAnswersArray, model, getEmbeddings) => {
@@ -92,7 +85,14 @@ const evaluateInput = async (userInput, question, correctAnswersArray, model, ge
 
   if (pairsToEvaluate.length > 0) {
     const batchedOutputs = await model(pairsToEvaluate, { top_k: 5, topk: 5 });
-    const normalizedOutputs = Array.isArray(batchedOutputs) && batchedOutputs.length > 0 && !Array.isArray(batchedOutputs[0]) ? [batchedOutputs] : batchedOutputs;
+      let normalizedOutputs = batchedOutputs;
+      if (Array.isArray(batchedOutputs) && batchedOutputs.length > 0 && !Array.isArray(batchedOutputs[0])) {
+          if (batchedOutputs.length === pairsToEvaluate.length) {
+              normalizedOutputs = batchedOutputs;
+          } else {
+              normalizedOutputs = [batchedOutputs];
+          }
+      }
     const resultsByOriginal = { distractor: {}, truth: {} };
     
     for (let i = 0; i < normalizedOutputs.length; i++) {
@@ -132,15 +132,19 @@ const evaluateInput = async (userInput, question, correctAnswersArray, model, ge
   }
 
   let maxEmbeddingSim = 0;
+  let combinedEmbeddingSim = 0;
   if (getEmbeddings && validTruths.length > 0) {
-    const textsToEmbed = [userInput.trim(), ...validTruths];
+    const combinedTruths = validTruths.join(" and ");
+    const textsToEmbed = [userInput.trim(), ...validTruths, combinedTruths];
     const embs = await getEmbeddings(textsToEmbed);
     if (embs && embs.length === textsToEmbed.length) {
        const inputEmb = embs[0];
-       for(let i=1; i<embs.length; i++){
+       for(let i=1; i<=validTruths.length; i++){
           const sim = cosineSimilarity(inputEmb, embs[i]);
           if(sim > maxEmbeddingSim) maxEmbeddingSim = sim;
        }
+       combinedEmbeddingSim = cosineSimilarity(inputEmb, embs[embs.length - 1]);
+       console.log("Max Emb Sim:", maxEmbeddingSim.toFixed(3), "Combined Emb Sim:", combinedEmbeddingSim.toFixed(3));
     }
   }
 
@@ -283,4 +287,4 @@ async function runTests() {
   console.log(`\n=== TEST SUMMARY: ${passed}/${total} PASSED ===\n`);
 }
 
-runTests().catch(console.error);
+runTests().catch(console.error);export { evaluateInput };
