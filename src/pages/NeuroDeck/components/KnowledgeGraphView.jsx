@@ -36,25 +36,55 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
       embedding: cardEmbeddings[q.id]
     }));
 
-    const allEdges = [];
-    for (let i = 0; i < nodes.length; i++) {
-      for (let j = i + 1; j < nodes.length; j++) {
-        const n1 = nodes[i];
-        const n2 = nodes[j];
-        if (n1.embedding && n2.embedding) {
+    let globalMax = -Infinity;
+    let globalMin = Infinity;
+    
+    // First Pass: Find the absolute bounds of the semantic space for this specific model + deck
+    nodes.forEach(n1 => {
+      nodes.forEach(n2 => {
+        if (n1.id !== n2.id && n1.embedding && n2.embedding) {
           const sim = cosineSimilarity(n1.embedding, n2.embedding);
-          allEdges.push({ source: n1, target: n2, weight: sim });
+          if (sim > globalMax) globalMax = sim;
+          if (sim < globalMin) globalMin = sim;
         }
-      }
-    }
+      });
+    });
     
-    // Sort descending by weight
-    allEdges.sort((a, b) => b.weight - a.weight);
+    const range = globalMax - globalMin || 1;
+    const edgesMap = new Map();
     
-    // Dynamically sparsify graph to prevent "ball of yarn" overload
-    // Keep a strict maximum of ~2.5 edges per node on average
-    const maxEdges = Math.min(allEdges.length, Math.floor(nodes.length * 2.5));
-    const edges = allEdges.slice(0, maxEdges);
+    // Second Pass: Build edges using universally normalized weights (0.0 to 1.0)
+    nodes.forEach(n1 => {
+      const nodeEdges = [];
+      nodes.forEach(n2 => {
+        if (n1.id !== n2.id && n1.embedding && n2.embedding) {
+          const sim = cosineSimilarity(n1.embedding, n2.embedding);
+          // Mathematical normalization completely neutralizes the differences between embedding models
+          const normalizedWeight = (sim - globalMin) / range;
+          nodeEdges.push({ source: n1, target: n2, weight: normalizedWeight, rawSim: sim });
+        }
+      });
+      
+      // Sort this specific node's edges by the normalized weight
+      nodeEdges.sort((a, b) => b.weight - a.weight);
+      
+      // Filter edges using the globally normalized ranking:
+      // 1. Guaranteed Connectivity: Always keep the top 2 semantic neighbors
+      // 2. Cluster Preservation: Keep any edge that falls into the top 15% of the graph's global variance (normalizedWeight >= 0.85)
+      const topEdges = nodeEdges.filter((e, idx) => {
+         if (idx < 2) return true;
+         return e.weight >= 0.85;
+      });
+      
+      topEdges.forEach(e => {
+        const key = [e.source.id, e.target.id].sort().join('-');
+        if (!edgesMap.has(key)) {
+          edgesMap.set(key, e);
+        }
+      });
+    });
+
+    const edges = Array.from(edgesMap.values());
 
     nodesRef.current = nodes;
     edgesRef.current = edges;
@@ -329,13 +359,13 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
               </p>
               <div className="w-64 h-3 bg-black/20 dark:bg-white/10 rounded-full overflow-hidden relative border border-white/5 shadow-inner">
                  <div 
-                   className="absolute left-0 top-0 bottom-0 bg-[var(--accent)] transition-all duration-300 rounded-full"
-                   style={{ width: `${embeddingProgress || 0}%` }}
+                   className={`absolute left-0 top-0 bottom-0 bg-[var(--accent)] transition-all duration-300 rounded-full ${embeddingStatus === "ready" ? "w-full animate-pulse opacity-70" : ""}`}
+                   style={embeddingStatus === "loading" ? { width: `${embeddingProgress || 0}%` } : {}}
                  ></div>
                  <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent"></div>
               </div>
               <div className="mt-2 text-xs font-bold text-[var(--text-muted)] tracking-widest uppercase">
-                {embeddingStatus === "loading" ? (t.downloadingAiModel || "Downloading AI Model...") : (t.extractingData || "Extracting Data...")} {embeddingProgress}%
+                {embeddingStatus === "loading" ? `${t.downloadingAiModel || "Downloading AI Model..."} ${embeddingProgress}%` : (t.extractingData || "Extracting Data...")}
               </div>
             </div>
           )}
