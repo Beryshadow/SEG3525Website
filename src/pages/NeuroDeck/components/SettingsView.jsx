@@ -107,6 +107,72 @@ export const SettingsView = ({
     });
   };
 
+  const handleAnkiImport = (text, filename) => {
+     try {
+        const lines = text.split('\n');
+        const parsedDeck = [];
+        
+        lines.forEach((line, idx) => {
+           if (!line.trim()) return;
+           const separator = line.includes('\t') ? '\t' : ',';
+           const row = line.split(separator); 
+           if (row.length >= 2) {
+              const question = row[0].replace(/^"|"$/g, '').trim();
+              const answer = row[1].replace(/^"|"$/g, '').trim();
+              
+              if (question && answer) {
+                 parsedDeck.push({
+                    id: `anki-${Date.now()}-${idx}`,
+                    question: question,
+                    choices: [answer],
+                    correctAnswers: [answer],
+                    score: 0,
+                    dueTurn: 0,
+                    attempts: 0,
+                    isMastered: false
+                 });
+              }
+           }
+        });
+        
+        if (parsedDeck.length > 0) {
+           onDirectDropSave({
+              id: Date.now().toString(),
+              name: filename.replace(/\.(csv|txt)$/i, ''),
+              deck: parsedDeck,
+              completed: false
+           });
+           showToast(`Imported ${parsedDeck.length} cards from Anki`);
+        } else {
+           showToast("No valid cards found in Anki file");
+        }
+     } catch (err) {
+        console.error("Anki import failed", err);
+        showToast("Failed to parse Anki file");
+     }
+  };
+
+  const handleAnkiExport = () => {
+     if (!currentDeck || currentDeck.length === 0) {
+         showToast("No deck currently loaded to export");
+         return;
+     }
+     const csvContent = currentDeck.map(q => {
+        const front = `"${q.question.replace(/"/g, '""')}"`;
+        const back = `"${(q.correctAnswers?.[0] || q.correctAnswer || "").replace(/"/g, '""')}"`;
+        return `${front},${back}`;
+     }).join('\n');
+     
+     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+     const link = document.createElement('a');
+     const url = URL.createObjectURL(blob);
+     link.setAttribute('href', url);
+     link.setAttribute('download', `neurodeck-anki-export-${Date.now()}.csv`);
+     document.body.appendChild(link);
+     link.click();
+     document.body.removeChild(link);
+  };
+
   return (
     <div className="w-full space-y-4 sm:space-y-8">
       <div 
@@ -300,12 +366,15 @@ export const SettingsView = ({
         <p className="text-[var(--text-muted)] font-medium mb-4 sm:mb-8 leading-relaxed text-xs sm:text-base">
           {t.dataBackupDesc || "Export your progress or import a backup"}
         </p>
-        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
-          <button onClick={onExportProgress} className="neu-btn flex-1 py-2 sm:py-4 font-black uppercase tracking-wider text-[var(--accent)] flex items-center justify-center text-[10px] sm:text-sm rounded-lg sm:rounded-2xl">
-            <DownloadIcon className="mr-2 sm:mr-3" /> {t.exportBackup || "Export"}
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 flex-wrap">
+          <button onClick={onExportProgress} className="neu-btn flex-1 min-w-[120px] py-2 sm:py-4 font-black uppercase tracking-wider text-[var(--accent)] flex items-center justify-center text-[10px] sm:text-sm rounded-lg sm:rounded-2xl">
+            <DownloadIcon className="mr-2 sm:mr-3" /> {t.exportBackup || "Export JSON"}
           </button>
-          <button onClick={() => fileInputRef.current.click()} className="neu-btn flex-1 py-2 sm:py-4 font-black uppercase tracking-wider text-[var(--text-muted)] flex items-center justify-center text-[10px] sm:text-sm rounded-lg sm:rounded-2xl">
-            <UploadIcon className="mr-2 sm:mr-3" /> {t.importBackup || "Import"}
+          <button onClick={handleAnkiExport} className="neu-btn flex-1 min-w-[120px] py-2 sm:py-4 font-black uppercase tracking-wider text-[var(--accent)] flex items-center justify-center text-[10px] sm:text-sm rounded-lg sm:rounded-2xl">
+            <DownloadIcon className="mr-2 sm:mr-3" /> {t.exportAnki || "Export Anki (CSV)"}
+          </button>
+          <button onClick={() => fileInputRef.current.click()} className="neu-btn flex-1 min-w-[120px] py-2 sm:py-4 font-black uppercase tracking-wider text-[var(--text-muted)] flex items-center justify-center text-[10px] sm:text-sm rounded-lg sm:rounded-2xl">
+            <UploadIcon className="mr-2 sm:mr-3" /> {t.importBackup || "Import (JSON/CSV)"}
           </button>
           <input
             type="file"
@@ -314,11 +383,20 @@ export const SettingsView = ({
               const file = e.target.files[0];
               if (!file) return;
               const reader = new FileReader();
-              reader.onload = (event) => onImportProgress(event.target.result);
+              reader.onload = (event) => {
+                 const text = event.target.result;
+                 if (file.name.toLowerCase().endsWith('.json')) {
+                    onImportProgress(text);
+                 } else if (file.name.toLowerCase().endsWith('.csv') || file.name.toLowerCase().endsWith('.txt')) {
+                    handleAnkiImport(text, file.name);
+                 } else {
+                    showToast("Unsupported file format");
+                 }
+              };
               reader.readAsText(file);
               e.target.value = null;
             }}
-            accept=".json"
+            accept=".json,.csv,.txt"
             className="hidden"
           />
         </div>

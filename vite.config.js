@@ -1,6 +1,7 @@
 import { defineConfig, transformWithOxc } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
+import { VitePWA } from 'vite-plugin-pwa';
 
 const transformJsxInJs = () => ({
   name: 'transform-jsx-in-js',
@@ -35,6 +36,32 @@ export default defineConfig({
     transformJsxInJs(), 
     tailwindcss(),
     react(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
+      manifest: {
+        name: 'NeuroDeck',
+        short_name: 'NeuroDeck',
+        description: 'AI-powered Flashcards with semantic grading',
+        theme_color: '#0f172a',
+        icons: [
+          {
+            src: '/favicon.ico',
+            sizes: '192x192',
+            type: 'image/png'
+          },
+          {
+            src: '/favicon.ico',
+            sizes: '512x512',
+            type: 'image/png'
+          }
+        ]
+      },
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,wasm}'],
+        maximumFileSizeToCacheInBytes: 10 * 1024 * 1024 // 10MB to cache models if needed, though they go to IndexedDB
+      }
+    })
   ],
   define: {
     'import.meta.env.VITE_BUILD_TIME': JSON.stringify(new Date().toLocaleString()),

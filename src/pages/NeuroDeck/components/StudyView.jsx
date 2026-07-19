@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { LightbulbIcon, SparklesIcon, CheckIcon, XIcon, PlayIcon } from './Icons';
 import { escapeRegExp, getCorrectAnswers, shuffleArray } from '../utils/helpers';
-
+import { cosineSimilarity } from '../../../utilities/shared';
 export const StudyView = ({
   question, currentIndex, totalCards, model, modelStatus, modelError, progressPercent, onComplete,
-  onNavigate, t, showToast, currentLangKey
+  onNavigate, t, showToast, currentLangKey, getEmbeddings
 }) => {
   const [phase, setPhase] = useState("input");
   const [userInput, setUserInput] = useState("");
@@ -294,6 +294,23 @@ export const StudyView = ({
       setTempSimScore(mappedScore10);
       setEvalMethod("text");
 
+      let maxEmbeddingSim = 0;
+      if (getEmbeddings && validTruths.length > 0) {
+        try {
+           const textsToEmbed = [userInput.trim(), ...validTruths];
+           const embs = await getEmbeddings(textsToEmbed);
+           if (embs && embs.length === textsToEmbed.length) {
+              const inputEmb = embs[0];
+              for(let i=1; i<embs.length; i++){
+                 const sim = cosineSimilarity(inputEmb, embs[i]);
+                 if(sim > maxEmbeddingSim) maxEmbeddingSim = sim;
+              }
+           }
+        } catch (e) {
+           console.error("Embedding gamification failed", e);
+        }
+      }
+
       if (hits === validTruths.length && validTruths.length > 0) {
         setPhase("success");
         setCalculatedScore(calculateNewScore("text"));
@@ -302,6 +319,7 @@ export const StudyView = ({
         setFeedback({
           type: "close",
           sim: mappedScore10,
+          hotColdScore: maxEmbeddingSim,
           overridden: false,
           customMessage: `${t.partialMatch || "Partial Match!"} ${hits}/${validTruths.length} ${t.correctConcepts || "correct concepts identified. Keep going!"}`
         });
@@ -311,6 +329,7 @@ export const StudyView = ({
           setFeedback({
             type: "leaning_wrong",
             sim: mappedScore10,
+            hotColdScore: maxEmbeddingSim,
             wrongSim: maxDistractorScore,
             wrongTarget: closestIncorrectText,
             overridden: false
@@ -319,6 +338,7 @@ export const StudyView = ({
           setFeedback({
             type: "wrong",
             sim: mappedScore10,
+            hotColdScore: maxEmbeddingSim,
             overridden: false,
           });
         }
@@ -516,6 +536,26 @@ export const StudyView = ({
                             ? t.closeFeedback 
                             : t.wrongFeedback}
                 </p>
+
+                {feedback.hotColdScore !== undefined && (
+                  <div className="mb-4 bg-[var(--bg-main)] rounded-xl p-3 sm:p-4 border border-white/5 flex flex-col gap-2 relative overflow-hidden">
+                    <div className="flex justify-between items-center text-[10px] sm:text-xs font-black uppercase tracking-widest text-[var(--text-muted)]">
+                       <span>Semantic Gamification (Beta)</span>
+                       <span style={{ color: feedback.hotColdScore > 0.7 ? '#ef4444' : feedback.hotColdScore > 0.4 ? '#f97316' : '#3b82f6' }}>
+                          {feedback.hotColdScore > 0.7 ? "Boiling Hot! 🔥" : feedback.hotColdScore > 0.4 ? "Getting Warmer ☀️" : "Freezing Cold 🧊"}
+                       </span>
+                    </div>
+                    <div className="w-full bg-white/5 rounded-full h-3 shadow-inner relative overflow-hidden">
+                       <div 
+                         className="h-full transition-all duration-700 ease-out absolute left-0 top-0 rounded-full" 
+                         style={{ 
+                            width: `${Math.max(5, Math.min(100, feedback.hotColdScore * 100))}%`,
+                            background: feedback.hotColdScore > 0.7 ? '#ef4444' : feedback.hotColdScore > 0.4 ? '#f97316' : '#3b82f6'
+                         }}
+                       />
+                    </div>
+                  </div>
+                )}
 
                 {hintText ? (
                   <div className="mb-3 sm:mb-6 neu-flat p-3 sm:p-5 rounded-lg sm:rounded-xl text-[10px] sm:text-sm font-mono text-[var(--text-main)]">

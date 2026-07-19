@@ -20,4 +20,4 @@ export const EditIcon = () => <i className="fas fa-pencil-alt"></i>;
 export const TrashIcon = () => <i className="fas fa-trash"></i>;
 export const RefreshIcon = () => <i className="fas fa-undo"></i>;
 export const CopyIcon = () => <i className="fas fa-copy"></i>;
-
+export const NetworkIcon = () => <i className="fas fa-project-diagram text-xl"></i>;

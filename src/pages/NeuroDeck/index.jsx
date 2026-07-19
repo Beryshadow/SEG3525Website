@@ -9,7 +9,8 @@ import { cosineSimilarity } from '../../utilities/shared';
 import { SettingsView } from './components/SettingsView';
 import { DashboardView } from './components/DashboardView';
 import { StudyView } from './components/StudyView';
-import { BrainIcon, SettingsIcon, ActivityIcon, CpuIcon, FireIcon } from './components/Icons';
+import { KnowledgeGraphView } from './components/KnowledgeGraphView';
+import { BrainIcon, SettingsIcon, ActivityIcon, CpuIcon, FireIcon, NetworkIcon } from './components/Icons';
 
 export default function NeuroDeck() {
   const [view, setView] = useState("study");
@@ -430,6 +431,9 @@ export default function NeuroDeck() {
             <button onClick={() => setView("dashboard")} className={`neu-btn w-10 h-10 flex items-center justify-center rounded-full ${view === "dashboard" ? "text-[var(--accent)]" : "text-[var(--text-main)]"}`} title={t.navDashboard || "Dashboard"}>
               <ActivityIcon />
             </button>
+            <button onClick={() => setView("graph")} className={`neu-btn w-10 h-10 flex items-center justify-center rounded-full ${view === "graph" ? "text-[var(--accent)]" : "text-[var(--text-main)]"}`} title={t.navGraph || "Knowledge Graph"}>
+              <NetworkIcon />
+            </button>
             <button onClick={() => setView("settings")} className={`neu-btn w-10 h-10 flex items-center justify-center rounded-full ${view === "settings" ? "text-[var(--accent)]" : "text-[var(--text-main)]"}`} title={t.navSettings || "Settings"}>
               <SettingsIcon />
             </button>
@@ -453,6 +457,7 @@ export default function NeuroDeck() {
             t={t}
             showToast={showToast}
             currentLangKey={currentLangKey}
+            getEmbeddings={getEmbeddings}
           />
         )}
         
@@ -465,6 +470,14 @@ export default function NeuroDeck() {
             onDeleteCards={handleDeleteCards}
             cardEmbeddings={cardEmbeddings}
             getEmbeddings={getEmbeddings}
+          />
+        )}
+
+        {view === "graph" && (
+          <KnowledgeGraphView
+            deck={currentDeck}
+            cardEmbeddings={cardEmbeddings}
+            t={t}
           />
         )}
 
