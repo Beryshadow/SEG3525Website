@@ -164,17 +164,18 @@ export default function NeuroDeck() {
     }
   }, []);
 
-  const handleCloudSyncDownload = useCallback(async (code) => {
+  const handleCloudSyncDownload = useCallback(async (code, manual = false) => {
     if (!code) return;
     try {
       const res = await fetch(`http://localhost:3001/api/sync/${code}`);
       if (res.status === 404) {
-         showToast("Sync code expired. Please generate a new one.");
+         showToast("Sync code expired or not found.");
          setSyncCode("");
          return;
       }
       if (!res.ok) {
          console.warn("Failed to pull sync data");
+         if (manual) showToast("Failed to pull sync data.");
          return;
       }
       const data = await res.json();
@@ -187,12 +188,19 @@ export default function NeuroDeck() {
          if (data.data.cardOrderMode) setCardOrderMode(data.data.cardOrderMode);
          if (data.data.selectedEmbeddingModel) setSelectedEmbeddingModel(data.data.selectedEmbeddingModel);
          setSyncVersion(data.version);
-         showToast("Cloud sync: Data pulled automatically.");
+         showToast("Cloud sync: Data pulled successfully.");
+      } else if (manual) {
+         showToast("Connected! You are already up to date.");
       }
     } catch (err) {
        console.error("Auto-pull error", err);
+       if (manual) showToast("Connection failed.");
     }
   }, [syncVersion, showToast]);
+
+  const handleConnectSyncCode = useCallback(() => {
+      handleCloudSyncDownload(syncCode, true);
+  }, [syncCode, handleCloudSyncDownload]);
 
   const forcePushToCloud = useCallback(async (codeToUse) => {
       const code = codeToUse || syncCode;
@@ -692,6 +700,7 @@ export default function NeuroDeck() {
             syncCode={syncCode}
             setSyncCode={setSyncCode}
             onGenerateSyncCode={handleGenerateSyncCode}
+            onConnectSyncCode={handleConnectSyncCode}
             t={t}
             showToast={showToast}
           />

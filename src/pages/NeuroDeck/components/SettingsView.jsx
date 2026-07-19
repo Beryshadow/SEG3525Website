@@ -8,7 +8,7 @@ export const SettingsView = ({
   onExportProgress, onImportProgress,
   myDecks, loadedDeckId, onSaveDeckToCache, onOverwriteDeck, onLoadDeckFromCache, 
   onDeleteDeckFromCache, onToggleDeckCompleted, onRenameDeck, onDirectDropSave,
-  onAppendToCurrentDeck, syncCode, setSyncCode, onGenerateSyncCode, t, showToast
+  onAppendToCurrentDeck, syncCode, setSyncCode, onGenerateSyncCode, onConnectSyncCode, t, showToast
 }) => {
   const [jsonInput, setJsonInput] = useState("");
   const [newDeckName, setNewDeckName] = useState("");
@@ -491,20 +491,29 @@ export const SettingsView = ({
         <div className="flex flex-col sm:flex-row gap-4 items-center">
           <div className="flex-1 w-full">
             <label className="text-xs font-bold text-[var(--text-muted)] block mb-1 uppercase tracking-widest">{t.syncCodeLabel || "Sync Code:"}</label>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-2">
               <input 
                 type="text" 
                 value={syncCode} 
                 onChange={e => setSyncCode(e.target.value)} 
-                className="neu-pressed flex-1 px-4 py-3 rounded-xl bg-transparent text-[var(--text-main)] font-black outline-none uppercase"
+                className="neu-pressed flex-1 px-4 py-3 rounded-xl bg-transparent text-[var(--text-main)] font-black outline-none uppercase min-w-[150px]"
                 placeholder="ENTER CODE"
               />
-              <button 
-                onClick={onGenerateSyncCode} 
-                className="neu-btn px-4 py-3 rounded-xl font-bold text-xs uppercase"
-              >
-                {t.generateCode || "Generate"}
-              </button>
+              <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
+                <button 
+                  onClick={onConnectSyncCode}
+                  disabled={!syncCode}
+                  className="neu-btn flex-1 sm:flex-none px-4 py-3 rounded-xl font-bold text-xs uppercase whitespace-nowrap disabled:opacity-50"
+                >
+                  {t.connectBtn || "Connect"}
+                </button>
+                <button 
+                  onClick={onGenerateSyncCode} 
+                  className="neu-btn flex-1 sm:flex-none px-4 py-3 rounded-xl font-bold text-xs uppercase whitespace-nowrap text-[color:var(--color-success)]"
+                >
+                  {t.generateCode || "Generate"}
+                </button>
+              </div>
             </div>
             <p className="text-[10px] text-[var(--text-muted)] mt-2">
               {syncCode ? "Auto-sync is enabled. Changes will be pushed and pulled automatically in the background." : "Enter a code to enable automatic cross-device sync (expires after 12h of inactivity)."}
