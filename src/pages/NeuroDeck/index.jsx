@@ -478,6 +478,7 @@ export default function NeuroDeck() {
             deck={currentDeck}
             cardEmbeddings={cardEmbeddings}
             t={t}
+            onGoToCard={(idx) => { setCurrentIndex(idx); setView("study"); }}
           />
         )}
 

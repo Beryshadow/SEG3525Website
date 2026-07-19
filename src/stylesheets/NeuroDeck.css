@@ -1,9 +1,15 @@
 .flashcard-route {
   --accent: #fdba74;
+  --graph-color-bad: 244, 63, 94;   /* #f43f5e */
+  --graph-color-mid: 251, 146, 60;  /* #fb923c */
+  --graph-color-good: 52, 211, 153; /* #34d399 */
 }
 
 .flashcard-route.light-mode {
   --accent: #c2410c;
+  --graph-color-bad: 225, 29, 72;   /* #e11d48 */
+  --graph-color-mid: 234, 88, 12;   /* #ea580c */
+  --graph-color-good: 16, 185, 129; /* #10b981 */
 }
 
 @keyframes customShake {

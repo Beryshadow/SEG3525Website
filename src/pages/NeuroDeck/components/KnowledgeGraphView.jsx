@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { cosineSimilarity } from '../../../utilities/shared';
 import { ActivityIcon, RefreshIcon } from './Icons';
 
-export const KnowledgeGraphView = ({ deck, cardEmbeddings, t }) => {
+export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard }) => {
   const canvasRef = useRef(null);
   const wrapperRef = useRef(null);
   const animationRef = useRef(null);
@@ -23,8 +23,9 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t }) => {
   const initSimulation = () => {
     if (!deck || deck.length === 0 || !cardEmbeddings) return;
 
-    const nodes = deck.map(q => ({
+    const nodes = deck.map((q, index) => ({
       id: q.id,
+      originalIndex: index,
       question: q.question,
       score: q.isMastered ? 10 : (q.score || 0),
       x: Math.random() * dimensions.width,
@@ -54,7 +55,16 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t }) => {
     setIsSimulating(true);
   };
 
-  const [themeColors, setThemeColors] = useState({ accent: '#a855f7', textMuted: 'rgba(255,255,255,0.5)' });
+  const [themeColors, setThemeColors] = useState({ 
+    accent: '#a855f7', 
+    textMuted: 'rgba(255,255,255,0.5)',
+    shadowD: 'rgba(0,0,0,0.5)',
+    gradL: 'rgba(255,255,255,0.2)',
+    gradD: 'rgba(0,0,0,0.2)',
+    colorBad: [244, 63, 94],
+    colorMid: [251, 146, 60],
+    colorGood: [52, 211, 153]
+  });
 
   useEffect(() => {
     initSimulation();
@@ -62,11 +72,43 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t }) => {
 
   useEffect(() => {
     const style = getComputedStyle(document.documentElement);
+    
+    const parseRgbArray = (val, fallback) => {
+      const parts = val.trim().split(',').map(Number);
+      return parts.length === 3 && !parts.some(isNaN) ? parts : fallback;
+    };
+
     setThemeColors({
       accent: style.getPropertyValue('--accent').trim() || '#a855f7',
-      textMuted: style.getPropertyValue('--text-muted').trim() || 'rgba(255,255,255,0.5)'
+      textMuted: style.getPropertyValue('--text-muted').trim() || 'rgba(255,255,255,0.5)',
+      shadowD: style.getPropertyValue('--shadow-d').trim() || 'rgba(0,0,0,0.5)',
+      gradL: style.getPropertyValue('--grad-l').trim() || 'rgba(255,255,255,0.2)',
+      gradD: style.getPropertyValue('--grad-d').trim() || 'rgba(0,0,0,0.2)',
+      colorBad: parseRgbArray(style.getPropertyValue('--graph-color-bad'), [244, 63, 94]),
+      colorMid: parseRgbArray(style.getPropertyValue('--graph-color-mid'), [251, 146, 60]),
+      colorGood: parseRgbArray(style.getPropertyValue('--graph-color-good'), [52, 211, 153])
     });
   }, []);
+
+  const getGradientColor = (score) => {
+     const [r1, g1, b1] = themeColors.colorBad;
+     const [r2, g2, b2] = themeColors.colorMid;
+     const [r3, g3, b3] = themeColors.colorGood;
+
+     let r, g, b;
+     if (score <= 5) {
+         const t = score / 5;
+         r = r1 + t * (r2 - r1);
+         g = g1 + t * (g2 - g1);
+         b = b1 + t * (b2 - b1);
+     } else {
+         const t = (score - 5) / 5;
+         r = r2 + t * (r3 - r2);
+         g = g2 + t * (g3 - g2);
+         b = b2 + t * (b3 - b2);
+     }
+     return `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`;
+  };
 
   useEffect(() => {
     const handleResize = () => {
@@ -178,15 +220,27 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t }) => {
         ctx.beginPath();
         ctx.arc(n.x, n.y, n.radius, 0, 2 * Math.PI);
         
-        let color = themeColors.accent; 
-        if (n.score === 10) color = '#34d399'; // Premium mint green
-        else if (n.score <= 3) color = '#f43f5e'; // Premium ruby red
-        else if (n.score <= 7) color = '#fb923c'; // Soft orange 
+        ctx.shadowColor = themeColors.shadowD;
+        ctx.shadowBlur = 8;
+        ctx.shadowOffsetX = 3;
+        ctx.shadowOffsetY = 3;
 
-        ctx.fillStyle = color;
+        ctx.fillStyle = getGradientColor(n.score);
         ctx.fill();
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = hoveredNode && hoveredNode.id === n.id ? '#ffffff' : 'rgba(0,0,0,0.5)';
+
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+
+        const grad = ctx.createLinearGradient(n.x - n.radius, n.y - n.radius, n.x + n.radius, n.y + n.radius);
+        grad.addColorStop(0, themeColors.gradL);
+        grad.addColorStop(1, themeColors.gradD);
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = hoveredNode && hoveredNode.id === n.id ? '#ffffff' : themeColors.shadowD;
         ctx.stroke();
       }
 
@@ -217,6 +271,15 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t }) => {
       }
     }
     setHoveredNode(found);
+    if (canvasRef.current) {
+       canvasRef.current.style.cursor = found ? 'pointer' : 'crosshair';
+    }
+  };
+
+  const handleMouseClick = () => {
+    if (hoveredNode && onGoToCard) {
+      onGoToCard(hoveredNode.originalIndex);
+    }
   };
 
   return (
@@ -242,6 +305,7 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t }) => {
             height={dimensions.height}
             onMouseMove={handleMouseMove}
             onMouseLeave={() => setHoveredNode(null)}
+            onClick={handleMouseClick}
             className="w-full h-full touch-none"
           />
           
@@ -255,7 +319,7 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t }) => {
             >
               <div className="text-[10px] font-black uppercase tracking-widest mb-2 text-[var(--text-muted)] flex items-center justify-between">
                  <span>{t.cardLabel || "Card"}</span>
-                 <span style={{ color: hoveredNode.score === 10 ? '#34d399' : hoveredNode.score <= 3 ? '#f43f5e' : hoveredNode.score <= 7 ? '#fb923c' : themeColors.accent }}>
+                 <span style={{ color: getGradientColor(hoveredNode.score) }}>
                     {hoveredNode.score}/10
                  </span>
               </div>
