@@ -17,6 +17,7 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
   const isDraggingRef = useRef(false);
   const dragStartRef = useRef({ x: 0, y: 0 });
   const lastPinchDistRef = useRef(null);
+  const lastPinchCenterRef = useRef(null);
 
   const REPULSION = 300;
   const SPRING_LENGTH = 150;
@@ -383,10 +384,11 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
       const dy = e.touches[0].clientY - e.touches[1].clientY;
       const dist = Math.sqrt(dx * dx + dy * dy);
       
-      if (lastPinchDistRef.current !== null) {
+      const pinchX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+      const pinchY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+
+      if (lastPinchDistRef.current !== null && lastPinchCenterRef.current) {
         const zoom = dist / lastPinchDistRef.current;
-        const pinchX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-        const pinchY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
         const rect = canvasRef.current.getBoundingClientRect();
         const mouseX = pinchX - rect.left;
         const mouseY = pinchY - rect.top;
@@ -394,8 +396,12 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
         cameraRef.current.x = mouseX - (mouseX - cameraRef.current.x) * zoom;
         cameraRef.current.y = mouseY - (mouseY - cameraRef.current.y) * zoom;
         cameraRef.current.scale *= zoom;
+
+        cameraRef.current.x += pinchX - lastPinchCenterRef.current.x;
+        cameraRef.current.y += pinchY - lastPinchCenterRef.current.y;
       }
       lastPinchDistRef.current = dist;
+      lastPinchCenterRef.current = { x: pinchX, y: pinchY };
       return;
     }
     handleMouseMove(e);
@@ -403,6 +409,7 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
   
   const handleTouchEnd = (e) => {
     lastPinchDistRef.current = null;
+    lastPinchCenterRef.current = null;
     handleMouseUp();
   };
   
