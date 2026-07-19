@@ -13,6 +13,11 @@ export const SettingsView = ({
   const [jsonInput, setJsonInput] = useState("");
   const [newDeckName, setNewDeckName] = useState("");
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [inputSyncCode, setInputSyncCode] = useState(syncCode || "");
+  
+  useEffect(() => {
+     setInputSyncCode(syncCode || "");
+  }, [syncCode]);
   
   const [editingDeckId, setEditingDeckId] = useState(null);
   const [editingDeckName, setEditingDeckName] = useState("");
@@ -494,15 +499,15 @@ export const SettingsView = ({
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-2">
               <input 
                 type="text" 
-                value={syncCode} 
-                onChange={e => setSyncCode(e.target.value)} 
+                value={inputSyncCode} 
+                onChange={e => setInputSyncCode(e.target.value)} 
                 className="neu-pressed flex-1 px-4 py-3 rounded-xl bg-transparent text-[var(--text-main)] font-black outline-none uppercase min-w-[150px]"
                 placeholder="ENTER CODE"
               />
               <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
                 <button 
-                  onClick={onConnectSyncCode}
-                  disabled={!syncCode}
+                  onClick={() => onConnectSyncCode(inputSyncCode)}
+                  disabled={!inputSyncCode}
                   className="neu-btn flex-1 sm:flex-none px-4 py-3 rounded-xl font-bold text-xs uppercase whitespace-nowrap disabled:opacity-50"
                 >
                   {t.connectBtn || "Connect"}

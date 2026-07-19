@@ -159,6 +159,8 @@ export default function NeuroDeck() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [navigate, view]);
 
+  const isPullingRef = useRef(false);
+
   useEffect(() => {
     return () => {
       if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
@@ -182,6 +184,7 @@ export default function NeuroDeck() {
       }
       const data = await res.json();
       if (data && data.version > syncVersion) {
+         isPullingRef.current = true;
          if (data.data.myDecks) setMyDecks(data.data.myDecks);
          if (data.data.currentDeck) setCurrentDeck(data.data.currentDeck);
          if (data.data.loadedDeckId !== undefined) setLoadedDeckId(data.data.loadedDeckId);
@@ -190,6 +193,9 @@ export default function NeuroDeck() {
          if (data.data.cardOrderMode) setCardOrderMode(data.data.cardOrderMode);
          if (data.data.selectedEmbeddingModel) setSelectedEmbeddingModel(data.data.selectedEmbeddingModel);
          setSyncVersion(data.version);
+         if (manual) {
+            setSyncCode(code);
+         }
          showToast("Cloud sync: Data pulled successfully.");
       } else if (manual) {
          showToast("Connected! You are already up to date.");
@@ -200,9 +206,9 @@ export default function NeuroDeck() {
     }
   }, [syncVersion, showToast]);
 
-  const handleConnectSyncCode = useCallback(() => {
-      handleCloudSyncDownload(syncCode, true);
-  }, [syncCode, handleCloudSyncDownload]);
+  const handleConnectSyncCode = useCallback((codeToConnect) => {
+      handleCloudSyncDownload(codeToConnect, true);
+  }, [handleCloudSyncDownload]);
 
   const forcePushToCloud = useCallback(async (codeToUse) => {
       const code = codeToUse || syncCode;
@@ -275,6 +281,10 @@ export default function NeuroDeck() {
     }
 
     if (syncCode) {
+       if (isPullingRef.current) {
+          isPullingRef.current = false;
+          return;
+       }
        if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
        syncTimeoutRef.current = setTimeout(async () => {
           const payload = { myDecks, currentDeck, loadedDeckId, streak, selectedModel, cardOrderMode, selectedEmbeddingModel };
