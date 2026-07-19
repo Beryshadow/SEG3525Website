@@ -332,10 +332,10 @@ export default function Portfolio() {
 
                 <div className="h-full">
                   <Link to="/neurodeck" className="neu-card block p-6 h-100 group">
-                    <div className={`${theme === 'light' ? 'light-mode' : ''} flashcard-route neu-pressed h-40 flex items-center justify-center mb-6`}>
+                    <div className={`${theme === 'light' ? 'light-mode' : ''} neurodeck-route neu-pressed h-40 flex items-center justify-center mb-6`}>
                       <i
                         className="fas fa-floppy-disk fa-3x opacity-80 group-hover:scale-110 transition-transform duration-500"
-                        style={{ color: 'var(--accent)' }}
+                        style={{ color: 'var(--color-accent)' }}
                       ></i>
                     </div>
                     <h5 className="font-bold text-lg text-[var(--text-main)] mb-3">
