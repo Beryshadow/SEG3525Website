@@ -404,7 +404,11 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
       lastPinchCenterRef.current = { x: pinchX, y: pinchY };
       return;
     }
+    
+    const wasDragging = isDraggingRef.current;
+    isDraggingRef.current = false;
     handleMouseMove(e);
+    isDraggingRef.current = wasDragging;
   };
   
   const handleTouchEnd = (e) => {
