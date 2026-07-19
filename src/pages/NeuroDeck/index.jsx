@@ -260,7 +260,6 @@ export default function NeuroDeck() {
        }
     };
     window.addEventListener('focus', onFocus);
-    onFocus();
     return () => window.removeEventListener('focus', onFocus);
   }, [syncCode, handleCloudSyncDownload]);
 
