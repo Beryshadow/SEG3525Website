@@ -8,7 +8,7 @@ export default function LineChart({ data, metric, currency, lang, t, onNodeClick
 
   const svgWidth = 600;
   const svgHeight = 260;
-  const margin = { top: 20, right: 25, bottom: 45, left: 75 };
+  const margin = { top: 20, right: 25, bottom: 45, left: 95 };
 
   const minYear = 1990;
   const maxYear = 2026;
@@ -143,7 +143,7 @@ export default function LineChart({ data, metric, currency, lang, t, onNodeClick
             {/* Y-Axis Title */}
             <text
               x={-(svgHeight / 2)}
-              y={20}
+              y={15}
               transform="rotate(-90)"
               textAnchor="middle"
               className="chart-axis-title font-bold"

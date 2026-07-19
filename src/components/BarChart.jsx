@@ -8,7 +8,7 @@ export default function BarChart({ data, metric, currency, lang, t, onBarClick }
 
   const svgWidth = 600;
   const svgHeight = 260;
-  const margin = { top: 20, right: 20, bottom: 75, left: 75 };
+  const margin = { top: 20, right: 20, bottom: 75, left: 95 };
 
   const yBounds = useMemo(() => {
     const values = data.map(d => d.value);
@@ -91,7 +91,7 @@ export default function BarChart({ data, metric, currency, lang, t, onBarClick }
             {/* Y-Axis Title */}
             <text
               x={-(svgHeight / 2)}
-              y={20}
+              y={15}
               transform="rotate(-90)"
               textAnchor="middle"
               className="chart-axis-title font-bold"

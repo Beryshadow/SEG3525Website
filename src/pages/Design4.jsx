@@ -399,8 +399,8 @@ export default function Design4() {
               {/* SECTION 1: Line Chart (Trends over time) */}
               <div className="row g-4 scroll-mt-24" id="trends">
                 
-                {/* Visualizer SVG (moved to be second in DOM so it's on the right) */}
-                <div className="col-12 col-xl-8 order-xl-2" style={{ position: 'relative', zIndex: 2 }}>
+                {/* Visualizer SVG (moved to be first in DOM so it's on the left) */}
+                <div className="col-12 col-xl-8 order-xl-1" style={{ position: 'relative', zIndex: 2 }}>
                   <div className="neu-panel p-6 h-100 flex flex-col gap-2">
                     <div className="mb-2">
                       <h3 className="text-lg font-bold text-textMain mb-1">{t.trendLineTitle}</h3>
@@ -419,8 +419,8 @@ export default function Design4() {
                   </div>
                 </div>
 
-                {/* Filters sidebar card (moved to be first in DOM so it's on the left) */}
-                <div className="col-12 col-xl-4 order-xl-1" style={{ position: 'relative', zIndex: 1 }}>
+                {/* Filters sidebar card (moved to be second in DOM so it's on the right) */}
+                <div className="col-12 col-xl-4 order-xl-2" style={{ position: 'relative', zIndex: 1 }}>
                   <div className="neu-panel p-6 h-100 flex flex-col gap-4">
                     <div className="d-flex flex-col gap-4">
                       <h2 className="text-base font-bold text-accent border-bottom pb-2 mb-2">
