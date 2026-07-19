@@ -197,7 +197,7 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard }) => {
           totalVelocity += Math.abs(n.vx) + Math.abs(n.vy);
         }
 
-        if (totalVelocity < 0.5 * nodes.length) {
+        if (totalVelocity < 0.02 * nodes.length) {
           setIsSimulating(false); 
         }
       }

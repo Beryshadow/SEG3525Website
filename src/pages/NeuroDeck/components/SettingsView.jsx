@@ -238,7 +238,7 @@ export const SettingsView = ({
           {loadedDeckId && (
             <button
                onClick={onOverwriteDeck}
-               className="neu-btn px-4 sm:px-8 py-3 sm:py-4 font-black uppercase tracking-widest text-[#10b981] rounded-lg sm:rounded-2xl text-[10px] sm:text-sm active:scale-95 transition-all whitespace-nowrap"
+               className="neu-btn px-4 sm:px-8 py-3 sm:py-4 font-black uppercase tracking-widest text-[color:var(--color-success)] rounded-lg sm:rounded-2xl text-[10px] sm:text-sm active:scale-95 transition-all whitespace-nowrap"
             >
               <i className="fas fa-sync-alt mr-2"></i> {t.overwriteDeckBtn || "Overwrite Progress"}
             </button>
@@ -288,7 +288,7 @@ export const SettingsView = ({
                                if (editingDeckName.trim()) onRenameDeck(d.id, editingDeckName.trim());
                                setEditingDeckId(null);
                              }}
-                             className="text-[#10b981] hover:opacity-80 p-2"
+                             className="text-[color:var(--color-success)] hover:opacity-80 p-2"
                            >
                               <CheckIcon />
                            </button>
@@ -308,7 +308,7 @@ export const SettingsView = ({
                      <button 
                         onClick={() => onLoadDeckFromCache(d.id)} 
                         disabled={loadedDeckId === d.id}
-                        className={`neu-btn flex-1 sm:flex-none px-3 sm:px-6 py-2 sm:py-3 text-[10px] sm:text-sm font-bold uppercase tracking-widest rounded-lg transition-colors ${loadedDeckId === d.id ? 'opacity-50 text-[var(--text-muted)]' : 'text-[var(--accent)]'}`}
+                        className={`neu-btn flex-1 sm:flex-none px-3 sm:px-6 py-2 sm:py-3 text-[10px] sm:text-sm font-bold uppercase tracking-widest rounded-lg transition-colors ${loadedDeckId === d.id ? 'opacity-50 text-[var(--text-muted)]' : 'text-[color:var(--color-success)]'}`}
                      >
                         {loadedDeckId === d.id ? (t.loadedDeck || "Loaded") : (t.loadBtn || "Load")}
                      </button>
@@ -322,7 +322,7 @@ export const SettingsView = ({
                             setTimeout(() => setConfirmDeleteId(null), 3000);
                           }
                         }}
-                        className={`neu-btn flex-1 sm:flex-none px-3 sm:px-6 py-2 sm:py-3 text-[10px] sm:text-sm font-bold uppercase tracking-widest rounded-lg transition-colors ${confirmDeleteId === d.id ? 'bg-[#ef4444] text-white' : 'text-[#ef4444]'}`}
+                        className={`neu-btn flex-1 sm:flex-none px-3 sm:px-6 py-2 sm:py-3 text-[10px] sm:text-sm font-bold uppercase tracking-widest rounded-lg transition-colors ${confirmDeleteId === d.id ? 'bg-[var(--color-danger)] text-white' : 'text-[color:var(--color-danger)]'}`}
                      >
                         {confirmDeleteId === d.id ? (t.confirmDeleteBtn || "Sure?") : (t.deleteBtn || "Delete")}
                      </button>
@@ -443,12 +443,12 @@ export const SettingsView = ({
           {t.rawDeckImportDesc || "Paste JSON to import."}
         </p>
         <textarea
-          className="neu-pressed w-full h-48 sm:h-80 p-3 sm:p-6 font-mono text-[9px] sm:text-xs rounded-xl sm:rounded-2xl border-0 text-[var(--text-main)] outline-none bg-transparent focus-within:ring-2 focus:ring-[#ef4444] transition-all"
+          className="neu-pressed w-full h-48 sm:h-80 p-3 sm:p-6 font-mono text-[9px] sm:text-xs rounded-xl sm:rounded-2xl border-0 text-[var(--text-main)] outline-none bg-transparent focus-within:ring-2 focus:ring-[color:var(--color-danger)] transition-all"
           value={jsonInput}
           onChange={(e) => setJsonInput(e.target.value)}
         />
         <div className="mt-4 sm:mt-8 flex justify-end">
-          <button onClick={() => onImport(jsonInput)} className="neu-btn w-full sm:w-auto px-4 sm:px-10 py-2 sm:py-4 font-black uppercase tracking-widest text-[#ef4444] text-[10px] sm:text-sm rounded-lg sm:rounded-2xl">
+          <button onClick={() => onImport(jsonInput)} className="neu-btn w-full sm:w-auto px-4 sm:px-10 py-2 sm:py-4 font-black uppercase tracking-widest text-[color:var(--color-danger)] text-[10px] sm:text-sm rounded-lg sm:rounded-2xl">
             {t.importResetDeck || "Import & Reset"}
           </button>
         </div>

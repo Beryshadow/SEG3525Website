@@ -522,9 +522,9 @@ export const StudyView = ({
 
             {feedback && phase === "input" && (
               <div className="mt-3 sm:mt-6 neu-pressed p-3 sm:p-6 rounded-xl sm:rounded-2xl animate-fade-in" style={{
-                borderLeft: `4px solid ${feedback.type === "close" ? '#3b82f6' : '#ef4444'}`
+                borderLeft: `4px solid ${feedback.type === "close" ? 'var(--color-info)' : 'var(--color-danger)'}`
               }}>
-                <h3 className="font-black text-sm sm:text-lg flex items-center mb-1 sm:mb-2" style={{ color: feedback.type === "close" ? '#3b82f6' : '#ef4444' }}>
+                <h3 className="font-black text-sm sm:text-lg flex items-center mb-1 sm:mb-2" style={{ color: feedback.type === "close" ? 'var(--color-info)' : 'var(--color-danger)' }}>
                   {feedback.type === "close" ? <><LightbulbIcon className="mr-2" /> {t.conceptuallyClose}</> : feedback.type === "leaning_wrong" ? <><XIcon className="mr-2" /> {t.leaningWrong || "Leaning Wrong"}</> : <><XIcon className="mr-2" /> {t.notQuiteRight}</>}
                 </h3>
                 <p className="text-[10px] sm:text-sm font-medium text-[var(--text-muted)] mb-3 sm:mb-6 leading-relaxed">
@@ -541,7 +541,7 @@ export const StudyView = ({
                   <div className="mb-4 bg-[var(--bg-main)] rounded-xl p-3 sm:p-4 border border-white/5 flex flex-col gap-2 relative overflow-hidden">
                     <div className="flex justify-between items-center text-[10px] sm:text-xs font-black uppercase tracking-widest text-[var(--text-muted)]">
                        <span>Semantic Gamification (Beta)</span>
-                       <span style={{ color: feedback.hotColdScore > 0.7 ? '#ef4444' : feedback.hotColdScore > 0.4 ? '#f97316' : '#3b82f6' }}>
+                       <span style={{ color: feedback.hotColdScore > 0.7 ? 'var(--color-danger)' : feedback.hotColdScore > 0.4 ? 'var(--color-warning)' : 'var(--color-info)' }}>
                           {feedback.hotColdScore > 0.7 ? "Boiling Hot! 🔥" : feedback.hotColdScore > 0.4 ? "Getting Warmer ☀️" : "Freezing Cold 🧊"}
                        </span>
                     </div>
@@ -550,7 +550,7 @@ export const StudyView = ({
                          className="h-full transition-all duration-700 ease-out absolute left-0 top-0 rounded-full" 
                          style={{ 
                             width: `${Math.max(5, Math.min(100, feedback.hotColdScore * 100))}%`,
-                            background: feedback.hotColdScore > 0.7 ? '#ef4444' : feedback.hotColdScore > 0.4 ? '#f97316' : '#3b82f6'
+                            background: feedback.hotColdScore > 0.7 ? 'var(--color-danger)' : feedback.hotColdScore > 0.4 ? 'var(--color-warning)' : 'var(--color-info)'
                          }}
                        />
                     </div>
@@ -594,7 +594,7 @@ export const StudyView = ({
                   <div className="mt-3 sm:mt-6 pt-2 sm:pt-4 border-t border-white/5 text-right">
                     <button
                       onClick={handleOverrideAI}
-                      className="text-[10px] sm:text-xs text-[var(--text-muted)] hover:text-[#10b981] font-bold transition-colors uppercase tracking-widest"
+                      className="text-[10px] sm:text-xs text-[var(--text-muted)] hover:text-[color:var(--color-success)] font-bold transition-colors uppercase tracking-widest"
                     >
                       {t.iWasRight || "I was right (Override AI)"}
                     </button>
@@ -615,8 +615,8 @@ export const StudyView = ({
 
                 if (isSingleAnswer) {
                   let extraClass = "neu-btn text-[var(--text-main)]";
-                  if (isClickedWrong) extraClass = "neu-pressed opacity-50 text-[#ef4444]";
-                  if (isShaking) extraClass += " animate-custom-shake text-[#ef4444]";
+                  if (isClickedWrong) extraClass = "neu-pressed opacity-50 text-[color:var(--color-danger)]";
+                  if (isShaking) extraClass += " animate-custom-shake text-[color:var(--color-danger)]";
 
                   return (
                     <button
@@ -634,7 +634,7 @@ export const StudyView = ({
                 }
 
                 let extraClass = isSelected ? "neu-pressed text-[var(--accent)]" : "neu-btn text-[var(--text-main)]";
-                if (isShaking) extraClass += " animate-custom-shake text-[#ef4444]";
+                if (isShaking) extraClass += " animate-custom-shake text-[color:var(--color-danger)]";
 
                 return (
                   <button
@@ -657,7 +657,7 @@ export const StudyView = ({
             {!isSingleAnswer && (
               <div className="flex flex-col items-center gap-3 sm:gap-4">
                 {feedback?.type === "mcq_error" && (
-                  <p className="text-[#ef4444] font-bold text-[10px] sm:text-sm uppercase tracking-widest text-center">
+                  <p className="text-[color:var(--color-danger)] font-bold text-[10px] sm:text-sm uppercase tracking-widest text-center">
                     {feedback.wrongSelected > 0 ? (t.mcqSelectedIncorrect || "You selected incorrect options. ") : ""}
                     {feedback.missed > 0 ? (t.mcqMissedCorrect || "You missed some correct options.") : ""}
                   </p>
@@ -682,7 +682,7 @@ export const StudyView = ({
               <div className="mt-4 sm:mt-8 pt-3 sm:pt-4 border-t border-white/5 text-center">
                 <button
                   onClick={handleOverrideAI}
-                  className="text-[10px] sm:text-xs font-bold text-[var(--text-muted)] hover:text-[#10b981] transition-colors uppercase tracking-widest"
+                  className="text-[10px] sm:text-xs font-bold text-[var(--text-muted)] hover:text-[color:var(--color-success)] transition-colors uppercase tracking-widest"
                 >
                   {t.iWasRight || "I was right (Override AI)"}
                 </button>
@@ -693,9 +693,9 @@ export const StudyView = ({
 
         {phase === "success" && (
           <div className="mt-4 sm:mt-8 animate-fade-in">
-            <div className="mb-4 sm:mb-8 neu-pressed p-4 sm:p-6 rounded-xl sm:rounded-2xl flex flex-col sm:flex-row items-center justify-between" style={{ borderLeft: '4px solid #10b981' }}>
+            <div className="mb-4 sm:mb-8 neu-pressed p-4 sm:p-6 rounded-xl sm:rounded-2xl flex flex-col sm:flex-row items-center justify-between" style={{ borderLeft: '4px solid var(--color-success)' }}>
               <div className="mb-3 sm:mb-0 text-center sm:text-left">
-                <h3 className="font-black text-base sm:text-xl text-[#10b981] flex items-center justify-center sm:justify-start uppercase tracking-widest">
+                <h3 className="font-black text-base sm:text-xl text-[color:var(--color-success)] flex items-center justify-center sm:justify-start uppercase tracking-widest">
                   <CheckIcon className="mr-2 sm:mr-3 text-lg sm:text-2xl" /> {t.correct}
                 </h3>
                 <p className="text-[10px] sm:text-sm font-bold text-[var(--text-muted)] mt-1 sm:mt-2 uppercase tracking-widest">
@@ -706,7 +706,7 @@ export const StudyView = ({
                 <button
                   ref={nextBtnRef}
                   onClick={handleNext}
-                  className="neu-btn w-full sm:w-auto px-4 sm:px-8 py-2 sm:py-4 font-black uppercase tracking-widest text-[#10b981] mb-2 sm:mb-3 text-[10px] sm:text-sm rounded-lg sm:rounded-2xl"
+                  className="neu-btn w-full sm:w-auto px-4 sm:px-8 py-2 sm:py-4 font-black uppercase tracking-widest text-[color:var(--color-success)] mb-2 sm:mb-3 text-[10px] sm:text-sm rounded-lg sm:rounded-2xl"
                 >
                   {t.nextQuestion} <i className="fas fa-arrow-right ml-2"></i>
                 </button>
@@ -718,7 +718,7 @@ export const StudyView = ({
                 const isCorrect = correctAnswersArray.includes(choice);
                 if (!isCorrect) return null;
                 return (
-                  <div key={idx} className="w-full text-left p-3 sm:p-5 rounded-xl sm:rounded-2xl font-medium flex items-center text-xs sm:text-base neu-pressed" style={{ color: '#10b981', borderLeft: '4px solid #10b981' }}>
+                  <div key={idx} className="w-full text-left p-3 sm:p-5 rounded-xl sm:rounded-2xl font-medium flex items-center text-xs sm:text-base neu-pressed" style={{ color: 'var(--color-success)', borderLeft: '4px solid var(--color-success)' }}>
                     <i className="fas fa-check text-lg mr-3 sm:mr-4"></i> <span className="leading-relaxed">{choice}</span>
                   </div>
                 );
@@ -729,7 +729,7 @@ export const StudyView = ({
               <div className="mt-6 pt-4 border-t border-white/5 text-center">
                 <button
                   onClick={handleOverrideAI}
-                  className="text-[10px] sm:text-xs font-bold text-[var(--text-muted)] hover:text-[#10b981] transition-colors uppercase tracking-widest"
+                  className="text-[10px] sm:text-xs font-bold text-[var(--text-muted)] hover:text-[color:var(--color-success)] transition-colors uppercase tracking-widest"
                 >
                   {t.iWasRight || "I was right (Override AI)"}
                 </button>

@@ -3,6 +3,11 @@
   --graph-color-bad: 244, 63, 94;   /* #f43f5e */
   --graph-color-mid: 251, 146, 60;  /* #fb923c */
   --graph-color-good: 52, 211, 153; /* #34d399 */
+  
+  --color-success: #10b981;
+  --color-danger: #ef4444;
+  --color-warning: #f97316;
+  --color-info: #3b82f6;
 }
 
 .flashcard-route.light-mode {
@@ -10,6 +15,11 @@
   --graph-color-bad: 225, 29, 72;   /* #e11d48 */
   --graph-color-mid: 234, 88, 12;   /* #ea580c */
   --graph-color-good: 16, 185, 129; /* #10b981 */
+
+  --color-success: #059669;
+  --color-danger: #dc2626;
+  --color-warning: #ea580c;
+  --color-info: #2563eb;
 }
 
 @keyframes customShake {
