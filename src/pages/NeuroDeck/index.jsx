@@ -80,6 +80,14 @@ export default function NeuroDeck() {
   }, [selectedEmbeddingModel]);
   const { getEmbeddings, modelStatus: embeddingStatus, backendUsed: embeddingBackend, modelError: embeddingError, progressPercent: embeddingProgress } = useEmbeddingModel(selectedEmbeddingModel);
   const [cardEmbeddings, setCardEmbeddings] = useState({});
+  const activeEmbeddingModelRef = useRef(selectedEmbeddingModel);
+
+  const handleRecalculateGraph = () => {
+    if (activeEmbeddingModelRef.current !== selectedEmbeddingModel) {
+      setCardEmbeddings({});
+      activeEmbeddingModelRef.current = selectedEmbeddingModel;
+    }
+  };
 
   useEffect(() => {
     if (!currentDeck || !getEmbeddings || embeddingStatus !== 'ready') return;
@@ -94,6 +102,7 @@ export default function NeuroDeck() {
              for(let i=0; i<toEmbed.length; i++) next[toEmbed[i].id] = res[i];
              return next;
           });
+          activeEmbeddingModelRef.current = selectedEmbeddingModel;
        }
     }).catch(console.error);
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -510,6 +519,7 @@ export default function NeuroDeck() {
             onGoToCard={(idx) => { setCurrentIndex(idx); setView("study"); }}
             embeddingStatus={embeddingStatus}
             embeddingProgress={embeddingProgress}
+            onRecalculate={handleRecalculateGraph}
           />
         )}
 

@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { cosineSimilarity } from '../../../utilities/shared';
 import { ActivityIcon, RefreshIcon, NetworkIcon } from './Icons';
 
-export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embeddingStatus, embeddingProgress }) => {
+export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embeddingStatus, embeddingProgress, onRecalculate }) => {
   const canvasRef = useRef(null);
   const wrapperRef = useRef(null);
   const animationRef = useRef(null);
@@ -307,7 +307,10 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
             {t.knowledgeGraphTitle || "Neuro-Map"}
           </h2>
           <button 
-             onClick={() => initSimulation()} 
+             onClick={() => {
+               if (onRecalculate) onRecalculate();
+               initSimulation();
+             }} 
              className="neu-btn px-4 py-2 pointer-events-auto text-xs font-bold uppercase tracking-widest text-[var(--accent)] rounded-lg flex items-center"
           >
             <RefreshIcon className="mr-2" /> {t.recenter || "Recalculate"}
