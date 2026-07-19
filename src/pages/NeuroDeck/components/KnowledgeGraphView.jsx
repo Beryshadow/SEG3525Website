@@ -361,6 +361,10 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
   };
 
   const handleMouseDown = (e) => {
+    if (e.touches && e.touches.length > 1) {
+      setHoveredNode(null);
+      return;
+    }
     if (!hoveredNode) {
       const { clientX, clientY } = getClientPos(e);
       isDraggingRef.current = true;
@@ -380,6 +384,7 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
   const handleTouchMove = (e) => {
     if (!canvasRef.current) return;
     if (e.touches && e.touches.length === 2) {
+      setHoveredNode(null);
       const dx = e.touches[0].clientX - e.touches[1].clientX;
       const dy = e.touches[0].clientY - e.touches[1].clientY;
       const dist = Math.sqrt(dx * dx + dy * dy);
