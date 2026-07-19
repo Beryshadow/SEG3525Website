@@ -536,7 +536,7 @@ export const SettingsView = ({
                 className="neu-pressed flex-1 px-4 py-3 rounded-xl bg-transparent text-[var(--text-main)] font-black outline-none uppercase min-w-[150px]"
                 placeholder="ENTER CODE"
               />
-              <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
                 {syncCode && (
                   <button 
                     onClick={onDisconnectSyncCode} 
