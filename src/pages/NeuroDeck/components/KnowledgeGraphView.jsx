@@ -11,10 +11,10 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t }) => {
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
   const [isSimulating, setIsSimulating] = useState(true);
 
-  const REPULSION = 1000;
-  const SPRING_LENGTH = 100;
-  const SPRING_STRENGTH = 0.05;
-  const DAMPING = 0.85;
+  const REPULSION = 300;
+  const SPRING_LENGTH = 150;
+  const SPRING_STRENGTH = 0.02;
+  const DAMPING = 0.70;
   const SIMILARITY_THRESHOLD = 0.3; 
 
   const nodesRef = useRef([]);
@@ -54,9 +54,19 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t }) => {
     setIsSimulating(true);
   };
 
+  const [themeColors, setThemeColors] = useState({ accent: '#a855f7', textMuted: 'rgba(255,255,255,0.5)' });
+
   useEffect(() => {
     initSimulation();
   }, [deck, cardEmbeddings, dimensions]);
+
+  useEffect(() => {
+    const style = getComputedStyle(document.documentElement);
+    setThemeColors({
+      accent: style.getPropertyValue('--accent').trim() || '#a855f7',
+      textMuted: style.getPropertyValue('--text-muted').trim() || 'rgba(255,255,255,0.5)'
+    });
+  }, []);
 
   useEffect(() => {
     const handleResize = () => {
@@ -129,9 +139,8 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t }) => {
         for (const n of nodes) {
            const dx = centerX - n.x;
            const dy = centerY - n.y;
-           const dist = Math.max(0.1, Math.sqrt(dx * dx + dy * dy));
-           n.vx += (dx / dist) * 0.5;
-           n.vy += (dy / dist) * 0.5;
+           n.vx += dx * 0.001;
+           n.vy += dy * 0.001;
         }
 
         for (const n of nodes) {
@@ -158,15 +167,18 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t }) => {
         ctx.beginPath();
         ctx.moveTo(edge.source.x, edge.source.y);
         ctx.lineTo(edge.target.x, edge.target.y);
-        ctx.strokeStyle = `rgba(255, 255, 255, ${edge.weight * 0.2})`;
+        // Use theme muted text color for edges with opacity
+        ctx.strokeStyle = themeColors.textMuted;
+        ctx.globalAlpha = edge.weight * 0.4;
         ctx.stroke();
       }
+      ctx.globalAlpha = 1.0;
 
       for (const n of nodes) {
         ctx.beginPath();
         ctx.arc(n.x, n.y, n.radius, 0, 2 * Math.PI);
         
-        let color = '#a855f7'; 
+        let color = themeColors.accent; 
         if (n.score === 10) color = '#10b981'; 
         else if (n.score <= 3) color = '#ef4444'; 
         else if (n.score <= 7) color = '#f97316'; 
@@ -208,7 +220,7 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t }) => {
   };
 
   return (
-    <div className="w-full h-full min-h-[500px] animate-fade-in flex flex-col">
+    <div className="w-full h-full min-h-[700px] animate-fade-in flex flex-col">
       <div className="neu-panel p-4 sm:p-8 flex-1 flex flex-col relative" ref={containerRef}>
         <div className="flex justify-between items-center mb-4 z-10 relative pointer-events-none">
           <h2 className="text-lg sm:text-2xl font-black text-[var(--text-main)] flex items-center uppercase tracking-widest">
@@ -235,19 +247,19 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t }) => {
           
           {hoveredNode && (
             <div 
-              className="absolute pointer-events-none neu-pressed p-3 rounded-lg z-20 max-w-xs shadow-xl border border-white/10"
+              className="absolute pointer-events-none neu-panel p-4 z-20 max-w-sm sm:max-w-md"
               style={{
-                left: Math.min(hoveredNode.x + 15, dimensions.width - 250),
-                top: Math.min(hoveredNode.y + 15, dimensions.height - 100)
+                left: Math.min(hoveredNode.x + 15, dimensions.width - 320),
+                top: Math.min(hoveredNode.y + 15, dimensions.height - 120)
               }}
             >
-              <div className="text-[10px] font-black uppercase tracking-widest mb-1 text-[var(--text-muted)] flex items-center justify-between">
+              <div className="text-[10px] font-black uppercase tracking-widest mb-2 text-[var(--text-muted)] flex items-center justify-between">
                  <span>{t.cardLabel || "Card"}</span>
-                 <span style={{ color: hoveredNode.score === 10 ? '#10b981' : hoveredNode.score <= 3 ? '#ef4444' : hoveredNode.score <= 7 ? '#f97316' : '#a855f7' }}>
+                 <span style={{ color: hoveredNode.score === 10 ? '#10b981' : hoveredNode.score <= 3 ? '#ef4444' : hoveredNode.score <= 7 ? '#f97316' : themeColors.accent }}>
                     {hoveredNode.score}/10
                  </span>
               </div>
-              <p className="text-xs font-medium text-[var(--text-main)] leading-relaxed">
+              <p className="text-sm font-medium text-[var(--text-main)] leading-relaxed">
                 {hoveredNode.question}
               </p>
             </div>
