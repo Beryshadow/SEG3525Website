@@ -1,0 +1,512 @@
+[
+  {
+    "name": "Q1. Synonym (Define structure)",
+    "questionId": 1,
+    "userInput": "It defines the structure and elements",
+    "truthMatch": [{"label": "neutral", "score": 0.8}, {"label": "entailment", "score": 0.1}],
+    "distractorMatches": {},
+    "embSim": 0.90,
+    "expectedMin": 8.0,
+    "expectedMax": 10.0
+  },
+  {
+    "name": "Q1. Distractor (Visual appearance)",
+    "questionId": 1,
+    "userInput": "To define how elements visually appear",
+    "truthMatch": [{"label": "contradiction", "score": 0.98}],
+    "distractorMatches": { "visually appear": [{"label": "entailment", "score": 0.98}] },
+    "embSim": 0.40,
+    "expectedMin": 0.0,
+    "expectedMax": 4.9
+  },
+  {
+    "name": "Q1. Partial (Headings and buttons)",
+    "questionId": 1,
+    "userInput": "headings and buttons",
+    "truthMatch": [{"label": "neutral", "score": 0.8}],
+    "distractorMatches": {},
+    "embSim": 0.60,
+    "expectedMin": 0.0,
+    "expectedMax": 6.0
+  },
+  {
+    "name": "Q2. Exact Match",
+    "questionId": 2,
+    "userInput": "The presentation and visual appearance of elements, including layout, color, spacing, and motion",
+    "truthMatch": null,
+    "distractorMatches": null,
+    "embSim": 0,
+    "expectedMin": 10.0,
+    "expectedMax": 10.0
+  },
+  {
+    "name": "Q2. Synonym (Styles and layout)",
+    "questionId": 2,
+    "userInput": "Styles, colors, and layouts",
+    "truthMatch": [{"label": "entailment", "score": 0.90}],
+    "distractorMatches": {},
+    "embSim": 0.95,
+    "expectedMin": 9.0,
+    "expectedMax": 10.0
+  },
+  {
+    "name": "Q3. Correct Concept (Live object tree)",
+    "questionId": 3,
+    "userInput": "A live object tree that JavaScript can read",
+    "truthMatch": [{"label": "entailment", "score": 0.88}],
+    "distractorMatches": {},
+    "embSim": 0.92,
+    "expectedMin": 9.0,
+    "expectedMax": 10.0
+  },
+  {
+    "name": "Q3. False Positive (CSS styling rule)",
+    "questionId": 3,
+    "userInput": "A live object tree for CSS styling rules",
+    "truthMatch": [{"label": "contradiction", "score": 0.9}],
+    "distractorMatches": {"CSS styling rule": [{"label": "entailment", "score": 0.95}]},
+    "embSim": 0.85,
+    "expectedMin": 0.0,
+    "expectedMax": 4.9
+  },
+  {
+    "name": "Q4. Correct (querySelector)",
+    "questionId": 4,
+    "userInput": "document.querySelector()",
+    "truthMatch": [{"label": "entailment", "score": 0.95}],
+    "distractorMatches": {},
+    "embSim": 0.98,
+    "expectedMin": 9.0,
+    "expectedMax": 10.0
+  },
+  {
+    "name": "Q4. Distractor Trap (createStyle)",
+    "questionId": 4,
+    "userInput": "document.createStyle()",
+    "truthMatch": [{"label": "contradiction", "score": 0.99}],
+    "distractorMatches": {"document.createStyle": [{"label": "entailment", "score": 0.99}]},
+    "embSim": 0.20,
+    "expectedMin": 0.0,
+    "expectedMax": 4.9
+  },
+  {
+    "name": "Q5. Subtle Negation",
+    "questionId": 5,
+    "userInput": "It does NOT attach a function that runs when clicked",
+    "truthMatch": [{"label": "contradiction", "score": 0.98}],
+    "distractorMatches": {},
+    "embSim": 0.96,
+    "expectedMin": 0.0,
+    "expectedMax": 4.9
+  },
+  {
+    "name": "Q5. Synonym Rescue",
+    "questionId": 5,
+    "userInput": "binds an action to a click",
+    "truthMatch": [{"label": "neutral", "score": 0.9}],
+    "distractorMatches": {},
+    "embSim": 0.86,
+    "expectedMin": 8.0,
+    "expectedMax": 10.0
+  },
+  {
+    "name": "Q6. Exact Match",
+    "questionId": 6,
+    "userInput": "The heading text and heading color are changed dynamically using JavaScript and the DOM",
+    "truthMatch": null,
+    "distractorMatches": null,
+    "embSim": 0,
+    "expectedMin": 10.0,
+    "expectedMax": 10.0
+  },
+  {
+    "name": "Q6. Synonym Match",
+    "questionId": 6,
+    "userInput": "Text and color change via JS and DOM",
+    "truthMatch": [{"label": "entailment", "score": 0.85}],
+    "distractorMatches": {},
+    "embSim": 0.90,
+    "expectedMin": 8.0,
+    "expectedMax": 10.0
+  },
+  {
+    "name": "Q7. Partial Match",
+    "questionId": 7,
+    "userInput": "visible text",
+    "truthMatch": [{"label": "neutral", "score": 0.70}],
+    "distractorMatches": {},
+    "embSim": 0.65,
+    "expectedMin": 0.0,
+    "expectedMax": 6.0
+  },
+  {
+    "name": "Q7. Distractor Trap",
+    "questionId": 7,
+    "userInput": "The CSS selector that is used to find an element inside the DOM tree",
+    "truthMatch": [{"label": "contradiction", "score": 0.9}],
+    "distractorMatches": {"CSS selector": [{"label": "entailment", "score": 0.95}]},
+    "embSim": 0.30,
+    "expectedMin": 0.0,
+    "expectedMax": 4.9
+  },
+  {
+    "name": "Q8. Correct Concept",
+    "questionId": 8,
+    "userInput": "it connects HTML CSS and JS panels automatically",
+    "truthMatch": [{"label": "entailment", "score": 0.95}],
+    "distractorMatches": {},
+    "embSim": 0.92,
+    "expectedMin": 9.0,
+    "expectedMax": 10.0
+  },
+  {
+    "name": "Q9. False Positive Contradiction",
+    "questionId": 9,
+    "userInput": "It is declared inside the event handlers",
+    "truthMatch": [{"label": "contradiction", "score": 0.98}],
+    "distractorMatches": {},
+    "embSim": 0.85,
+    "expectedMin": 0.0,
+    "expectedMax": 4.9
+  },
+  {
+    "name": "Q10. Gibberish",
+    "questionId": 10,
+    "userInput": "potatoes and tomatoes",
+    "truthMatch": [{"label": "contradiction", "score": 0.99}],
+    "distractorMatches": {},
+    "embSim": 0.1,
+    "expectedMin": 0.0,
+    "expectedMax": 3.0
+  },
+  {
+    "name": "Q11. Exact Match",
+    "questionId": 11,
+    "userInput": "It adds the class if it is missing and removes the class if it is already present",
+    "truthMatch": null,
+    "distractorMatches": null,
+    "embSim": 0,
+    "expectedMin": 10.0,
+    "expectedMax": 10.0
+  },
+  {
+    "name": "Q12. Subtle Negation",
+    "questionId": 12,
+    "userInput": "It does not keep visual design in CSS",
+    "truthMatch": [{"label": "contradiction", "score": 0.96}],
+    "distractorMatches": {},
+    "embSim": 0.95,
+    "expectedMin": 0.0,
+    "expectedMax": 4.9
+  },
+  {
+    "name": "Q13. Synonym",
+    "questionId": 13,
+    "userInput": "In the CSS file where body.dark overrides body colors",
+    "truthMatch": [{"label": "entailment", "score": 0.85}],
+    "distractorMatches": {},
+    "embSim": 0.90,
+    "expectedMin": 8.0,
+    "expectedMax": 10.0
+  },
+  {
+    "name": "Q14. Synonym",
+    "questionId": 14,
+    "userInput": "A variable in CSS you use with var()",
+    "truthMatch": [{"label": "entailment", "score": 0.90}],
+    "distractorMatches": {},
+    "embSim": 0.95,
+    "expectedMin": 9.0,
+    "expectedMax": 10.0
+  },
+  {
+    "name": "Q15. Correct Concept",
+    "questionId": 15,
+    "userInput": "style.setProperty() changes CSS variables",
+    "truthMatch": [{"label": "entailment", "score": 0.92}],
+    "distractorMatches": {},
+    "embSim": 0.90,
+    "expectedMin": 8.0,
+    "expectedMax": 10.0
+  },
+  {
+    "name": "Q16. Distractor Trap",
+    "questionId": 16,
+    "userInput": "The number of buttons shown on the page",
+    "truthMatch": [{"label": "contradiction", "score": 0.9}],
+    "distractorMatches": {"number of buttons": [{"label": "entailment", "score": 0.95}]},
+    "embSim": 0.30,
+    "expectedMin": 0.0,
+    "expectedMax": 4.9
+  },
+  {
+    "name": "Q17. Partial",
+    "questionId": 17,
+    "userInput": "It computes a color",
+    "truthMatch": [{"label": "neutral", "score": 0.8}],
+    "distractorMatches": {},
+    "embSim": 0.60,
+    "expectedMin": 0.0,
+    "expectedMax": 6.0
+  },
+  {
+    "name": "Q18. Exact Match",
+    "questionId": 18,
+    "userInput": "input, because it fires whenever the value of the input changes while typing",
+    "truthMatch": null,
+    "distractorMatches": null,
+    "embSim": 0,
+    "expectedMin": 10.0,
+    "expectedMax": 10.0
+  },
+  {
+    "name": "Q18. Synonym Concept",
+    "questionId": 18,
+    "userInput": "The input event, which triggers on every keystroke",
+    "truthMatch": [{"label": "entailment", "score": 0.92}],
+    "distractorMatches": {},
+    "embSim": 0.88,
+    "expectedMin": 9.0,
+    "expectedMax": 10.0
+  },
+  {
+    "name": "Q19. Semantic Wrapper",
+    "questionId": 19,
+    "userInput": "It represents the text that the user typed in",
+    "truthMatch": [{"label": "entailment", "score": 0.85}],
+    "distractorMatches": {},
+    "embSim": 0.85,
+    "expectedMin": 8.0,
+    "expectedMax": 10.0
+  },
+  {
+    "name": "Q19. Distractor Trap",
+    "questionId": 19,
+    "userInput": "The CSS class currently applied to the input element by the stylesheet",
+    "truthMatch": [{"label": "contradiction", "score": 0.99}],
+    "distractorMatches": {"The CSS class currently applied": [{"label": "entailment", "score": 0.99}]},
+    "embSim": 0.3,
+    "expectedMin": 0.0,
+    "expectedMax": 4.9
+  },
+  {
+    "name": "Q20. Missing Context (Partial)",
+    "questionId": 20,
+    "userInput": "It shows stranger when empty",
+    "truthMatch": [{"label": "neutral", "score": 0.7}],
+    "distractorMatches": {},
+    "embSim": 0.75,
+    "expectedMin": 0.0,
+    "expectedMax": 7.5
+  },
+  {
+    "name": "Q20. Contradiction",
+    "questionId": 20,
+    "userInput": "It always displays the typed text, even when the input field contains no characters",
+    "truthMatch": [{"label": "contradiction", "score": 0.98}],
+    "distractorMatches": {"always displays the typed text": [{"label": "entailment", "score": 0.95}]},
+    "embSim": 0.4,
+    "expectedMin": 0.0,
+    "expectedMax": 4.9
+  },
+  {
+    "name": "Q21. Correct Concept",
+    "questionId": 21,
+    "userInput": "It dynamically applies or drops the class based on the boolean condition",
+    "truthMatch": [{"label": "entailment", "score": 0.95}],
+    "distractorMatches": {},
+    "embSim": 0.86,
+    "expectedMin": 8.0,
+    "expectedMax": 10.0
+  },
+  {
+    "name": "Q22. Distractor Trap",
+    "questionId": 22,
+    "userInput": "The JavaScript constant MAX, because it stores the maximum number of characters",
+    "truthMatch": [{"label": "contradiction", "score": 0.99}],
+    "distractorMatches": {"JavaScript constant MAX": [{"label": "entailment", "score": 0.99}]},
+    "embSim": 0.2,
+    "expectedMin": 0.0,
+    "expectedMax": 4.9
+  },
+  {
+    "name": "Q23. Synonym",
+    "questionId": 23,
+    "userInput": "It makes a list item in memory",
+    "truthMatch": [{"label": "entailment", "score": 0.85}],
+    "distractorMatches": {},
+    "embSim": 0.80,
+    "expectedMin": 8.0,
+    "expectedMax": 10.0
+  },
+  {
+    "name": "Q24. Correct Concept",
+    "questionId": 24,
+    "userInput": "It appends the li as a child node",
+    "truthMatch": [{"label": "entailment", "score": 0.92}],
+    "distractorMatches": {},
+    "embSim": 0.88,
+    "expectedMin": 8.0,
+    "expectedMax": 10.0
+  },
+  {
+    "name": "Q25. Synonym",
+    "questionId": 25,
+    "userInput": "Event delegation lets the UL handle all clicks",
+    "truthMatch": [{"label": "entailment", "score": 0.90}],
+    "distractorMatches": {},
+    "embSim": 0.85,
+    "expectedMin": 8.0,
+    "expectedMax": 10.0
+  },
+  {
+    "name": "Q26. Exact Match",
+    "questionId": 26,
+    "userInput": "The actual element that triggered the event, such as the clicked list item",
+    "truthMatch": null,
+    "distractorMatches": null,
+    "embSim": 0,
+    "expectedMin": 10.0,
+    "expectedMax": 10.0
+  },
+  {
+    "name": "Q26. Distractor",
+    "questionId": 26,
+    "userInput": "The CSS file that provides the visual style for the clicked element",
+    "truthMatch": [{"label": "contradiction", "score": 0.95}],
+    "distractorMatches": {"CSS file": [{"label": "entailment", "score": 0.98}]},
+    "embSim": 0.1,
+    "expectedMin": 0.0,
+    "expectedMax": 4.9
+  },
+  {
+    "name": "Q27. Correct Concept",
+    "questionId": 27,
+    "userInput": "It makes a CSS property change smoothly over time",
+    "truthMatch": [{"label": "entailment", "score": 0.95}],
+    "distractorMatches": {},
+    "embSim": 0.92,
+    "expectedMin": 9.0,
+    "expectedMax": 10.0
+  },
+  {
+    "name": "Q28. False Positive Trap (Semantic Rescue)",
+    "questionId": 28,
+    "userInput": "JavaScript changes the width but it doesn't animate it",
+    "truthMatch": [{"label": "neutral", "score": 0.90}],
+    "distractorMatches": {},
+    "embSim": 0.92,
+    "expectedMin": 8.0,
+    "expectedMax": 10.0
+  },
+  {
+    "name": "Q29. Synonym",
+    "questionId": 29,
+    "userInput": "The boolean flips, a class toggles, and text updates",
+    "truthMatch": [{"label": "entailment", "score": 0.94}],
+    "distractorMatches": {},
+    "embSim": 0.90,
+    "expectedMin": 8.0,
+    "expectedMax": 10.0
+  },
+  {
+    "name": "Q30. Distractor Trap",
+    "questionId": 30,
+    "userInput": "JavaScript should contain all structure, style, and behavior so that HTML and CSS stay minimal",
+    "truthMatch": [{"label": "contradiction", "score": 0.99}],
+    "distractorMatches": {"JavaScript should contain all structure": [{"label": "entailment", "score": 0.99}]},
+    "embSim": 0.40,
+    "expectedMin": 0.0,
+    "expectedMax": 4.9
+  },
+  {
+    "name": "Q31. Exact Match",
+    "questionId": 31,
+    "userInput": "Transmission Control Protocol (TCP)",
+    "truthMatch": null,
+    "distractorMatches": null,
+    "embSim": 0,
+    "expectedMin": 10.0,
+    "expectedMax": 10.0
+  },
+  {
+    "name": "Q31. Synonym / Acronym",
+    "questionId": 31,
+    "userInput": "TCP",
+    "truthMatch": [{"label": "entailment", "score": 0.98}],
+    "distractorMatches": {},
+    "embSim": 0.70,
+    "expectedMin": 8.0,
+    "expectedMax": 10.0
+  },
+  {
+    "name": "Q32. Correct Concept",
+    "questionId": 32,
+    "userInput": "QUIC protocol running on UDP",
+    "truthMatch": [{"label": "entailment", "score": 0.96}],
+    "distractorMatches": {},
+    "embSim": 0.92,
+    "expectedMin": 9.0,
+    "expectedMax": 10.0
+  },
+  {
+    "name": "Q33. Partial Concept",
+    "questionId": 33,
+    "userInput": "The entity tag header",
+    "truthMatch": [{"label": "entailment", "score": 0.85}],
+    "distractorMatches": {},
+    "embSim": 0.60,
+    "expectedMin": 8.0,
+    "expectedMax": 10.0
+  },
+  {
+    "name": "Q33. Strong Contradiction",
+    "questionId": 33,
+    "userInput": "Last-Modified",
+    "truthMatch": [{"label": "contradiction", "score": 0.99}],
+    "distractorMatches": {"Last-Modified": [{"label": "entailment", "score": 0.99}]},
+    "embSim": 0.20,
+    "expectedMin": 0.0,
+    "expectedMax": 4.9
+  },
+  {
+    "name": "Q1. Absolute Gibberish",
+    "questionId": 1,
+    "userInput": "123123asdfasdf",
+    "truthMatch": [{"label": "contradiction", "score": 0.95}],
+    "distractorMatches": {},
+    "embSim": 0.05,
+    "expectedMin": 0.0,
+    "expectedMax": 2.0
+  },
+  {
+    "name": "Q1. Weak Entailment",
+    "questionId": 1,
+    "userInput": "It organizes things",
+    "truthMatch": [{"label": "neutral", "score": 0.6}],
+    "distractorMatches": {},
+    "embSim": 0.50,
+    "expectedMin": 0.0,
+    "expectedMax": 6.0
+  },
+  {
+    "name": "Q2. Weak Contradiction",
+    "questionId": 2,
+    "userInput": "It colors the page but doesn't do layout",
+    "truthMatch": [{"label": "contradiction", "score": 0.90}],
+    "distractorMatches": {},
+    "embSim": 0.75,
+    "expectedMin": 0.0,
+    "expectedMax": 4.9
+  },
+  {
+    "name": "Q3. Strong Neutral",
+    "questionId": 3,
+    "userInput": "It's a thing the browser makes",
+    "truthMatch": [{"label": "neutral", "score": 0.85}],
+    "distractorMatches": {},
+    "embSim": 0.60,
+    "expectedMin": 0.0,
+    "expectedMax": 6.5
+  }
+]

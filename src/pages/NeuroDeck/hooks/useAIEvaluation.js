@@ -174,7 +174,7 @@ export const useAIEvaluation = ({ model, getEmbeddings, t, currentLangKey }) => 
           if (effectiveTruthScore >= 0.90) mappedScore10 = 10.0;
       } else if (hits > 0) {
           const hitRatio = hits / validTruths.length;
-          mappedScore10 = 5.0 + (hitRatio * 4.9);
+          mappedScore10 = hitRatio * 4.9;
       } else {
           const ratio = maxDistractorScore > 0 ? (effectiveTruthScore / Math.max(0.01, maxDistractorScore)) : effectiveTruthScore;
           mappedScore10 = ratio * 4.9;

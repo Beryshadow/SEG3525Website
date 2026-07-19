@@ -1,0 +1,280 @@
+[
+  {
+    "name": "M1. 3/3 Correct Concepts",
+    "choices": ["HTML", "CSS", "JS", "Java"],
+    "customTruths": ["HTML", "CSS", "JS"],
+    "userInput": "It uses HTML, CSS, and JS",
+    "truthMatchesMap": {
+      "HTML": [{"label": "entailment", "score": 0.95}],
+      "CSS": [{"label": "entailment", "score": 0.95}],
+      "JS": [{"label": "entailment", "score": 0.95}]
+    },
+    "distractorMatches": {},
+    "embSim": 0.9,
+    "expectedMin": 9.0,
+    "expectedMax": 10.0
+  },
+  {
+    "name": "M2. 2/3 Partial Match",
+    "choices": ["HTML", "CSS", "JS", "Java"],
+    "customTruths": ["HTML", "CSS", "JS"],
+    "userInput": "It uses HTML and CSS",
+    "truthMatchesMap": {
+      "HTML": [{"label": "entailment", "score": 0.95}],
+      "CSS": [{"label": "entailment", "score": 0.95}],
+      "JS": [{"label": "neutral", "score": 0.9}]
+    },
+    "distractorMatches": {},
+    "embSim": 0.8,
+    "expectedMin": 3.0,
+    "expectedMax": 3.5
+  },
+  {
+    "name": "M3. 1/3 Partial Match",
+    "choices": ["HTML", "CSS", "JS", "Java"],
+    "customTruths": ["HTML", "CSS", "JS"],
+    "userInput": "Just HTML",
+    "truthMatchesMap": {
+      "HTML": [{"label": "entailment", "score": 0.95}],
+      "CSS": [{"label": "neutral", "score": 0.9}],
+      "JS": [{"label": "contradiction", "score": 0.95}]
+    },
+    "distractorMatches": {},
+    "embSim": 0.6,
+    "expectedMin": 1.0,
+    "expectedMax": 2.0
+  },
+  {
+    "name": "M4. 0/3 Wrong",
+    "choices": ["HTML", "CSS", "JS", "Java"],
+    "customTruths": ["HTML", "CSS", "JS"],
+    "userInput": "It uses Python and C++",
+    "truthMatchesMap": {
+      "HTML": [{"label": "contradiction", "score": 0.99}],
+      "CSS": [{"label": "contradiction", "score": 0.99}],
+      "JS": [{"label": "contradiction", "score": 0.99}]
+    },
+    "distractorMatches": {},
+    "embSim": 0.1,
+    "expectedMin": 0.0,
+    "expectedMax": 4.9
+  },
+  {
+    "name": "M5. Distractor Suppresses Partial Truth",
+    "choices": ["HTML", "CSS", "JS", "Java"],
+    "customTruths": ["HTML", "CSS", "JS"],
+    "userInput": "HTML but mostly Java",
+    "truthMatchesMap": {
+      "HTML": [{"label": "entailment", "score": 0.95}],
+      "CSS": [{"label": "neutral", "score": 0.9}],
+      "JS": [{"label": "neutral", "score": 0.9}]
+    },
+    "distractorMatches": {
+      "Java": [{"label": "entailment", "score": 0.99}]
+    },
+    "embSim": 0.5,
+    "expectedMin": 0.0,
+    "expectedMax": 4.9
+  },
+  {
+    "name": "M6. 3/3 Correct + High Distractor",
+    "choices": ["HTML", "CSS", "JS", "Java"],
+    "customTruths": ["HTML", "CSS", "JS"],
+    "userInput": "HTML, CSS, JS, and Java too",
+    "truthMatchesMap": {
+      "HTML": [{"label": "entailment", "score": 0.98}],
+      "CSS": [{"label": "entailment", "score": 0.98}],
+      "JS": [{"label": "entailment", "score": 0.98}]
+    },
+    "distractorMatches": {
+      "Java": [{"label": "entailment", "score": 0.95}]
+    },
+    "embSim": 0.9,
+    "expectedMin": 5.0,
+    "expectedMax": 10.0
+  },
+  {
+    "name": "M7. Semantic Rescue on Multi-Answer (0/3 NLI, 0.95 Emb)",
+    "choices": ["HTML", "CSS", "JS", "Java"],
+    "customTruths": ["HTML", "CSS", "JS"],
+    "userInput": "The three web standards",
+    "truthMatchesMap": {
+      "HTML": [{"label": "neutral", "score": 0.9}],
+      "CSS": [{"label": "neutral", "score": 0.9}],
+      "JS": [{"label": "neutral", "score": 0.9}]
+    },
+    "distractorMatches": {},
+    "embSim": 0.95,
+    "expectedMin": 1.0,
+    "expectedMax": 2.0
+  },
+  {
+    "name": "M8. Partial Semantic Rescue",
+    "choices": ["HTML", "CSS", "JS", "Java"],
+    "customTruths": ["HTML", "CSS", "JS"],
+    "userInput": "Frontend coding",
+    "truthMatchesMap": {
+      "HTML": [{"label": "contradiction", "score": 0.8}],
+      "CSS": [{"label": "contradiction", "score": 0.8}],
+      "JS": [{"label": "contradiction", "score": 0.8}]
+    },
+    "distractorMatches": {},
+    "embSim": 0.88,
+    "expectedMin": 0.0,
+    "expectedMax": 0.0
+  },
+  {
+    "name": "M9. All Contradictions (No Rescue)",
+    "choices": ["HTML", "CSS", "JS", "Java"],
+    "customTruths": ["HTML", "CSS", "JS"],
+    "userInput": "A totally unrelated thing",
+    "truthMatchesMap": {
+      "HTML": [{"label": "contradiction", "score": 0.99}],
+      "CSS": [{"label": "contradiction", "score": 0.99}],
+      "JS": [{"label": "contradiction", "score": 0.99}]
+    },
+    "distractorMatches": {},
+    "embSim": 0.2,
+    "expectedMin": 0.0,
+    "expectedMax": 4.9
+  },
+  {
+    "name": "M10. 4/5 Partial",
+    "choices": ["A", "B", "C", "D", "E"],
+    "customTruths": ["A", "B", "C", "D", "E"],
+    "userInput": "A B C D",
+    "truthMatchesMap": {
+      "A": [{"label": "entailment", "score": 0.95}],
+      "B": [{"label": "entailment", "score": 0.95}],
+      "C": [{"label": "entailment", "score": 0.95}],
+      "D": [{"label": "entailment", "score": 0.95}],
+      "E": [{"label": "neutral", "score": 0.9}]
+    },
+    "distractorMatches": {},
+    "embSim": 0.8,
+    "expectedMin": 3.9,
+    "expectedMax": 4.0
+  },
+  {
+    "name": "M11. 5/5 Correct",
+    "choices": ["A", "B", "C", "D", "E"],
+    "customTruths": ["A", "B", "C", "D", "E"],
+    "userInput": "A B C D E",
+    "truthMatchesMap": {
+      "A": [{"label": "entailment", "score": 0.95}],
+      "B": [{"label": "entailment", "score": 0.95}],
+      "C": [{"label": "entailment", "score": 0.95}],
+      "D": [{"label": "entailment", "score": 0.95}],
+      "E": [{"label": "entailment", "score": 0.95}]
+    },
+    "distractorMatches": {},
+    "embSim": 0.95,
+    "expectedMin": 9.0,
+    "expectedMax": 10.0
+  },
+  {
+    "name": "M12. Weak Distractor, Partial Match",
+    "choices": ["HTML", "CSS", "JS", "Java"],
+    "customTruths": ["HTML", "CSS", "JS"],
+    "userInput": "HTML and some Java",
+    "truthMatchesMap": {
+      "HTML": [{"label": "entailment", "score": 0.95}],
+      "CSS": [{"label": "neutral", "score": 0.9}],
+      "JS": [{"label": "neutral", "score": 0.9}]
+    },
+    "distractorMatches": {
+      "Java": [{"label": "entailment", "score": 0.3}]
+    },
+    "embSim": 0.7,
+    "expectedMin": 1.0,
+    "expectedMax": 2.0
+  },
+  {
+    "name": "M13. Distractor matches Truth exactly (Suppression)",
+    "choices": ["HTML", "CSS", "JS", "Java"],
+    "customTruths": ["HTML", "CSS", "JS"],
+    "userInput": "HTML and Java",
+    "truthMatchesMap": {
+      "HTML": [{"label": "entailment", "score": 0.95}],
+      "CSS": [{"label": "neutral", "score": 0.9}],
+      "JS": [{"label": "neutral", "score": 0.9}]
+    },
+    "distractorMatches": {
+      "Java": [{"label": "entailment", "score": 0.95}]
+    },
+    "embSim": 0.7,
+    "expectedMin": 0.0,
+    "expectedMax": 4.9
+  },
+  {
+    "name": "M14. 2/2 Truths Correct, no Distractors",
+    "choices": ["HTML", "CSS"],
+    "customTruths": ["HTML", "CSS"],
+    "userInput": "HTML and CSS",
+    "truthMatchesMap": {
+      "HTML": [{"label": "entailment", "score": 0.95}],
+      "CSS": [{"label": "entailment", "score": 0.95}]
+    },
+    "distractorMatches": {},
+    "embSim": 0.95,
+    "expectedMin": 9.0,
+    "expectedMax": 10.0
+  },
+  {
+    "name": "M15. Semantic Rescue on 2/2 Truths",
+    "choices": ["HTML", "CSS"],
+    "customTruths": ["HTML", "CSS"],
+    "userInput": "The building blocks",
+    "truthMatchesMap": {
+      "HTML": [{"label": "neutral", "score": 0.9}],
+      "CSS": [{"label": "neutral", "score": 0.9}]
+    },
+    "distractorMatches": {},
+    "embSim": 0.95,
+    "expectedMin": 2.0,
+    "expectedMax": 2.5
+  },
+  {
+    "name": "M16. Leniency (Different Wording, Same Logic)",
+    "choices": ["Structure", "Appearance", "Logic"],
+    "customTruths": ["It organizes the document hierarchy", "It styles the visual presentation"],
+    "userInput": "It manages the layout and paints the screen",
+    "truthMatchesMap": {
+      "It organizes the document hierarchy": [{"label": "entailment", "score": 0.88}],
+      "It styles the visual presentation": [{"label": "entailment", "score": 0.85}]
+    },
+    "distractorMatches": {},
+    "embSim": 0.90,
+    "expectedMin": 8.0,
+    "expectedMax": 10.0
+  },
+  {
+    "name": "M17. Leniency (Different order of explanation)",
+    "choices": ["Step A", "Step B"],
+    "customTruths": ["The browser fetches HTML", "The browser parses it into the DOM"],
+    "userInput": "It creates a DOM tree but first it has to fetch the HTML",
+    "truthMatchesMap": {
+      "The browser fetches HTML": [{"label": "entailment", "score": 0.92}],
+      "The browser parses it into the DOM": [{"label": "entailment", "score": 0.90}]
+    },
+    "distractorMatches": {},
+    "embSim": 0.95,
+    "expectedMin": 9.0,
+    "expectedMax": 10.0
+  },
+  {
+    "name": "M18. Order Dependent False Positive Trap",
+    "choices": ["Capturing then bubbling", "Bubbling then capturing"],
+    "customTruths": ["Events capture downwards, then bubble upwards"],
+    "userInput": "Events bubble upwards, then capture downwards",
+    "truthMatchesMap": {
+      "Events capture downwards, then bubble upwards": [{"label": "contradiction", "score": 0.99}]
+    },
+    "distractorMatches": {
+      "Bubbling then capturing": [{"label": "entailment", "score": 0.99}]
+    },
+    "embSim": 0.98,
+    "expectedMin": 0.0,
+    "expectedMax": 4.9
+  }
+]
