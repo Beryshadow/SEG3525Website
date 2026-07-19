@@ -122,7 +122,7 @@ app.get('/api/sync/:code/version', (req, res) => {
 app.use(express.static(path.join(__dirname, '../build')));
 
 // Fallback to index.html for React Router
-app.get('*', (req, res) => {
+app.get('/*path', (req, res) => {
     res.sendFile(path.join(__dirname, '../build', 'index.html'));
 });
 
