@@ -402,46 +402,50 @@ export const SettingsView = ({
         <p className="text-[var(--text-muted)] font-medium mb-4 sm:mb-8 leading-relaxed text-xs sm:text-base">
           {t.dataBackupDesc || "Export your progress or import a backup"}
         </p>
-        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 flex-wrap">
-          <button onClick={onExportProgress} className="neu-btn flex-1 min-w-[120px] py-2 sm:py-4 font-black uppercase tracking-wider text-[var(--accent)] flex items-center justify-center text-[10px] sm:text-sm rounded-lg sm:rounded-2xl">
-            <UploadIcon className="mr-2 sm:mr-3" /> {t.exportBackup || "Export JSON (With Progress)"}
-          </button>
-          <button onClick={onExportWithoutProgress} className="neu-btn flex-1 min-w-[120px] py-2 sm:py-4 font-black uppercase tracking-wider text-[var(--accent)] flex items-center justify-center text-[10px] sm:text-sm rounded-lg sm:rounded-2xl">
-            <UploadIcon className="mr-2 sm:mr-3" /> Export JSON (Clean)
-          </button>
-          <button onClick={() => fileInputRef.current.click()} className="neu-btn flex-1 min-w-[120px] py-2 sm:py-4 font-black uppercase tracking-wider text-[var(--text-muted)] flex items-center justify-center text-[10px] sm:text-sm rounded-lg sm:rounded-2xl">
-            <DownloadIcon className="mr-2 sm:mr-3" /> {t.importBackup || "Import (JSON/CSV)"}
-          </button>
+        <div className="mb-8">
+          <label className="text-xs font-bold text-[var(--text-muted)] block mb-2 uppercase tracking-widest">Export & Share</label>
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 flex-wrap">
+            <button onClick={onExportProgress} className="neu-btn flex-1 min-w-[120px] py-2 sm:py-4 font-black uppercase tracking-wider text-[var(--accent)] flex items-center justify-center text-[10px] sm:text-sm rounded-lg sm:rounded-2xl">
+              <UploadIcon className="mr-2 sm:mr-3" /> {t.exportBackup || "Export JSON (With Progress)"}
+            </button>
+            <button onClick={onExportWithoutProgress} className="neu-btn flex-1 min-w-[120px] py-2 sm:py-4 font-black uppercase tracking-wider text-[var(--accent)] flex items-center justify-center text-[10px] sm:text-sm rounded-lg sm:rounded-2xl">
+              <UploadIcon className="mr-2 sm:mr-3" /> Export JSON (Clean)
+            </button>
+            <button onClick={handleAnkiExport} className="neu-btn flex-1 min-w-[120px] py-2 sm:py-4 font-black uppercase tracking-wider text-[var(--text-muted)] flex items-center justify-center text-[10px] sm:text-sm rounded-lg sm:rounded-2xl">
+              <UploadIcon className="mr-2 sm:mr-3" /> {t.exportAnki || "Export Anki (CSV)"}
+            </button>
+            <button onClick={() => onShareToCode(true)} className="neu-btn flex-1 min-w-[120px] py-2 sm:py-4 font-black uppercase tracking-wider text-[color:var(--color-success)] flex items-center justify-center text-[10px] sm:text-sm rounded-lg sm:rounded-2xl">
+              <UploadIcon className="mr-2 sm:mr-3" /> Share (With Progress)
+            </button>
+            <button onClick={() => onShareToCode(false)} className="neu-btn flex-1 min-w-[120px] py-2 sm:py-4 font-black uppercase tracking-wider text-[color:var(--color-success)] flex items-center justify-center text-[10px] sm:text-sm rounded-lg sm:rounded-2xl">
+              <UploadIcon className="mr-2 sm:mr-3" /> Share (Clean)
+            </button>
+          </div>
         </div>
-        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 flex-wrap mt-4">
-          <button onClick={handleAnkiExport} className="neu-btn flex-1 min-w-[120px] py-2 sm:py-4 font-black uppercase tracking-wider text-[var(--text-muted)] flex items-center justify-center text-[10px] sm:text-sm rounded-lg sm:rounded-2xl">
-            <UploadIcon className="mr-2 sm:mr-3" /> {t.exportAnki || "Export Anki (CSV)"}
-          </button>
-          <button onClick={() => onShareToCode(true)} className="neu-btn flex-1 min-w-[120px] py-2 sm:py-4 font-black uppercase tracking-wider text-[color:var(--color-success)] flex items-center justify-center text-[10px] sm:text-sm rounded-lg sm:rounded-2xl">
-            <UploadIcon className="mr-2 sm:mr-3" /> Share to Code (With Progress)
-          </button>
-          <button onClick={() => onShareToCode(false)} className="neu-btn flex-1 min-w-[120px] py-2 sm:py-4 font-black uppercase tracking-wider text-[color:var(--color-success)] flex items-center justify-center text-[10px] sm:text-sm rounded-lg sm:rounded-2xl">
-            <UploadIcon className="mr-2 sm:mr-3" /> Share to Code (Clean)
-          </button>
-        </div>
-        <div className="mt-6">
-           <label className="text-xs font-bold text-[var(--text-muted)] block mb-1 uppercase tracking-widest">Import From Cloud Code:</label>
-           <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-2">
-              <input 
-                 type="text" 
-                 value={importCode} 
-                 onChange={e => setImportCode(e.target.value)} 
-                 className="neu-pressed flex-1 px-4 py-3 rounded-xl bg-transparent text-[var(--text-main)] font-black outline-none uppercase min-w-[150px]"
-                 placeholder="ENTER SHARE CODE"
-              />
-              <button 
-                 onClick={() => { onImportFromCode(importCode); setImportCode(""); }}
-                 disabled={!importCode}
-                 className="neu-btn flex-1 sm:flex-none px-6 py-3 rounded-xl font-bold text-xs uppercase whitespace-nowrap disabled:opacity-50 text-[var(--text-main)]"
-              >
-                 <DownloadIcon className="mr-2 inline" /> Import
-              </button>
-           </div>
+
+        <div>
+          <label className="text-xs font-bold text-[var(--text-muted)] block mb-2 uppercase tracking-widest">Import & Load</label>
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 flex-wrap mb-4">
+            <button onClick={() => fileInputRef.current.click()} className="neu-btn flex-none sm:flex-1 min-w-[120px] py-3 sm:py-4 font-black uppercase tracking-wider text-[var(--text-muted)] flex items-center justify-center text-xs sm:text-sm rounded-lg sm:rounded-2xl">
+              <DownloadIcon className="mr-2 sm:mr-3" /> {t.importBackup || "Import File (JSON/CSV)"}
+            </button>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+            <input 
+              type="text" 
+              value={importCode} 
+              onChange={e => setImportCode(e.target.value)} 
+              className="neu-pressed flex-1 px-4 py-3 rounded-xl bg-transparent text-[var(--text-main)] font-black outline-none uppercase min-w-[150px]"
+              placeholder="ENTER SHARE CODE"
+            />
+            <button 
+              onClick={() => { onImportFromCode(importCode); setImportCode(""); }}
+              disabled={!importCode}
+              className="neu-btn flex-1 sm:flex-none px-8 py-3 rounded-xl font-bold text-xs sm:text-sm uppercase whitespace-nowrap disabled:opacity-50 text-[var(--text-main)]"
+            >
+              <DownloadIcon className="mr-2 inline" /> Import Code
+            </button>
+          </div>
         </div>
         <input
             type="file"
