@@ -341,11 +341,11 @@ export const SettingsView = ({
       </div>
 
       <div className="neu-panel p-4 sm:p-8 md:p-12 flex flex-col sm:flex-row justify-between items-center gap-6">
-        <div className="text-center sm:text-left">
-          <h2 className="text-lg sm:text-2xl font-black text-[var(--text-main)] mb-2 flex items-center justify-center sm:justify-start uppercase tracking-widest">
+        <div className="text-left">
+          <h2 className="text-lg sm:text-2xl font-black text-[var(--text-main)] mb-2 flex items-center justify-start uppercase tracking-widest">
             <SparklesIcon className="mr-2 sm:mr-4 text-[var(--accent)] text-lg sm:text-2xl" /> {t.llmGeneratorTitle || "AI Deck Generator"}
           </h2>
-          <p className="text-[10px] sm:text-sm font-medium text-[var(--text-muted)] max-w-md">
+          <p className="text-[10px] sm:text-sm font-medium text-[var(--text-muted)] max-w-md text-left">
             {t.llmGeneratorDesc || "Copy the prompt template to automatically generate JSON flashcards from your study notes using ChatGPT, Claude, or other LLMs."}
           </p>
         </div>
