@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { cosineSimilarity } from '../../../utilities/shared';
-import { ActivityIcon, RefreshIcon } from './Icons';
+import { ActivityIcon, RefreshIcon, NetworkIcon } from './Icons';
 
-export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard }) => {
+export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embeddingStatus, embeddingProgress }) => {
   const canvasRef = useRef(null);
   const wrapperRef = useRef(null);
   const animationRef = useRef(null);
@@ -133,6 +133,12 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard }) => {
 
     const step = () => {
       if (!isRunning) return;
+      
+      if (document.hidden) {
+        animationRef.current = requestAnimationFrame(step);
+        return;
+      }
+
       const nodes = nodesRef.current;
       const edges = edgesRef.current;
 
@@ -209,7 +215,6 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard }) => {
         ctx.beginPath();
         ctx.moveTo(edge.source.x, edge.source.y);
         ctx.lineTo(edge.target.x, edge.target.y);
-        // Use theme muted text color for edges with opacity
         ctx.strokeStyle = themeColors.textMuted;
         ctx.globalAlpha = edge.weight * 0.4;
         ctx.stroke();
@@ -253,7 +258,7 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard }) => {
       isRunning = false;
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
     };
-  }, [dimensions, isSimulating, hoveredNode]);
+  }, [dimensions, isSimulating, hoveredNode, themeColors]);
 
   const handleMouseMove = (e) => {
     if (!canvasRef.current) return;
@@ -299,6 +304,27 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard }) => {
         </div>
 
         <div ref={wrapperRef} className="absolute inset-0 top-16 bottom-4 left-4 right-4 rounded-xl overflow-hidden cursor-crosshair">
+          {deck && deck.some(q => !cardEmbeddings[q.id]) && (
+            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[var(--bg-main)] bg-opacity-80 backdrop-blur-sm rounded-2xl">
+              <NetworkIcon className="text-4xl text-[var(--accent)] mb-4 animate-pulse" />
+              <h3 className="text-xl font-black uppercase tracking-widest text-[var(--text-main)] mb-2">
+                {t.analyzing || "Analyzing Context..."}
+              </h3>
+              <p className="text-[var(--text-muted)] text-sm mb-6 max-w-md text-center">
+                {t.generatingEmbeddingsDesc || "Generating neural embeddings for your knowledge graph. This only happens once."}
+              </p>
+              <div className="w-64 h-3 bg-black/20 dark:bg-white/10 rounded-full overflow-hidden relative border border-white/5 shadow-inner">
+                 <div 
+                   className="absolute left-0 top-0 bottom-0 bg-[var(--accent)] transition-all duration-300 rounded-full"
+                   style={{ width: `${embeddingProgress || 0}%` }}
+                 ></div>
+                 <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent"></div>
+              </div>
+              <div className="mt-2 text-xs font-bold text-[var(--text-muted)] tracking-widest uppercase">
+                {embeddingStatus === "loading" ? (t.downloadingAiModel || "Downloading AI Model...") : (t.extractingData || "Extracting Data...")} {embeddingProgress}%
+              </div>
+            </div>
+          )}
           <canvas
             ref={canvasRef}
             width={dimensions.width}
