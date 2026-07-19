@@ -3,6 +3,7 @@ import { SaveIcon, ClockIcon, RandomIcon, SeqIcon, DownloadIcon, UploadIcon, Spa
 
 export const SettingsView = ({
   currentDeck, onImport, selectedModel, onModelChange,
+  selectedEmbeddingModel, onEmbeddingModelChange,
   cardOrderMode, onCardOrderChange,
   onExportProgress, onImportProgress,
   myDecks, loadedDeckId, onSaveDeckToCache, onOverwriteDeck, onLoadDeckFromCache, 
@@ -56,6 +57,12 @@ export const SettingsView = ({
     { id: "Xenova/nli-deberta-v3-small", name: "DeBERTa-v3 NLI (Small)", desc: t.fastLightweight || "High-accuracy Cross-Encoder" },
     { id: "Xenova/nli-deberta-v3-base", name: "DeBERTa-v3 NLI (Base)", desc: t.moreAccurate || "Maximum accuracy (Slower)" },
     { id: "Xenova/nli-deberta-v3-large", name: "DeBERTa-v3 NLI (Large)", desc: t.highQuality || "Highest accuracy (Slowest)" }
+  ];
+
+  const AVAILABLE_EMBEDDING_MODELS = [
+    { id: "Xenova/all-MiniLM-L6-v2", name: "MiniLM-L6-v2 (Fast)", desc: "Very fast, lightweight (22MB)" },
+    { id: "Xenova/all-MiniLM-L12-v2", name: "MiniLM-L12-v2 (Balanced)", desc: "Better accuracy, slightly slower (33MB)" },
+    { id: "Xenova/bge-small-en-v1.5", name: "BGE Small EN (High Quality)", desc: "State of the art accuracy (33MB)" }
   ];
 
   const handleDrop = (e) => {
@@ -404,12 +411,29 @@ export const SettingsView = ({
 
       <div className="neu-panel p-4 sm:p-8 md:p-12">
         <h2 className="text-lg sm:text-2xl font-black text-[var(--text-main)] mb-4 sm:mb-8 flex items-center uppercase tracking-widest">
-          <CpuIcon className="mr-2 sm:mr-4 text-[var(--accent)] text-lg sm:text-2xl" /> {t.aiModelTitle || "AI Model"}
+          <CpuIcon className="mr-2 sm:mr-4 text-[var(--accent)] text-lg sm:text-2xl" /> {t.aiModelTitle || "NLI Model (Grading)"}
         </h2>
         <div className="flex flex-col gap-2 sm:gap-4">
           {AVAILABLE_MODELS.map((m) => (
             <label key={m.id} className={`p-4 sm:p-6 rounded-xl sm:rounded-2xl cursor-pointer flex items-center text-left transition-all duration-300 ${selectedModel === m.id ? "neu-pressed text-[var(--accent)]" : "neu-btn text-[var(--text-main)]"}`}>
               <input type="radio" name="ai-model" value={m.id} checked={selectedModel === m.id} onChange={(e) => onModelChange(e.target.value)} className="hidden" />
+              <div>
+                <div className="font-black uppercase tracking-widest text-xs sm:text-base">{m.name}</div>
+                <div className="text-[9px] sm:text-xs font-medium opacity-70 mt-1">{m.desc}</div>
+              </div>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div className="neu-panel p-4 sm:p-8 md:p-12">
+        <h2 className="text-lg sm:text-2xl font-black text-[var(--text-main)] mb-4 sm:mb-8 flex items-center uppercase tracking-widest">
+          <BrainIcon className="mr-2 sm:mr-4 text-[var(--accent)] text-lg sm:text-2xl" /> {t.embeddingModelTitle || "Embedding Model (Semantic Focus & Graph)"}
+        </h2>
+        <div className="flex flex-col gap-2 sm:gap-4">
+          {AVAILABLE_EMBEDDING_MODELS.map((m) => (
+            <label key={m.id} className={`p-4 sm:p-6 rounded-xl sm:rounded-2xl cursor-pointer flex items-center text-left transition-all duration-300 ${selectedEmbeddingModel === m.id ? "neu-pressed text-[var(--accent)]" : "neu-btn text-[var(--text-main)]"}`}>
+              <input type="radio" name="embedding-model" value={m.id} checked={selectedEmbeddingModel === m.id} onChange={(e) => onEmbeddingModelChange(e.target.value)} className="hidden" />
               <div>
                 <div className="font-black uppercase tracking-widest text-xs sm:text-base">{m.name}</div>
                 <div className="text-[9px] sm:text-xs font-medium opacity-70 mt-1">{m.desc}</div>

@@ -56,12 +56,29 @@ export default function NeuroDeck() {
     }
   });
 
-  const [selectedModel, setSelectedModel] = useState("Xenova/nli-deberta-v3-small");
+  const [selectedModel, setSelectedModel] = useState(() => {
+    return localStorage.getItem('neurodeck-ai-model') || "Xenova/nli-deberta-v3-small";
+  });
+  useEffect(() => {
+    localStorage.setItem('neurodeck-ai-model', selectedModel);
+  }, [selectedModel]);
+  
   const { model, modelStatus, backendUsed, modelError, progressPercent } = useNLIModel(selectedModel);
 
-  const [cardOrderMode, setCardOrderMode] = useState("random");
+  const [cardOrderMode, setCardOrderMode] = useState(() => {
+    return localStorage.getItem('neurodeck-card-order') || "random";
+  });
+  useEffect(() => {
+    localStorage.setItem('neurodeck-card-order', cardOrderMode);
+  }, [cardOrderMode]);
   
-  const { getEmbeddings, modelStatus: embeddingStatus, backendUsed: embeddingBackend, progressPercent: embeddingProgress } = useEmbeddingModel();
+  const [selectedEmbeddingModel, setSelectedEmbeddingModel] = useState(() => {
+    return localStorage.getItem('neurodeck-embedding-model') || "Xenova/all-MiniLM-L6-v2";
+  });
+  useEffect(() => {
+    localStorage.setItem('neurodeck-embedding-model', selectedEmbeddingModel);
+  }, [selectedEmbeddingModel]);
+  const { getEmbeddings, modelStatus: embeddingStatus, backendUsed: embeddingBackend, progressPercent: embeddingProgress } = useEmbeddingModel(selectedEmbeddingModel);
   const [cardEmbeddings, setCardEmbeddings] = useState({});
 
   useEffect(() => {
@@ -488,6 +505,8 @@ export default function NeuroDeck() {
             onImport={handleImport}
             selectedModel={selectedModel}
             onModelChange={setSelectedModel}
+            selectedEmbeddingModel={selectedEmbeddingModel}
+            onEmbeddingModelChange={setSelectedEmbeddingModel}
             cardOrderMode={cardOrderMode}
             onCardOrderChange={setCardOrderMode}
             onExportProgress={handleExportProgress}
