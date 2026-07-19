@@ -613,7 +613,7 @@ export const StudyView = ({
                 : (t.pressNumber || "Select all that apply and submit.")}
             </p>
 
-            {feedback && !feedback.overridden && !skippedToMCQ && (
+            {feedback && !feedback.overridden && !skippedToMCQ && wrongClicks === 0 && (
               <div className="mt-4 sm:mt-8 pt-3 sm:pt-4 border-t border-white/5 text-center">
                 <button
                   onClick={handleOverrideAI}
@@ -659,6 +659,17 @@ export const StudyView = ({
                 );
               })}
             </div>
+
+            {feedback && !feedback.overridden && !skippedToMCQ && wrongClicks === 0 && (
+              <div className="mt-6 pt-4 border-t border-white/5 text-center">
+                <button
+                  onClick={handleOverrideAI}
+                  className="text-[10px] sm:text-xs font-bold text-[var(--text-muted)] hover:text-[#10b981] transition-colors uppercase tracking-widest"
+                >
+                  {t.iWasRight || "I was right (Override AI)"}
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
