@@ -207,13 +207,13 @@ export const SettingsView = ({
              placeholder={t.searchDecksPrompt || "Search decks..."}
              className="neu-pressed px-4 py-3 rounded-xl bg-transparent text-[var(--text-main)] text-sm font-medium outline-none"
            />
-           <div className="flex gap-2">
-             <select onChange={(e) => setFilterMode(e.target.value)} className="neu-btn px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-widest">
+           <div className="flex flex-col sm:flex-row gap-2">
+             <select onChange={(e) => setFilterMode(e.target.value)} className="neu-btn flex-1 px-3 sm:px-4 py-3 rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-widest">
                 <option value="all">{t.all || "All"}</option>
                 <option value="completed">{t.completed || "Completed"}</option>
                 <option value="in-progress">{t.inProgress || "In Progress"}</option>
              </select>
-             <select onChange={(e) => setSortBy(e.target.value)} className="neu-btn px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-widest">
+             <select onChange={(e) => setSortBy(e.target.value)} className="neu-btn flex-1 px-3 sm:px-4 py-3 rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-widest">
                 <option value="name">{t.sortByName || "Sort by Name"}</option>
                 <option value="score">{t.sortByAvg || "Sort by Score"}</option>
                 <option value="progress">{t.sortByProgress || "Sort by Progress"}</option>
