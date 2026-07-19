@@ -8,12 +8,14 @@ export const SettingsView = ({
   onExportProgress, onImportProgress,
   myDecks, loadedDeckId, onSaveDeckToCache, onOverwriteDeck, onLoadDeckFromCache, 
   onDeleteDeckFromCache, onToggleDeckCompleted, onRenameDeck, onDirectDropSave,
-  onAppendToCurrentDeck, syncCode, setSyncCode, onGenerateSyncCode, onConnectSyncCode, t, showToast
+  onAppendToCurrentDeck, syncCode, setSyncCode, onGenerateSyncCode, onConnectSyncCode, onDisconnectSyncCode,
+  onExportWithoutProgress, onShareToCode, onImportFromCode, t, showToast
 }) => {
   const [jsonInput, setJsonInput] = useState("");
   const [newDeckName, setNewDeckName] = useState("");
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [inputSyncCode, setInputSyncCode] = useState(syncCode || "");
+  const [importCode, setImportCode] = useState("");
   
   useEffect(() => {
      setInputSyncCode(syncCode || "");
@@ -402,15 +404,46 @@ export const SettingsView = ({
         </p>
         <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 flex-wrap">
           <button onClick={onExportProgress} className="neu-btn flex-1 min-w-[120px] py-2 sm:py-4 font-black uppercase tracking-wider text-[var(--accent)] flex items-center justify-center text-[10px] sm:text-sm rounded-lg sm:rounded-2xl">
-            <DownloadIcon className="mr-2 sm:mr-3" /> {t.exportBackup || "Export JSON"}
+            <DownloadIcon className="mr-2 sm:mr-3" /> {t.exportBackup || "Export JSON (With Progress)"}
           </button>
-          <button onClick={handleAnkiExport} className="neu-btn flex-1 min-w-[120px] py-2 sm:py-4 font-black uppercase tracking-wider text-[var(--accent)] flex items-center justify-center text-[10px] sm:text-sm rounded-lg sm:rounded-2xl">
-            <DownloadIcon className="mr-2 sm:mr-3" /> {t.exportAnki || "Export Anki (CSV)"}
+          <button onClick={onExportWithoutProgress} className="neu-btn flex-1 min-w-[120px] py-2 sm:py-4 font-black uppercase tracking-wider text-[var(--accent)] flex items-center justify-center text-[10px] sm:text-sm rounded-lg sm:rounded-2xl">
+            <DownloadIcon className="mr-2 sm:mr-3" /> Export JSON (Clean)
           </button>
           <button onClick={() => fileInputRef.current.click()} className="neu-btn flex-1 min-w-[120px] py-2 sm:py-4 font-black uppercase tracking-wider text-[var(--text-muted)] flex items-center justify-center text-[10px] sm:text-sm rounded-lg sm:rounded-2xl">
             <UploadIcon className="mr-2 sm:mr-3" /> {t.importBackup || "Import (JSON/CSV)"}
           </button>
-          <input
+        </div>
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 flex-wrap mt-4">
+          <button onClick={handleAnkiExport} className="neu-btn flex-1 min-w-[120px] py-2 sm:py-4 font-black uppercase tracking-wider text-[var(--text-muted)] flex items-center justify-center text-[10px] sm:text-sm rounded-lg sm:rounded-2xl">
+            <DownloadIcon className="mr-2 sm:mr-3" /> {t.exportAnki || "Export Anki (CSV)"}
+          </button>
+          <button onClick={() => onShareToCode(true)} className="neu-btn flex-1 min-w-[120px] py-2 sm:py-4 font-black uppercase tracking-wider text-[color:var(--color-success)] flex items-center justify-center text-[10px] sm:text-sm rounded-lg sm:rounded-2xl">
+            <UploadIcon className="mr-2 sm:mr-3" /> Share to Code (With Progress)
+          </button>
+          <button onClick={() => onShareToCode(false)} className="neu-btn flex-1 min-w-[120px] py-2 sm:py-4 font-black uppercase tracking-wider text-[color:var(--color-success)] flex items-center justify-center text-[10px] sm:text-sm rounded-lg sm:rounded-2xl">
+            <UploadIcon className="mr-2 sm:mr-3" /> Share to Code (Clean)
+          </button>
+        </div>
+        <div className="mt-6">
+           <label className="text-xs font-bold text-[var(--text-muted)] block mb-1 uppercase tracking-widest">Import From Cloud Code:</label>
+           <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-2">
+              <input 
+                 type="text" 
+                 value={importCode} 
+                 onChange={e => setImportCode(e.target.value)} 
+                 className="neu-pressed flex-1 px-4 py-3 rounded-xl bg-transparent text-[var(--text-main)] font-black outline-none uppercase min-w-[150px]"
+                 placeholder="ENTER SHARE CODE"
+              />
+              <button 
+                 onClick={() => { onImportFromCode(importCode); setImportCode(""); }}
+                 disabled={!importCode}
+                 className="neu-btn flex-1 sm:flex-none px-6 py-3 rounded-xl font-bold text-xs uppercase whitespace-nowrap disabled:opacity-50 text-[var(--text-main)]"
+              >
+                 <DownloadIcon className="mr-2 inline" /> Import
+              </button>
+           </div>
+        </div>
+        <input
             type="file"
             ref={fileInputRef}
             onChange={(e) => {
@@ -433,7 +466,6 @@ export const SettingsView = ({
             accept=".json,.csv,.txt"
             className="hidden"
           />
-        </div>
       </div>
 
       <div className="neu-panel p-4 sm:p-8 md:p-12">
@@ -505,6 +537,14 @@ export const SettingsView = ({
                 placeholder="ENTER CODE"
               />
               <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
+                {syncCode && (
+                  <button 
+                    onClick={onDisconnectSyncCode} 
+                    className="neu-btn flex-1 sm:flex-none px-4 py-3 rounded-xl font-bold text-xs uppercase whitespace-nowrap text-[color:var(--color-danger)]"
+                  >
+                    Stop Sync
+                  </button>
+                )}
                 <button 
                   onClick={() => onConnectSyncCode(inputSyncCode)}
                   disabled={!inputSyncCode}

@@ -560,6 +560,85 @@ export default function NeuroDeck() {
     URL.revokeObjectURL(url);
   };
 
+  const handleExportWithoutProgress = () => {
+    const strippedDeck = currentDeck.map(q => ({
+      ...q,
+      score: 0,
+      attempts: 0,
+      isMastered: false
+    }));
+    const dataStr = JSON.stringify([{ ...strippedDeck }], null, 2);
+    // Wait, the standard array format for raw decks is just the array of cards
+    const blob = new Blob([JSON.stringify(strippedDeck, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `neurodeck-clean-export-${new Date().toISOString().split("T")[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleShareToCode = async (withProgress) => {
+    const newCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const deckToShare = withProgress ? currentDeck : currentDeck.map(q => ({
+      ...q,
+      score: 0,
+      attempts: 0,
+      isMastered: false
+    }));
+    
+    const payload = { sharedDeck: deckToShare, sharedName: `Shared Deck ${newCode}` };
+    const newVersion = Date.now();
+    try {
+      const res = await fetch(`${SYNC_API_BASE}/${newCode}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: payload, version: newVersion })
+      });
+      if (res.ok) {
+        showToast(`Deck shared! Code: ${newCode} (Copied to clipboard)`);
+        navigator.clipboard.writeText(newCode).catch(() => {});
+      }
+    } catch (err) {
+      console.error("Share error", err);
+      showToast("Failed to generate share code.");
+    }
+  };
+
+  const handleImportFromCode = async (code) => {
+    if (!code) return;
+    try {
+      const res = await fetch(`${SYNC_API_BASE}/${code}/version`);
+      if (res.status === 404) {
+        showToast("Share code expired or invalid.");
+        return;
+      }
+      if (res.ok) {
+        const dataRes = await fetch(`${SYNC_API_BASE}/${code}`);
+        const data = await dataRes.json();
+        if (data && data.data && data.data.sharedDeck) {
+          const newDeck = data.data.sharedDeck;
+          if (window.confirm("Would you like to append these shared cards to your current deck, or save as a new deck in 'My Decks'?\n\nOK = Append\nCancel = New Deck")) {
+            handleAppendToCurrentDeck(newDeck);
+          } else {
+            handleDirectDropSave({
+              id: Date.now().toString(),
+              name: data.data.sharedName || `Imported Deck ${code}`,
+              deck: newDeck,
+              completed: false
+            });
+            showToast("Saved as new deck in My Decks!");
+          }
+        } else {
+          showToast("Code does not contain a shared deck.");
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to fetch share code.");
+    }
+  };
+
   const handleImportProgress = (jsonStr) => {
     try {
       const parsed = JSON.parse(jsonStr);
@@ -712,6 +791,10 @@ export default function NeuroDeck() {
             setSyncCode={setSyncCode}
             onGenerateSyncCode={handleGenerateSyncCode}
             onConnectSyncCode={handleConnectSyncCode}
+            onDisconnectSyncCode={() => setSyncCode("")}
+            onExportWithoutProgress={handleExportWithoutProgress}
+            onShareToCode={handleShareToCode}
+            onImportFromCode={handleImportFromCode}
             t={t}
             showToast={showToast}
           />
