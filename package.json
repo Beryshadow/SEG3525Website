@@ -22,6 +22,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "start": "node server/sync-server.js",
     "preview": "vite preview",
     "init-tw": "tailwindcss init -p",
     "postinstall": "node scripts/patch-bootstrap.js"

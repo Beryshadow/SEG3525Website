@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -98,6 +99,8 @@ app.get('/api/sync/:code', (req, res) => {
     });
 });
 
+
+
 // GET: Retrieve only the sync version
 app.get('/api/sync/:code/version', (req, res) => {
     const { code } = req.params;
@@ -113,6 +116,14 @@ app.get('/api/sync/:code/version', (req, res) => {
     }
 
     res.json({ version: entry.version });
+});
+
+// Serve static files from the Vite build directory
+app.use(express.static(path.join(__dirname, '../build')));
+
+// Fallback to index.html for React Router
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../build', 'index.html'));
 });
 
 app.listen(PORT, () => {

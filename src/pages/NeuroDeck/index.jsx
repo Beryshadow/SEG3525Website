@@ -12,6 +12,8 @@ import { StudyView } from './components/StudyView';
 import { KnowledgeGraphView } from './components/KnowledgeGraphView';
 import { BrainIcon, SettingsIcon, ActivityIcon, CpuIcon, FireIcon, NetworkIcon } from './components/Icons';
 
+const SYNC_API_BASE = import.meta.env.DEV ? 'http://localhost:3001/api/sync' : '/api/sync';
+
 export default function NeuroDeck() {
   const [view, setView] = useState("study");
   const navigate = useNavigate();
@@ -167,7 +169,7 @@ export default function NeuroDeck() {
   const handleCloudSyncDownload = useCallback(async (code, manual = false) => {
     if (!code) return;
     try {
-      const res = await fetch(`http://localhost:3001/api/sync/${code}`);
+      const res = await fetch(`${SYNC_API_BASE}/${code}`);
       if (res.status === 404) {
          showToast("Sync code expired or not found.");
          setSyncCode("");
@@ -208,7 +210,7 @@ export default function NeuroDeck() {
       const payload = { myDecks, currentDeck, loadedDeckId, streak, selectedModel, cardOrderMode, selectedEmbeddingModel };
       const newVersion = Date.now();
       try {
-         const res = await fetch(`http://localhost:3001/api/sync/${code}`, {
+         const res = await fetch(`${SYNC_API_BASE}/${code}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ data: payload, version: newVersion })
@@ -233,7 +235,7 @@ export default function NeuroDeck() {
     if (syncCode) {
        intervalId = setInterval(async () => {
           try {
-             const res = await fetch(`http://localhost:3001/api/sync/${syncCode}/version`);
+             const res = await fetch(`${SYNC_API_BASE}/${syncCode}/version`);
              if (res.status === 404) {
                  showToast("Sync code expired. Please generate a new one.");
                  setSyncCode("");
@@ -279,7 +281,7 @@ export default function NeuroDeck() {
           const payload = { myDecks, currentDeck, loadedDeckId, streak, selectedModel, cardOrderMode, selectedEmbeddingModel };
           const newVersion = Date.now();
           try {
-             const res = await fetch(`http://localhost:3001/api/sync/${syncCode}`, {
+             const res = await fetch(`${SYNC_API_BASE}/${syncCode}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ data: payload, version: newVersion })
