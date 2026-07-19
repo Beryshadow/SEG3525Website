@@ -317,18 +317,26 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
     };
   }, [dimensions, isSimulating, hoveredNode, themeColors]);
 
+  const getClientPos = (e) => {
+    if (e.touches && e.touches.length > 0) {
+      return { clientX: e.touches[0].clientX, clientY: e.touches[0].clientY };
+    }
+    return { clientX: e.clientX, clientY: e.clientY };
+  };
+
   const handleMouseMove = (e) => {
     if (!canvasRef.current) return;
+    const { clientX, clientY } = getClientPos(e);
     const rect = canvasRef.current.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
+    const mouseX = clientX - rect.left;
+    const mouseY = clientY - rect.top;
     
     setMousePos({ x: mouseX, y: mouseY });
 
     if (isDraggingRef.current) {
-      cameraRef.current.x += e.clientX - dragStartRef.current.x;
-      cameraRef.current.y += e.clientY - dragStartRef.current.y;
-      dragStartRef.current = { x: e.clientX, y: e.clientY };
+      cameraRef.current.x += clientX - dragStartRef.current.x;
+      cameraRef.current.y += clientY - dragStartRef.current.y;
+      dragStartRef.current = { x: clientX, y: clientY };
     }
 
     const worldX = (mouseX - cameraRef.current.x) / cameraRef.current.scale;
@@ -352,8 +360,9 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
 
   const handleMouseDown = (e) => {
     if (!hoveredNode) {
+      const { clientX, clientY } = getClientPos(e);
       isDraggingRef.current = true;
-      dragStartRef.current = { x: e.clientX, y: e.clientY };
+      dragStartRef.current = { x: clientX, y: clientY };
     }
   };
 
@@ -455,6 +464,10 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
             onMouseDown={handleMouseDown}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseLeave}
+            onTouchMove={handleMouseMove}
+            onTouchStart={handleMouseDown}
+            onTouchEnd={handleMouseUp}
+            onTouchCancel={handleMouseLeave}
             onWheel={handleWheel}
             onClick={handleMouseClick}
             className="w-full h-full touch-none"

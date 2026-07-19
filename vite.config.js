@@ -59,7 +59,11 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,wasm}'],
-        maximumFileSizeToCacheInBytes: 10 * 1024 * 1024 // 10MB to cache models if needed, though they go to IndexedDB
+        maximumFileSizeToCacheInBytes: 10 * 1024 * 1024
+      },
+      devOptions: {
+        enabled: true,
+        type: 'module'
       }
     })
   ],
