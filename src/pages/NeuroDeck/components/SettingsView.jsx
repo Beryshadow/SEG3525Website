@@ -60,9 +60,9 @@ export const SettingsView = ({
   ];
 
   const AVAILABLE_EMBEDDING_MODELS = [
-    { id: "Xenova/all-MiniLM-L6-v2", name: "MiniLM-L6-v2 (Fast)", desc: "Very fast, lightweight (22MB)" },
-    { id: "Xenova/all-MiniLM-L12-v2", name: "MiniLM-L12-v2 (Balanced)", desc: "Better accuracy, slightly slower (33MB)" },
-    { id: "Xenova/bge-small-en-v1.5", name: "BGE Small EN (High Quality)", desc: "State of the art accuracy (33MB)" }
+    { id: "Xenova/all-MiniLM-L6-v2", name: "MiniLM-L6-v2 (Fast)", desc: t.embeddingFast || "Very fast, lightweight (22MB)" },
+    { id: "Xenova/all-MiniLM-L12-v2", name: "MiniLM-L12-v2 (Balanced)", desc: t.embeddingBalanced || "Better accuracy, slightly slower (120MB)" },
+    { id: "Xenova/bge-large-en-v1.5", name: "BGE Large EN (High Quality)", desc: t.embeddingHQ || "State of the art accuracy (1.3GB)" }
   ];
 
   const handleDrop = (e) => {
