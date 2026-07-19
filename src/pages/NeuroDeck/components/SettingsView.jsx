@@ -209,9 +209,40 @@ export const SettingsView = ({
      document.body.removeChild(link);
   };
 
+  const navItems = [
+    { id: 'decks', icon: <SaveIcon />, label: t.myDecksTitle || "My Decks" },
+    { id: 'algorithm', icon: <ClockIcon />, label: "Algorithm Selection" },
+    { id: 'backup', icon: <DownloadIcon />, label: t.dataBackup || "Data Backup" },
+    { id: 'nli', icon: <CpuIcon />, label: t.aiModelTitle || "NLI Model" },
+    { id: 'embedding', icon: <BrainIcon />, label: t.embeddingModelTitle || "Embedding Model" },
+    { id: 'generator', icon: <SparklesIcon />, label: t.llmGeneratorTitle || "AI Generator" },
+    { id: 'sync', icon: <UploadIcon />, label: t.cloudSyncTitle || "Cloud Sync" },
+    { id: 'raw', icon: <EditIcon />, label: t.rawDeckImport || "Raw Import" }
+  ];
+
+  const scrollTo = (id) => {
+    const el = document.getElementById(`settings-${id}`);
+    if (el) {
+      const y = el.getBoundingClientRect().top + window.pageYOffset - 100;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }
+  };
+
   return (
-    <div className="w-full space-y-4 sm:space-y-8">
+    <div className="flex flex-col lg:flex-row gap-6 sm:gap-8 w-full">
+      <div className="w-full lg:w-1/4 hidden lg:block">
+        <nav className="sticky top-24 flex flex-col gap-3">
+          {navItems.map(item => (
+            <button key={item.id} onClick={() => scrollTo(item.id)} className="neu-btn p-4 flex items-center gap-4 text-sm font-bold text-left w-full rounded-2xl transition-all hover:text-[var(--accent)]">
+              <div className="w-5 text-center text-[var(--accent)]">{item.icon}</div>
+              <span className="uppercase tracking-widest text-[10px] xl:text-xs text-[var(--text-main)] leading-tight">{item.label}</span>
+            </button>
+          ))}
+        </nav>
+      </div>
+      <div className="w-full lg:w-3/4 space-y-4 sm:space-y-8">
       <div 
+        id="settings-decks"
         className={`neu-panel p-4 sm:p-8 md:p-12 transition-all border-2 ${isDraggingOver ? 'border-[var(--accent)] bg-[var(--accent)] bg-opacity-5' : 'border-transparent'}`}
         onDragOver={(e) => { e.preventDefault(); setIsDraggingOver(true); }}
         onDragLeave={(e) => { e.preventDefault(); setIsDraggingOver(false); }}
@@ -373,7 +404,7 @@ export const SettingsView = ({
         )}
       </div>
 
-      <div className="neu-panel p-4 sm:p-8 md:p-12">
+      <div id="settings-algorithm" className="neu-panel p-4 sm:p-8 md:p-12">
         <h2 className="text-lg sm:text-2xl font-black text-[var(--text-main)] mb-4 sm:mb-8 flex items-center uppercase tracking-widest">
           <ClockIcon className="mr-2 sm:mr-4 text-[var(--accent)] text-lg sm:text-2xl" /> Card Delivery Modifier
         </h2>
@@ -395,7 +426,7 @@ export const SettingsView = ({
         </div>
       </div>
 
-      <div className="neu-panel p-4 sm:p-8 md:p-12">
+      <div id="settings-backup" className="neu-panel p-4 sm:p-8 md:p-12">
         <h2 className="text-lg sm:text-2xl font-black text-[var(--text-main)] mb-3 sm:mb-6 flex items-center uppercase tracking-widest">
           <DownloadIcon className="mr-2 sm:mr-4 text-[var(--accent)] text-lg sm:text-2xl" /> {t.dataBackup || "Data Backup"}
         </h2>
@@ -472,7 +503,7 @@ export const SettingsView = ({
           />
       </div>
 
-      <div className="neu-panel p-4 sm:p-8 md:p-12">
+      <div id="settings-nli" className="neu-panel p-4 sm:p-8 md:p-12">
         <h2 className="text-lg sm:text-2xl font-black text-[var(--text-main)] mb-4 sm:mb-8 flex items-center uppercase tracking-widest">
           <CpuIcon className="mr-2 sm:mr-4 text-[var(--accent)] text-lg sm:text-2xl" /> {t.aiModelTitle || "NLI Model (Grading)"}
         </h2>
@@ -489,7 +520,7 @@ export const SettingsView = ({
         </div>
       </div>
 
-      <div className="neu-panel p-4 sm:p-8 md:p-12">
+      <div id="settings-embedding" className="neu-panel p-4 sm:p-8 md:p-12">
         <h2 className="text-lg sm:text-2xl font-black text-[var(--text-main)] mb-4 sm:mb-8 flex items-center uppercase tracking-widest">
           <BrainIcon className="mr-2 sm:mr-4 text-[var(--accent)] text-lg sm:text-2xl" /> {t.embeddingModelTitle || "Embedding Model (Semantic Focus & Graph)"}
         </h2>
@@ -506,7 +537,7 @@ export const SettingsView = ({
         </div>
       </div>
 
-      <div className="neu-panel p-4 sm:p-8 md:p-12 flex flex-col sm:flex-row justify-between items-center gap-6">
+      <div id="settings-generator" className="neu-panel p-4 sm:p-8 md:p-12 flex flex-col sm:flex-row justify-between items-center gap-6">
         <div className="text-left">
           <h2 className="text-lg sm:text-2xl font-black text-[var(--text-main)] mb-2 flex items-center justify-start uppercase tracking-widest">
             <SparklesIcon className="mr-2 sm:mr-4 text-[var(--accent)] text-lg sm:text-2xl" /> {t.llmGeneratorTitle || "AI Deck Generator"}
@@ -525,7 +556,7 @@ export const SettingsView = ({
         </div>
       </div>
 
-      <div className="neu-panel p-4 sm:p-8 md:p-12">
+      <div id="settings-sync" className="neu-panel p-4 sm:p-8 md:p-12">
         <h2 className="text-lg sm:text-2xl font-black text-[var(--text-main)] mb-4 sm:mb-8 flex items-center uppercase tracking-widest">
           <UploadIcon className="mr-2 sm:mr-4 text-[var(--accent)] text-lg sm:text-2xl" /> {t.cloudSyncTitle || "P2P Cloud Sync"}
         </h2>
@@ -571,7 +602,7 @@ export const SettingsView = ({
         </div>
       </div>
 
-      <div className="neu-panel p-4 sm:p-8 md:p-12">
+      <div id="settings-raw" className="neu-panel p-4 sm:p-8 md:p-12">
         <h2 className="text-lg sm:text-2xl font-black text-[var(--text-main)] mb-3 sm:mb-6 flex items-center uppercase tracking-widest">
           <UploadIcon className="mr-2 sm:mr-4 text-[var(--accent)] text-lg sm:text-2xl" /> {t.rawDeckImport || "Raw Deck Import"}
         </h2>
