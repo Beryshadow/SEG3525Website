@@ -1,4 +1,4 @@
-.flashcard-route {
+.neurodeck-route {
   --accent: #fdba74;
   --graph-color-bad: 244, 63, 94;   /* #f43f5e */
   --graph-color-mid: 251, 146, 60;  /* #fb923c */
@@ -10,7 +10,7 @@
   --color-info: #3b82f6;
 }
 
-.flashcard-route.light-mode {
+.neurodeck-route.light-mode {
   --accent: #c2410c;
   --graph-color-bad: 225, 29, 72;   /* #e11d48 */
   --graph-color-mid: 234, 88, 12;   /* #ea580c */
