@@ -129,7 +129,8 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
       gradD: style.getPropertyValue('--grad-d').trim() || 'rgba(0,0,0,0.2)',
       colorBad: parseRgbArray(style.getPropertyValue('--graph-color-bad'), [244, 63, 94]),
       colorMid: parseRgbArray(style.getPropertyValue('--graph-color-mid'), [251, 146, 60]),
-      colorGood: parseRgbArray(style.getPropertyValue('--graph-color-good'), [52, 211, 153])
+      colorGood: parseRgbArray(style.getPropertyValue('--graph-color-good'), [52, 211, 153]),
+      colorMastered: parseRgbArray(style.getPropertyValue('--graph-color-mastered'), [168, 85, 247])
     });
   }, []);
 
@@ -137,15 +138,20 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
      const [r1, g1, b1] = themeColors.colorBad;
      const [r2, g2, b2] = themeColors.colorMid;
      const [r3, g3, b3] = themeColors.colorGood;
+     const [r4, g4, b4] = themeColors.colorMastered;
+
+     if (score >= 8) {
+         return `rgb(${r4}, ${g4}, ${b4})`;
+     }
 
      let r, g, b;
-     if (score <= 5) {
-         const t = score / 5;
+     if (score <= 3) {
+         const t = score / 3;
          r = r1 + t * (r2 - r1);
          g = g1 + t * (g2 - g1);
          b = b1 + t * (b2 - b1);
      } else {
-         const t = (score - 5) / 5;
+         const t = (score - 3) / 4;
          r = r2 + t * (r3 - r2);
          g = g2 + t * (g3 - g2);
          b = b2 + t * (b3 - b2);
