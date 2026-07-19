@@ -3,7 +3,7 @@ import { SaveIcon, ClockIcon, RandomIcon, SeqIcon, DownloadIcon, UploadIcon, Spa
 
 export const SettingsView = ({
   currentDeck, onImport, selectedModel, onModelChange,
-  hintPref, onHintPrefChange, cardOrderMode, onCardOrderChange,
+  cardOrderMode, onCardOrderChange,
   onExportProgress, onImportProgress,
   myDecks, loadedDeckId, onSaveDeckToCache, onOverwriteDeck, onLoadDeckFromCache, 
   onDeleteDeckFromCache, onToggleDeckCompleted, onRenameDeck, onDirectDropSave, t, showToast
@@ -319,28 +319,6 @@ export const SettingsView = ({
             accept=".json"
             className="hidden"
           />
-        </div>
-      </div>
-
-      <div className="neu-panel p-4 sm:p-8 md:p-12">
-        <h2 className="text-lg sm:text-2xl font-black text-[var(--text-main)] mb-4 sm:mb-8 flex items-center uppercase tracking-widest">
-          <SparklesIcon className="mr-2 sm:mr-4 text-[var(--accent)] text-lg sm:text-2xl" /> {t.hintEngine || "Hint Engine"}
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6">
-          <label className={`p-4 sm:p-6 rounded-xl sm:rounded-2xl cursor-pointer flex items-start text-left transition-all ${hintPref === "ablation" ? "neu-pressed text-[var(--accent)]" : "neu-btn text-[var(--text-main)]"}`}>
-            <input type="radio" name="hint-pref" value="ablation" checked={hintPref === "ablation"} onChange={(e) => onHintPrefChange(e.target.value)} className="hidden" />
-            <div>
-              <div className="font-black mb-1 sm:mb-2 uppercase tracking-widest text-xs sm:text-base">{t.blankCoreWords || "Blank Core Words"}</div>
-              <div className="text-[9px] sm:text-xs font-medium opacity-70 leading-relaxed">{t.blankCoreWordsDesc || "Hides keywords."}</div>
-            </div>
-          </label>
-          <label className={`p-4 sm:p-6 rounded-xl sm:rounded-2xl cursor-pointer flex items-start text-left transition-all ${hintPref === "synonym" ? "neu-pressed text-[var(--accent)]" : "neu-btn text-[var(--text-main)]"}`}>
-            <input type="radio" name="hint-pref" value="synonym" checked={hintPref === "synonym"} onChange={(e) => onHintPrefChange(e.target.value)} className="hidden" />
-            <div>
-              <div className="font-black mb-1 sm:mb-2 uppercase tracking-widest text-xs sm:text-base">{t.relatedConcept || "Related Concept"}</div>
-              <div className="text-[9px] sm:text-xs font-medium opacity-70 leading-relaxed">{t.relatedConceptDesc || "Shows synonyms."}</div>
-            </div>
-          </label>
         </div>
       </div>
 

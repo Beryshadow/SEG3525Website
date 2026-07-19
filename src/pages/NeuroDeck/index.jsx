@@ -56,7 +56,6 @@ export default function NeuroDeck() {
   const [selectedModel, setSelectedModel] = useState("Xenova/nli-deberta-v3-small");
   const { model, modelStatus, backendUsed, modelError, progressPercent } = useNLIModel(selectedModel);
 
-  const [hintPref, setHintPref] = useState("ablation");
   const [cardOrderMode, setCardOrderMode] = useState("random");
 
   const [streak, setStreak] = useState(() => {
@@ -401,7 +400,6 @@ export default function NeuroDeck() {
             progressPercent={progressPercent}
             onComplete={updateCardStats}
             onNavigate={handleManualNavigation}
-            hintPref={hintPref}
             t={t}
             showToast={showToast}
             currentLangKey={currentLangKey}
@@ -424,8 +422,6 @@ export default function NeuroDeck() {
             onImport={handleImport}
             selectedModel={selectedModel}
             onModelChange={setSelectedModel}
-            hintPref={hintPref}
-            onHintPrefChange={setHintPref}
             cardOrderMode={cardOrderMode}
             onCardOrderChange={setCardOrderMode}
             onExportProgress={handleExportProgress}

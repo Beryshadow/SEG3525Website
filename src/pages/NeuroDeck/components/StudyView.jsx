@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { LightbulbIcon, SparklesIcon, CheckIcon, XIcon, PlayIcon } from './Icons';
 import { escapeRegExp, getCorrectAnswers, shuffleArray } from '../utils/helpers';
-import { STOP_WORDS } from '../../../data/flashcardData';
 
 export const StudyView = ({
   question, currentIndex, totalCards, model, modelStatus, modelError, progressPercent, onComplete,
-  onNavigate, hintPref, t, showToast, currentLangKey
+  onNavigate, t, showToast, currentLangKey
 }) => {
   const [phase, setPhase] = useState("input");
   const [userInput, setUserInput] = useState("");
@@ -13,7 +12,6 @@ export const StudyView = ({
   
   const [tempSimScore, setTempSimScore] = useState(0);
 
-  const [isGeneratingHint, setIsGeneratingHint] = useState(false);
   const [hintText, setHintText] = useState(null);
   const [hintUsed, setHintUsed] = useState(false);
 
@@ -36,12 +34,7 @@ export const StudyView = ({
   const correctAnswersArray = useMemo(() => getCorrectAnswers(question), [question]);
   const isSingleAnswer = correctAnswersArray.length === 1;
 
-  const stopWordsSet = useMemo(() => {
-    const list = Array.isArray(STOP_WORDS)
-      ? STOP_WORDS
-      : (STOP_WORDS instanceof Set ? Array.from(STOP_WORDS) : []);
-    return new Set(list.map(w => w.toLowerCase()));
-  }, []);
+
 
   useEffect(() => {
     setPhase("input");
@@ -50,7 +43,6 @@ export const StudyView = ({
     setTempSimScore(0);
     setHintText(null);
     setHintUsed(false);
-    setIsGeneratingHint(false);
 
     setEvalMethod(null);
     setWrongClicks(0);
@@ -319,77 +311,11 @@ export const StudyView = ({
     setFeedback(null);
   };
 
-  const generateSmartHint = async () => {
-    setIsGeneratingHint(true);
-    try {
-      const truthText = correctAnswersArray.join(" ");
-      const words = truthText.split(/\s+/)
-        .map(w => ({ original: w, clean: w.replace(/[^a-zA-Z0-9]/g, "").toLowerCase() }))
-        .filter(w => w.clean.length > 2 && !stopWordsSet.has(w.clean));
-
-      if (words.length === 0) {
-        setHintText(t.shortHintError);
-        setIsGeneratingHint(false);
-        return;
-      }
-
-      const yieldThread = () => new Promise(resolve => setTimeout(resolve, 15));
-      const sepToken = model?.tokenizer?.sep_token || "[SEP]";
-      const basePhrase = currentLangKey === 'FR' ? `L'idée principale est :` : `The core meaning is:`;
-      const statementTruth = `${basePhrase} ${truthText}`;
-
-      const combinedBase = `${statementTruth} ${sepToken} ${statementTruth}`;
-      const baseOutput = await model(combinedBase, { top_k: 3, topk: 3 });
-      await yieldThread();
-      const baseEmb = getEntailmentScores(baseOutput, "HintBase").entailment;
-
-      for (const w of words) {
-        const ablatedInput = truthText.replace(new RegExp(`\\b${escapeRegExp(w.original)}\\b`, 'gi'), "");
-        const statementAblated = `${basePhrase} ${ablatedInput.trim()}`;
-        
-        const combinedAblated = `${statementAblated} ${sepToken} ${statementTruth}`;
-        const ablOut = await model(combinedAblated, { top_k: 3, topk: 3 });
-        await yieldThread();
-        
-        const ablEnt = getEntailmentScores(ablOut, `HintAblate_${w.clean}`).entailment;
-        w.sim = baseEmb - ablEnt; 
-      }
-
-      words.sort((a, b) => b.sim - a.sim);
-      const topWords = words.slice(0, 2); 
-
-      if (hintPref === "ablation") {
-        let hintedText = truthText;
-        topWords.forEach(w => {
-          hintedText = hintedText.replace(new RegExp(`\\b${escapeRegExp(w.original)}\\b`, 'gi'), "_".repeat(w.original.length));
-        });
-        setHintText(hintedText);
-      } else if (hintPref === "synonym") {
-        const allSynonyms = [];
-        for (let w of topWords) {
-          try {
-            const res = await fetch(`https://api.datamuse.com/words?ml=${encodeURIComponent(w.clean)}&max=8`);
-            const data = await res.json();
-            const valid = data.filter(d => {
-              const syn = d.word.toLowerCase();
-              const overlap = correctAnswersArray.some(ans => ans.toLowerCase().includes(syn) || syn.includes(ans.toLowerCase()));
-              return !overlap && syn.length > 2;
-            });
-            if (valid.length > 0) allSynonyms.push(...valid.slice(0, 2).map(v => v.word));
-          } catch (e) {}
-        }
-
-        if (allSynonyms.length > 0) {
-          setHintText(`${t.relatedConceptHint} ${[...new Set(allSynonyms)].join(", ")}`);
-        } else {
-          setHintText(`${t.stronglyRelatedHint} ${topWords.map(w => w.original).join(", ")}`);
-        }
-      }
+  const handleShowHint = () => {
+    if (question && question.hint) {
+      setHintText(question.hint);
       setHintUsed(true);
-    } catch (e) {
-      setHintText(t.aiHintError);
     }
-    setIsGeneratingHint(false);
   };
 
   const handleSubmitMCQ = () => {
@@ -573,14 +499,15 @@ export const StudyView = ({
                   </div>
                 ) : (
                   <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
-                    <button
-                      onClick={generateSmartHint}
-                      disabled={isGeneratingHint}
-                      className="neu-btn flex-1 py-2 sm:py-4 px-3 sm:px-6 font-bold uppercase tracking-wider flex items-center justify-center disabled:opacity-50 text-[var(--accent)] text-[10px] sm:text-sm rounded-lg sm:rounded-2xl"
-                    >
-                      {isGeneratingHint ? <i className="fas fa-spinner fa-spin mr-2 sm:mr-3"></i> : <SparklesIcon className="mr-2 sm:mr-3" />}
-                      <span>{t.getAiHint}</span>
-                    </button>
+                    {question.hint && (
+                      <button
+                        onClick={handleShowHint}
+                        className="neu-btn flex-1 py-2 sm:py-4 px-3 sm:px-6 font-bold uppercase tracking-wider flex items-center justify-center text-[var(--accent)] text-[10px] sm:text-sm rounded-lg sm:rounded-2xl"
+                      >
+                        <SparklesIcon className="mr-2 sm:mr-3" />
+                        <span>{t.getAiHint}</span>
+                      </button>
+                    )}
                     <button
                       onClick={() => setPhase("mcq")}
                       className="neu-btn flex-1 py-2 sm:py-4 px-3 sm:px-6 font-bold uppercase tracking-wider text-[var(--text-muted)] text-[10px] sm:text-sm rounded-lg sm:rounded-2xl"
