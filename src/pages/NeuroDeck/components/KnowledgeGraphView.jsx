@@ -500,7 +500,7 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
             onTouchEnd={handleTouchEnd}
             onTouchCancel={handleTouchEnd}
             onWheel={handleWheel}
-            onClick={handleMouseClick}
+            onDoubleClick={handleMouseClick}
             className="w-full h-full touch-none"
           />
           
