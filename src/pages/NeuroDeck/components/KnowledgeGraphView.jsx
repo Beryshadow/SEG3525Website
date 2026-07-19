@@ -11,6 +11,10 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
   const [isSimulating, setIsSimulating] = useState(true);
   const [clusterThreshold, setClusterThreshold] = useState(0.85);
+  
+  const cameraRef = useRef({ x: 0, y: 0, scale: 1 });
+  const isDraggingRef = useRef(false);
+  const dragStartRef = useRef({ x: 0, y: 0 });
 
   const REPULSION = 300;
   const SPRING_LENGTH = 150;
@@ -89,6 +93,7 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
 
     nodesRef.current = nodes;
     edgesRef.current = edges;
+    cameraRef.current = { x: 0, y: 0, scale: 1 };
     setIsSimulating(true);
   };
 
@@ -233,9 +238,6 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
           n.vy *= DAMPING;
           n.x += n.vx;
           n.y += n.vy;
-          
-          n.x = Math.max(n.radius, Math.min(dimensions.width - n.radius, n.x));
-          n.y = Math.max(n.radius, Math.min(dimensions.height - n.radius, n.y));
 
           totalVelocity += Math.abs(n.vx) + Math.abs(n.vy);
         }
@@ -246,6 +248,10 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
       }
 
       ctx.clearRect(0, 0, dimensions.width, dimensions.height);
+      
+      ctx.save();
+      ctx.translate(cameraRef.current.x, cameraRef.current.y);
+      ctx.scale(cameraRef.current.scale, cameraRef.current.scale);
 
       for (const edge of edges) {
         ctx.beginPath();
@@ -290,6 +296,8 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
         ctx.strokeStyle = hoveredNode && hoveredNode.id === n.id ? '#ffffff' : themeColors.shadowD;
         ctx.stroke();
       }
+      
+      ctx.restore();
 
       animationRef.current = requestAnimationFrame(step);
     };
@@ -305,26 +313,69 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
   const handleMouseMove = (e) => {
     if (!canvasRef.current) return;
     const rect = canvasRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+
+    if (isDraggingRef.current) {
+      cameraRef.current.x += e.clientX - dragStartRef.current.x;
+      cameraRef.current.y += e.clientY - dragStartRef.current.y;
+      dragStartRef.current = { x: e.clientX, y: e.clientY };
+    }
+
+    const worldX = (mouseX - cameraRef.current.x) / cameraRef.current.scale;
+    const worldY = (mouseY - cameraRef.current.y) / cameraRef.current.scale;
 
     let found = null;
     for (const n of nodesRef.current) {
-      const dx = n.x - x;
-      const dy = n.y - y;
+      const dx = n.x - worldX;
+      const dy = n.y - worldY;
       if (dx * dx + dy * dy < (n.radius * 2) * (n.radius * 2)) {
         found = n;
         break;
       }
     }
+    
     setHoveredNode(found);
     if (canvasRef.current) {
-       canvasRef.current.style.cursor = found ? 'pointer' : 'crosshair';
+       canvasRef.current.style.cursor = isDraggingRef.current ? 'grabbing' : (found ? 'pointer' : 'grab');
     }
   };
 
+  const handleMouseDown = (e) => {
+    if (!hoveredNode) {
+      isDraggingRef.current = true;
+      dragStartRef.current = { x: e.clientX, y: e.clientY };
+    }
+  };
+
+  const handleMouseUp = () => {
+    isDraggingRef.current = false;
+  };
+
+  const handleMouseLeave = () => {
+    isDraggingRef.current = false;
+    setHoveredNode(null);
+  };
+  
+  const handleWheel = (e) => {
+    if (!canvasRef.current) return;
+    e.preventDefault();
+    const zoomIntensity = 0.1;
+    const wheel = e.deltaY < 0 ? 1 : -1;
+    const zoom = Math.exp(wheel * zoomIntensity);
+    
+    const rect = canvasRef.current.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    
+    // Zoom around mouse pointer
+    cameraRef.current.x = mouseX - (mouseX - cameraRef.current.x) * zoom;
+    cameraRef.current.y = mouseY - (mouseY - cameraRef.current.y) * zoom;
+    cameraRef.current.scale *= zoom;
+  };
+
   const handleMouseClick = () => {
-    if (hoveredNode && onGoToCard) {
+    if (hoveredNode && onGoToCard && !isDraggingRef.current) {
       onGoToCard(hoveredNode.originalIndex);
     }
   };
@@ -392,7 +443,10 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
             width={dimensions.width}
             height={dimensions.height}
             onMouseMove={handleMouseMove}
-            onMouseLeave={() => setHoveredNode(null)}
+            onMouseDown={handleMouseDown}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseLeave}
+            onWheel={handleWheel}
             onClick={handleMouseClick}
             className="w-full h-full touch-none"
           />
