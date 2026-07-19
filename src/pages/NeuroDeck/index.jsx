@@ -436,6 +436,7 @@ export default function NeuroDeck() {
             onRenameDeck={renameDeck}
             onDirectDropSave={handleDirectDropSave}
             t={t}
+            showToast={showToast}
           />
         )}
       </main>

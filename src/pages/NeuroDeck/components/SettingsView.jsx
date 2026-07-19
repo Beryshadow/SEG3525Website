@@ -6,7 +6,7 @@ export const SettingsView = ({
   hintPref, onHintPrefChange, cardOrderMode, onCardOrderChange,
   onExportProgress, onImportProgress,
   myDecks, loadedDeckId, onSaveDeckToCache, onOverwriteDeck, onLoadDeckFromCache, 
-  onDeleteDeckFromCache, onToggleDeckCompleted, onRenameDeck, onDirectDropSave, t
+  onDeleteDeckFromCache, onToggleDeckCompleted, onRenameDeck, onDirectDropSave, t, showToast
 }) => {
   const [jsonInput, setJsonInput] = useState("");
   const [newDeckName, setNewDeckName] = useState("");
@@ -104,12 +104,9 @@ export const SettingsView = ({
     const textToCopy = lang === 'fr' ? promptFR : promptEN;
 
     navigator.clipboard.writeText(textToCopy).then(() => {
-      // Create a temporary toast via DOM or simple alert since we don't have showToast passed directly in SettingsView easily,
-      // wait, `t` is passed, but maybe we can just alert or if we need toast we can just do alert.
-      // Ah wait, SettingsView doesn't have showToast in its props. Let me just use alert.
-      alert(`Prompt copied to clipboard! Paste it into ChatGPT/Claude.`);
+      showToast(`Prompt copied to clipboard! Paste it into ChatGPT/Claude.`);
     }).catch(() => {
-      alert("Failed to copy. Clipboard access denied.");
+      showToast("Failed to copy. Clipboard access denied.");
     });
   };
 
