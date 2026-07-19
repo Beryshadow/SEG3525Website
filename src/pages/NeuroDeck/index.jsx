@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSharedLogic } from '../../utilities/shared';
 import { useNLIModel } from '../../hooks/useNLIModel';
-import { TRANSLATIONS } from '../../data/flashcardData';
+import { TRANSLATIONS, DEFAULT_DECK } from '../../data/flashcardData';
 
 import { SettingsView } from './components/SettingsView';
 import { DashboardView } from './components/DashboardView';
@@ -39,9 +39,9 @@ export default function NeuroDeck() {
     try {
       const savedDeck = localStorage.getItem('neurodeck-progress');
       const parsed = savedDeck ? JSON.parse(savedDeck) : null;
-      return Array.isArray(parsed) && parsed.length > 0 ? parsed : [];
+      return Array.isArray(parsed) && parsed.length > 0 ? parsed : DEFAULT_DECK;
     } catch (e) {
-      return [];
+      return DEFAULT_DECK;
     }
   });
 
