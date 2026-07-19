@@ -7,7 +7,8 @@ export const SettingsView = ({
   cardOrderMode, onCardOrderChange,
   onExportProgress, onImportProgress,
   myDecks, loadedDeckId, onSaveDeckToCache, onOverwriteDeck, onLoadDeckFromCache, 
-  onDeleteDeckFromCache, onToggleDeckCompleted, onRenameDeck, onDirectDropSave, t, showToast
+  onDeleteDeckFromCache, onToggleDeckCompleted, onRenameDeck, onDirectDropSave,
+  onAppendToCurrentDeck, syncCode, setSyncCode, onGenerateSyncCode, t, showToast
 }) => {
   const [jsonInput, setJsonInput] = useState("");
   const [newDeckName, setNewDeckName] = useState("");
@@ -92,12 +93,18 @@ export const SettingsView = ({
           };
         });
 
-        onDirectDropSave({
-          id: Date.now().toString(),
-          name: name,
-          deck: formattedDeck,
-          completed: false
-        });
+        if (window.confirm(t.deckAppendPrompt || "Would you like to create a new deck or append these questions to the current working deck?\n\nOK = Append\nCancel = New Deck")) {
+          if (onAppendToCurrentDeck) {
+             onAppendToCurrentDeck(formattedDeck);
+          }
+        } else {
+          onDirectDropSave({
+            id: Date.now().toString(),
+            name: name,
+            deck: formattedDeck,
+            completed: false
+          });
+        }
       } catch (err) {
         console.error("Drop import failed", err);
       }
@@ -107,6 +114,15 @@ export const SettingsView = ({
 
   const handleCopyPrompt = () => {
     const textToCopy = t.llmPromptTemplate;
+    navigator.clipboard.writeText(textToCopy).then(() => {
+      showToast(t.promptCopiedBtn || "Copied!");
+    }).catch(() => {
+      showToast("Failed to copy. Clipboard access denied.");
+    });
+  };
+
+  const handleCopyLongPrompt = () => {
+    const textToCopy = t.llmPromptLongTemplate;
     navigator.clipboard.writeText(textToCopy).then(() => {
       showToast(t.promptCopiedBtn || "Copied!");
     }).catch(() => {
@@ -143,12 +159,18 @@ export const SettingsView = ({
         });
         
         if (parsedDeck.length > 0) {
-           onDirectDropSave({
-              id: Date.now().toString(),
-              name: filename.replace(/\.(csv|txt)$/i, ''),
-              deck: parsedDeck,
-              completed: false
-           });
+           if (window.confirm(t.deckAppendPrompt || "Would you like to create a new deck or append these questions to the current working deck?\n\nOK = Append\nCancel = New Deck")) {
+              if (onAppendToCurrentDeck) {
+                 onAppendToCurrentDeck(parsedDeck);
+              }
+           } else {
+              onDirectDropSave({
+                 id: Date.now().toString(),
+                 name: filename.replace(/\.(csv|txt)$/i, ''),
+                 deck: parsedDeck,
+                 completed: false
+              });
+           }
            showToast(`Imported ${parsedDeck.length} cards from Anki`);
         } else {
            showToast("No valid cards found in Anki file");
@@ -456,6 +478,38 @@ export const SettingsView = ({
           <button onClick={handleCopyPrompt} className="neu-btn px-6 py-3 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-widest flex items-center justify-center whitespace-nowrap text-[var(--text-main)]">
             <CopyIcon className="mr-2" /> {t.copyPromptBtn || "Copy Prompt Template"}
           </button>
+          <button onClick={handleCopyLongPrompt} className="neu-btn px-6 py-3 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-widest flex items-center justify-center whitespace-nowrap text-[color:var(--color-success)]">
+            <CopyIcon className="mr-2" /> {t.copyLongPromptBtn || "Copy Long Prompt"}
+          </button>
+        </div>
+      </div>
+
+      <div className="neu-panel p-4 sm:p-8 md:p-12">
+        <h2 className="text-lg sm:text-2xl font-black text-[var(--text-main)] mb-4 sm:mb-8 flex items-center uppercase tracking-widest">
+          <UploadIcon className="mr-2 sm:mr-4 text-[var(--accent)] text-lg sm:text-2xl" /> {t.cloudSyncTitle || "P2P Cloud Sync"}
+        </h2>
+        <div className="flex flex-col sm:flex-row gap-4 items-center">
+          <div className="flex-1 w-full">
+            <label className="text-xs font-bold text-[var(--text-muted)] block mb-1 uppercase tracking-widest">{t.syncCodeLabel || "Sync Code:"}</label>
+            <div className="flex gap-2">
+              <input 
+                type="text" 
+                value={syncCode} 
+                onChange={e => setSyncCode(e.target.value)} 
+                className="neu-pressed flex-1 px-4 py-3 rounded-xl bg-transparent text-[var(--text-main)] font-black outline-none uppercase"
+                placeholder="ENTER CODE"
+              />
+              <button 
+                onClick={onGenerateSyncCode} 
+                className="neu-btn px-4 py-3 rounded-xl font-bold text-xs uppercase"
+              >
+                {t.generateCode || "Generate"}
+              </button>
+            </div>
+            <p className="text-[10px] text-[var(--text-muted)] mt-2">
+              {syncCode ? "Auto-sync is enabled. Changes will be pushed and pulled automatically in the background." : "Enter a code to enable automatic cross-device sync (expires after 12h of inactivity)."}
+            </p>
+          </div>
         </div>
       </div>
 

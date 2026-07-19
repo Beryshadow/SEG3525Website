@@ -111,7 +111,23 @@ export const TRANSLATIONS = {
     sortByAvg: "Trier par moyenne",
     sortByProgress: "Trier par progression",
     searchDecksPrompt: "Chercher les paquets...",
-    loadedDeck: "Déjà chargé"
+    loadedDeck: "Déjà chargé",
+    llmGeneratorLongTitle: "Générateur de Deck IA (Questions Longues)",
+    llmGeneratorLongDesc: "Générez des questions longues (sans choix multiples) pour une auto-évaluation.",
+    copyLongPromptBtn: "Copier le Modèle Long",
+    llmPromptLongTemplate: "Vous êtes un assistant éducatif expert. Je vais vous fournir un document ou un texte d'étude. Votre tâche est d'extraire les informations les plus importantes et de générer un paquet de cartes mémoire formaté sous forme de tableau JSON strict. CES QUESTIONS SONT DES QUESTIONS LONGUES SANS CHOIX MULTIPLES.\n\n### Exigences du Schéma JSON\nChaque objet DOIT comporter :\n1. `id` : Identifiant unique.\n2. `question` : La question longue (ex: \"Dessinez...\", \"Expliquez...\", \"Calculez...\").\n3. `type` : \"long\"\n4. `hint` : Un indice ou la réponse attendue (Optionnel).\nNe pas inclure de tableau `choices` ni `correctAnswers`.\n\n### Texte d'Entrée :\n[COLLEZ VOTRE DOCUMENT OU TEXTE ICI]",
+    longFinished: "Je l'ai terminé",
+    longWorkedOn: "J'y ai travaillé",
+    longGaveUp: "J'ai abandonné",
+    longSkip: "Passer",
+    deckAppendPrompt: "Voulez-vous créer un nouveau paquet ou ajouter ces questions au paquet actuel ?",
+    deckCreateNew: "Nouveau Paquet",
+    deckAppend: "Ajouter",
+    cloudSyncTitle: "Synchronisation P2P",
+    syncCodeLabel: "Code de Sync :",
+    generateCode: "Générer",
+    syncUpload: "Envoyer au Cloud",
+    syncDownload: "Récupérer du Cloud"
   },
   EN: {
     appTitle: "NeuroDeck",
@@ -225,7 +241,23 @@ export const TRANSLATIONS = {
     sortByAvg: "Sort by Average",
     sortByProgress: "Sort by Progress",
     searchDecksPrompt: "Search decks...",
-    loadedDeck: "Already loaded"
+    loadedDeck: "Already loaded",
+    llmGeneratorLongTitle: "AI Deck Generator (Long Form)",
+    llmGeneratorLongDesc: "Generate long-form questions (no multiple choice) for self-grading.",
+    copyLongPromptBtn: "Copy Long Prompt",
+    llmPromptLongTemplate: "You are an expert educational assistant. I will provide you with a study document or text. Your task is to extract the most important information and generate a flashcard deck formatted as a strict JSON array. THESE ARE LONG FORM QUESTIONS WITH NO MULTIPLE CHOICES.\n\n### JSON Schema Requirements\nEach object MUST have:\n1. `id`: A unique string identifier.\n2. `question`: The long form question text (e.g., \"Draw a diagram...\", \"Run this algorithm...\", \"Explain...\").\n3. `type`: \"long\"\n4. `hint`: A hint or the expected answer/rubric to grade against (Optional).\nDo NOT include a `choices` array or `correctAnswers` array.\n\n### Input Text:\n[PASTE YOUR DOCUMENT OR TEXT HERE]",
+    longFinished: "I finished it",
+    longWorkedOn: "I worked on it",
+    longGaveUp: "I gave up",
+    longSkip: "Skip",
+    deckAppendPrompt: "Would you like to create a new deck or append these questions to the current working deck?",
+    deckCreateNew: "New Deck",
+    deckAppend: "Append",
+    cloudSyncTitle: "P2P Cloud Sync",
+    syncCodeLabel: "Sync Code:",
+    generateCode: "Generate",
+    syncUpload: "Upload to Cloud",
+    syncDownload: "Download from Cloud"
   }
 };
 

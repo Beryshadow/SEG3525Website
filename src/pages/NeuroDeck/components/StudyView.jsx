@@ -34,10 +34,12 @@ export const StudyView = ({
   const correctAnswersArray = useMemo(() => getCorrectAnswers(question), [question]);
   const isSingleAnswer = correctAnswersArray.length === 1;
 
-
+  const isLongQuestion = useMemo(() => {
+    return question && (question.type === "long" || !question.choices || question.choices.length === 0);
+  }, [question]);
 
   useEffect(() => {
-    setPhase("input");
+    setPhase(isLongQuestion ? "long_question" : "input");
     setUserInput("");
     setFeedback(null);
     setTempSimScore(0);
@@ -440,7 +442,7 @@ export const StudyView = ({
           <h2 className="text-xl sm:text-3xl font-black text-[var(--text-main)] leading-tight flex-1">
             {question.question}
           </h2>
-          {phase !== "success" && (
+          {phase !== "success" && !isLongQuestion && (
             <div className="flex items-center gap-2 self-end sm:self-start">
               <button onClick={() => { setSkippedToMCQ(true); setPhase("mcq"); }} className="neu-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-widest text-[var(--text-muted)] whitespace-nowrap transition-colors hover:text-[var(--accent)]">
                 {t.showChoicesDirect || "Choices"}
@@ -450,9 +452,43 @@ export const StudyView = ({
               </button>
             </div>
           )}
+          {phase !== "success" && isLongQuestion && (
+            <div className="flex items-center gap-2 self-end sm:self-start">
+              <button onClick={handleSkip} className="neu-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-widest text-[var(--accent)] whitespace-nowrap transition-colors hover:text-[var(--text-main)]">
+                {t.longSkip || "Skip"}
+              </button>
+            </div>
+          )}
         </div>
 
-        {(phase === "input" || phase === "evaluating") && (
+        {phase === "long_question" && (
+           <div className="flex justify-center mt-8">
+             <button onClick={() => setPhase("long_rubric")} className="neu-btn px-8 py-4 font-black uppercase tracking-widest text-[var(--accent)] rounded-xl sm:rounded-2xl w-full sm:w-auto">
+               Show Rubric / Answer
+             </button>
+           </div>
+        )}
+        {phase === "long_rubric" && (
+           <div className="space-y-6 mt-4">
+             <div className="neu-flat p-4 sm:p-6 rounded-xl sm:rounded-2xl text-[var(--text-main)] font-medium text-sm sm:text-base border border-white/5">
+                <h3 className="font-black text-[var(--accent)] mb-2 uppercase tracking-widest text-xs">Rubric / Expected Answer:</h3>
+                <p className="whitespace-pre-wrap">{question.hint || (question.correctAnswers && question.correctAnswers.length > 0 ? question.correctAnswers[0] : "No specific answer provided. Use your best judgement.")}</p>
+             </div>
+             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+               <button onClick={() => { setCalculatedScore(10); setEvalMethod("skip"); setPhase("success"); onComplete(question.id, 10, true, false); }} className="neu-btn py-4 text-[color:var(--color-success)] font-black uppercase tracking-widest rounded-xl text-xs sm:text-sm">
+                 {t.longFinished || "I finished it (100%)"}
+               </button>
+               <button onClick={() => { setCalculatedScore(5); setEvalMethod("skip"); setPhase("success"); onComplete(question.id, 5, true, false); }} className="neu-btn py-4 text-[color:var(--color-warning)] font-black uppercase tracking-widest rounded-xl text-xs sm:text-sm">
+                 {t.longWorkedOn || "I worked on it (50%)"}
+               </button>
+               <button onClick={() => { setCalculatedScore(0); setEvalMethod("skip"); setPhase("success"); onComplete(question.id, 0, false, false); }} className="neu-btn py-4 text-[color:var(--color-danger)] font-black uppercase tracking-widest rounded-xl text-xs sm:text-sm sm:col-span-2">
+                 {t.longGaveUp || "I gave up (0%)"}
+               </button>
+             </div>
+           </div>
+        )}
+
+        {(phase === "input" || phase === "evaluating") && !isLongQuestion && (
           <div className="space-y-4 sm:space-y-6">
             <textarea
               className={`neu-pressed w-full h-24 sm:h-40 p-3 sm:p-6 border-0 rounded-xl sm:rounded-2xl resize-none transition-all bg-transparent text-[var(--text-main)] outline-none font-medium leading-relaxed text-sm sm:text-base ${feedback && !feedback.overridden

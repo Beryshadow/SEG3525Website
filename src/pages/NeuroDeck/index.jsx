@@ -114,6 +114,23 @@ export default function NeuroDeck() {
 
   const [toastMessage, setToastMessage] = useState("");
   const toastTimeoutRef = useRef(null);
+  const syncTimeoutRef = useRef(null);
+
+  const [syncCode, setSyncCode] = useState(() => {
+    return localStorage.getItem('neurodeck-sync-code') || "";
+  });
+  
+  const [syncVersion, setSyncVersion] = useState(() => {
+    return parseInt(localStorage.getItem('neurodeck-sync-version')) || 0;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('neurodeck-sync-code', syncCode);
+  }, [syncCode]);
+  
+  useEffect(() => {
+    localStorage.setItem('neurodeck-sync-version', syncVersion.toString());
+  }, [syncVersion]);
 
   const showToast = useCallback((msg) => {
     if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
@@ -143,8 +160,99 @@ export default function NeuroDeck() {
   useEffect(() => {
     return () => {
       if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+      if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
     }
   }, []);
+
+  const handleCloudSyncDownload = useCallback(async (code) => {
+    if (!code) return;
+    try {
+      const res = await fetch(`http://localhost:3001/api/sync/${code}`);
+      if (res.status === 404) {
+         showToast("Sync code expired. Please generate a new one.");
+         setSyncCode("");
+         return;
+      }
+      if (!res.ok) {
+         console.warn("Failed to pull sync data");
+         return;
+      }
+      const data = await res.json();
+      if (data && data.version > syncVersion) {
+         if (data.data.myDecks) setMyDecks(data.data.myDecks);
+         if (data.data.currentDeck) setCurrentDeck(data.data.currentDeck);
+         if (data.data.loadedDeckId !== undefined) setLoadedDeckId(data.data.loadedDeckId);
+         if (data.data.streak !== undefined) setStreak(data.data.streak);
+         if (data.data.selectedModel) setSelectedModel(data.data.selectedModel);
+         if (data.data.cardOrderMode) setCardOrderMode(data.data.cardOrderMode);
+         if (data.data.selectedEmbeddingModel) setSelectedEmbeddingModel(data.data.selectedEmbeddingModel);
+         setSyncVersion(data.version);
+         showToast("Cloud sync: Data pulled automatically.");
+      }
+    } catch (err) {
+       console.error("Auto-pull error", err);
+    }
+  }, [syncVersion, showToast]);
+
+  const forcePushToCloud = useCallback(async (codeToUse) => {
+      const code = codeToUse || syncCode;
+      if (!code) return;
+      const payload = { myDecks, currentDeck, loadedDeckId, streak, selectedModel, cardOrderMode, selectedEmbeddingModel };
+      const newVersion = Date.now();
+      try {
+         const res = await fetch(`http://localhost:3001/api/sync/${code}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ data: payload, version: newVersion })
+         });
+         if (res.ok) {
+            setSyncVersion(newVersion);
+            showToast("Cloud sync: Data pushed initially.");
+         }
+      } catch (err) {
+         console.error("Auto-push error", err);
+      }
+  }, [syncCode, myDecks, currentDeck, loadedDeckId, streak, selectedModel, cardOrderMode, selectedEmbeddingModel, showToast]);
+
+  const handleGenerateSyncCode = useCallback(() => {
+     const newCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+     setSyncCode(newCode);
+     forcePushToCloud(newCode);
+  }, [forcePushToCloud]);
+
+  useEffect(() => {
+    let intervalId;
+    if (syncCode) {
+       intervalId = setInterval(async () => {
+          try {
+             const res = await fetch(`http://localhost:3001/api/sync/${syncCode}/version`);
+             if (res.status === 404) {
+                 showToast("Sync code expired. Please generate a new one.");
+                 setSyncCode("");
+                 return;
+             }
+             if (res.ok) {
+                const data = await res.json();
+                if (data && data.version > syncVersion) {
+                   handleCloudSyncDownload(syncCode);
+                }
+             }
+          } catch (err) {}
+       }, 5000);
+    }
+    return () => { if (intervalId) clearInterval(intervalId); }
+  }, [syncCode, syncVersion, handleCloudSyncDownload, showToast]);
+
+  useEffect(() => {
+    const onFocus = () => {
+       if (syncCode) {
+          handleCloudSyncDownload(syncCode);
+       }
+    };
+    window.addEventListener('focus', onFocus);
+    onFocus();
+    return () => window.removeEventListener('focus', onFocus);
+  }, [syncCode, handleCloudSyncDownload]);
 
   useEffect(() => {
     localStorage.setItem('neurodeck-progress', JSON.stringify(currentDeck));
@@ -156,7 +264,27 @@ export default function NeuroDeck() {
     } else {
       localStorage.removeItem('neurodeck-loaded-deck-id');
     }
-  }, [currentDeck, currentIndex, streak, myDecks, loadedDeckId]);
+
+    if (syncCode) {
+       if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
+       syncTimeoutRef.current = setTimeout(async () => {
+          const payload = { myDecks, currentDeck, loadedDeckId, streak, selectedModel, cardOrderMode, selectedEmbeddingModel };
+          const newVersion = Date.now();
+          try {
+             const res = await fetch(`http://localhost:3001/api/sync/${syncCode}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ data: payload, version: newVersion })
+             });
+             if (res.ok) {
+                setSyncVersion(newVersion);
+             }
+          } catch (err) {
+             console.error("Auto-push error", err);
+          }
+       }, 2000);
+    }
+  }, [currentDeck, currentIndex, streak, myDecks, loadedDeckId, syncCode, selectedModel, cardOrderMode, selectedEmbeddingModel]);
 
   const selectNextCard = useCallback((deck) => {
     if (!deck || deck.length === 0) return 0;
@@ -351,6 +479,20 @@ export default function NeuroDeck() {
     showToast(`${t.deckSaved || "Deck saved as"} "${deckObj.name}"`);
   };
 
+  const handleAppendToCurrentDeck = (newCardsArray) => {
+    setCurrentDeck(prev => {
+      const next = [...prev, ...newCardsArray];
+      if (loadedDeckId) {
+        setMyDecks(currDecks => currDecks.map(d => {
+           if (d.id === loadedDeckId) return { ...d, deck: next };
+           return d;
+        }));
+      }
+      return next;
+    });
+    showToast(`Appended ${newCardsArray.length} cards to the current deck.`);
+  };
+
   const handleUpdateCards = (updates) => {
     setCurrentDeck(prev => {
       const next = [...prev];
@@ -535,14 +677,21 @@ export default function NeuroDeck() {
             onCardOrderChange={setCardOrderMode}
             onExportProgress={handleExportProgress}
             onImportProgress={handleImportProgress}
-            myDecks={myDecks}
-            loadedDeckId={loadedDeckId}
             onSaveDeckToCache={saveDeckToCache}
             onOverwriteDeck={overwriteDeckCache}
+            myDecks={myDecks}
+            loadedDeckId={loadedDeckId}
             onLoadDeckFromCache={loadDeckFromCache}
             onDeleteDeckFromCache={deleteDeckFromCache}
+            onToggleDeckCompleted={(id) => {
+               setMyDecks(prev => prev.map(d => d.id === id ? { ...d, completed: !d.completed } : d));
+            }}
             onRenameDeck={renameDeck}
             onDirectDropSave={handleDirectDropSave}
+            onAppendToCurrentDeck={handleAppendToCurrentDeck}
+            syncCode={syncCode}
+            setSyncCode={setSyncCode}
+            onGenerateSyncCode={handleGenerateSyncCode}
             t={t}
             showToast={showToast}
           />
