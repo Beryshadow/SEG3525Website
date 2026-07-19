@@ -97,14 +97,10 @@ export const SettingsView = ({
     reader.readAsText(file);
   };
 
-  const handleCopyPrompt = (lang) => {
-    const promptEN = `Generate a JSON array of flashcards for me to memorize. Each object in the array must strictly follow this structure: {"id": "unique-string", "question": "Question text here?", "correctAnswers": ["Valid Answer 1", "Valid Answer 2"], "choices": ["Valid Answer 1", "Distractor 1", "Distractor 2", "Distractor 3"]}. Output ONLY raw valid JSON.`;
-    const promptFR = `Générez un tableau JSON de cartes mémoire. Chaque objet doit strictement suivre cette structure : {"id": "chaine-unique", "question": "Texte de la question ?", "correctAnswers": ["Réponse valide 1", "Réponse valide 2"], "choices": ["Réponse valide 1", "Distracteur 1", "Distracteur 2", "Distracteur 3"]}. Ne sortez QUE du JSON valide.`;
-
-    const textToCopy = lang === 'fr' ? promptFR : promptEN;
-
+  const handleCopyPrompt = () => {
+    const textToCopy = t.llmPromptTemplate;
     navigator.clipboard.writeText(textToCopy).then(() => {
-      showToast(`Prompt copied to clipboard! Paste it into ChatGPT/Claude.`);
+      showToast(t.promptCopiedBtn || "Copied!");
     }).catch(() => {
       showToast("Failed to copy. Clipboard access denied.");
     });
@@ -368,18 +364,15 @@ export const SettingsView = ({
       <div className="neu-panel p-4 sm:p-8 md:p-12 flex flex-col sm:flex-row justify-between items-center gap-6">
         <div className="text-center sm:text-left">
           <h2 className="text-lg sm:text-2xl font-black text-[var(--text-main)] mb-2 flex items-center justify-center sm:justify-start uppercase tracking-widest">
-            <SparklesIcon className="mr-2 sm:mr-4 text-[var(--accent)] text-lg sm:text-2xl" /> {t.aiPromptTitle || "AI Generation Prompt"}
+            <SparklesIcon className="mr-2 sm:mr-4 text-[var(--accent)] text-lg sm:text-2xl" /> {t.llmGeneratorTitle || "AI Deck Generator"}
           </h2>
           <p className="text-[10px] sm:text-sm font-medium text-[var(--text-muted)] max-w-md">
-            {t.aiPromptDesc || "Outsource deck creation! Copy a strict JSON instruction prompt to paste into ChatGPT, Claude, or Gemini. Import the result below."}
+            {t.llmGeneratorDesc || "Copy the prompt template to automatically generate JSON flashcards from your study notes using ChatGPT, Claude, or other LLMs."}
           </p>
         </div>
         <div className="flex flex-col gap-3 w-full sm:w-auto">
-          <button onClick={() => handleCopyPrompt('en')} className="neu-btn px-6 py-3 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-widest flex items-center justify-center whitespace-nowrap text-[var(--text-main)]">
-            <CopyIcon className="mr-2" /> Copy English Prompt
-          </button>
-          <button onClick={() => handleCopyPrompt('fr')} className="neu-btn px-6 py-3 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-widest flex items-center justify-center whitespace-nowrap text-[var(--text-main)]">
-            <CopyIcon className="mr-2" /> Copier Prompt Français
+          <button onClick={handleCopyPrompt} className="neu-btn px-6 py-3 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-widest flex items-center justify-center whitespace-nowrap text-[var(--text-main)]">
+            <CopyIcon className="mr-2" /> {t.copyPromptBtn || "Copy Prompt Template"}
           </button>
         </div>
       </div>
