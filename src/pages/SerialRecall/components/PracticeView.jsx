@@ -120,26 +120,6 @@ export const PracticeView = ({ lists, updateList, nliModel, showToast, setView, 
     }
   };
 
-  const checkEntailment = async (truth, input) => {
-    if (!nliModel || input.trim() === "") return false;
-    const sepToken = nliModel?.tokenizer?.sep_token || "[SEP]";
-    const statementTruth = `The item is: ${truth}`;
-    const statementInput = `The item is: ${input}`;
-    try {
-      const combined = `${statementInput} ${sepToken} ${statementTruth}`;
-      const out = await nliModel(combined, { top_k: 5 });
-      const classes = Array.isArray(out) && Array.isArray(out[0]) ? out[0] : (Array.isArray(out) ? out : [out]);
-      let entailScore = 0;
-      for (const c of classes) {
-        const label = c.label.toUpperCase();
-        if (label.includes('ENTAIL') || label === 'LABEL_1') entailScore = c.score;
-      }
-      return entailScore > 0.85;
-    } catch (e) {
-      return false;
-    }
-  };
-
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
       if (isEvaluated) {
@@ -174,6 +154,8 @@ export const PracticeView = ({ lists, updateList, nliModel, showToast, setView, 
     const newValidation = {};
     const yieldThread = () => new Promise(res => setTimeout(res, 10));
 
+    const pendingSemanticChecks = [];
+
     for (const idx of hiddenIndices) {
       const truth = currentList.items[idx].toLowerCase().trim();
       const input = (userInputs[idx] || "").toLowerCase().trim();
@@ -186,16 +168,69 @@ export const PracticeView = ({ lists, updateList, nliModel, showToast, setView, 
         if (dist <= allowedTypos) {
           newValidation[idx] = "correct";
         } else {
-          const isSemanticMatch = await checkEntailment(truth, input);
-          await yieldThread();
-          if (isSemanticMatch) {
-            newValidation[idx] = "correct";
-          } else {
-            newValidation[idx] = "wrong";
-            allCorrect = false;
-          }
+          pendingSemanticChecks.push({ idx, truth, input });
         }
       }
+    }
+
+    if (pendingSemanticChecks.length > 0 && nliModel) {
+      const sepToken = nliModel?.tokenizer?.sep_token || "[SEP]";
+      const batchedInputs = [];
+      const mapping = [];
+
+      for (const item of pendingSemanticChecks) {
+         if (item.input.trim() === "") continue; 
+         const statementTruth = `The item is: ${item.truth}`;
+         const statementInput = `The item is: ${item.input}`;
+         
+         const combined = `${statementInput} ${sepToken} ${statementTruth}`;
+         batchedInputs.push(combined);
+         mapping.push(item.idx);
+      }
+
+      if (batchedInputs.length > 0) {
+        try {
+          const out = await nliModel(batchedInputs, { top_k: 5 });
+          await yieldThread();
+          
+          const normalizedOutputs = Array.isArray(out) && out.length > 0 && !Array.isArray(out[0])
+              ? [out]
+              : out;
+          
+          for (let i = 0; i < normalizedOutputs.length; i++) {
+             const classes = normalizedOutputs[i];
+             const originalIdx = mapping[i];
+             
+             let entailScore = 0;
+             for (const c of classes) {
+                const label = c.label.toUpperCase();
+                if (label.includes('ENTAIL') || label === 'LABEL_1') entailScore = c.score;
+             }
+             
+             if (entailScore > 0.85) {
+                newValidation[originalIdx] = "correct";
+             } else {
+                newValidation[originalIdx] = "wrong";
+             }
+          }
+        } catch (e) {
+           for (const item of pendingSemanticChecks) {
+              if (!newValidation[item.idx]) newValidation[item.idx] = "wrong";
+           }
+        }
+      }
+    }
+
+    for (const item of pendingSemanticChecks) {
+       if (!newValidation[item.idx]) {
+          newValidation[item.idx] = "wrong";
+       }
+    }
+
+    for (const idx of hiddenIndices) {
+       if (newValidation[idx] !== "correct") {
+          allCorrect = false;
+       }
     }
 
     setValidation(newValidation);

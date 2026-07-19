@@ -191,62 +191,87 @@ export const StudyView = ({
       const truthTexts = correctAnswersArray;
       const incorrectTexts = question.choices.filter(c => !correctAnswersArray.includes(c));
       const sepToken = model?.tokenizer?.sep_token || "[SEP]";
+      const questionContext = currentLangKey === 'FR' ? `Question: ${question.question} Réponse:` : `Question: ${question.question} Answer:`;
+      const statementUser = `${questionContext} ${userInput.trim()}`;
       
-      const basePhrase = currentLangKey === 'FR' ? `L'idée principale est :` : `The core meaning is:`;
-      const statementUser = `${basePhrase} ${userInput.trim()}`;
-      const yieldThread = () => new Promise(resolve => setTimeout(resolve, 15));
-
-      const evaluateBidirectional = async (choiceText, debugLabel) => {
-        const statementChoice = `${basePhrase} ${choiceText.trim()}`;
-
-        const combinedForward = `${statementUser} ${sepToken} ${statementChoice}`;
-        const outForward = await model(combinedForward, { top_k: 5, topk: 5 });
-        await yieldThread(); 
-        const resForward = getEntailmentScores(outForward, `${debugLabel} (Forward)`);
-        
-        const combinedBackward = `${statementChoice} ${sepToken} ${statementUser}`;
-        const outBackward = await model(combinedBackward, { top_k: 5, topk: 5 });
-        await yieldThread(); 
-        const resBackward = getEntailmentScores(outBackward, `${debugLabel} (Backward)`);
-        
-        const avgEntailment = (resForward.entailment + resBackward.entailment) / 2;
-        const isEntailment = resForward.isEntailment || resBackward.isEntailment;
-        
-        return { entailment: avgEntailment, isEntailment };
-      };
-
       const compositeDistractor = incorrectTexts.join(". ");
       const distractorField = [...incorrectTexts, compositeDistractor].filter(d => d.trim());
       const validTruths = truthTexts.filter(t => t.trim());
 
-      let maxDistractorScore = 0;
-      let closestIncorrectText = null;
-
-      for (const dist of distractorField) {
-          const res = await evaluateBidirectional(dist, "Distractor");
-          if (res.entailment > maxDistractorScore) {
-              maxDistractorScore = res.entailment;
-              closestIncorrectText = dist === compositeDistractor ? "Composite Distractor" : dist;
-          }
-      }
+      const pairsToEvaluate = [];
+      const mapping = []; 
 
       let hits = 0;
       let totalEntailment = 0;
 
+      for (const dist of distractorField) {
+        const statementChoice = `${questionContext} ${dist.trim()}`;
+        pairsToEvaluate.push(`${statementUser} ${sepToken} ${statementChoice}`);
+        mapping.push({ type: 'distractor', dir: 'forward', text: dist });
+        pairsToEvaluate.push(`${statementChoice} ${sepToken} ${statementUser}`);
+        mapping.push({ type: 'distractor', dir: 'backward', text: dist });
+      }
+
       for (const truth of validTruths) {
-          const cleanTruth = truth.trim().toLowerCase();
-          if (cleanInput === cleanTruth) {
-              totalEntailment += 1.0;
-              hits++;
-              continue;
-          }
+        const cleanTruth = truth.trim().toLowerCase();
+        if (cleanInput === cleanTruth) {
+          totalEntailment += 1.0;
+          hits++;
+          continue; 
+        }
+        const statementChoice = `${questionContext} ${truth.trim()}`;
+        pairsToEvaluate.push(`${statementUser} ${sepToken} ${statementChoice}`);
+        mapping.push({ type: 'truth', dir: 'forward', text: truth });
+        pairsToEvaluate.push(`${statementChoice} ${sepToken} ${statementUser}`);
+        mapping.push({ type: 'truth', dir: 'backward', text: truth });
+      }
+
+      let maxDistractorScore = 0;
+      let closestIncorrectText = null;
+
+      if (pairsToEvaluate.length > 0) {
+        const batchedOutputs = await model(pairsToEvaluate, { top_k: 5, topk: 5 });
+        const normalizedOutputs = Array.isArray(batchedOutputs) && batchedOutputs.length > 0 && !Array.isArray(batchedOutputs[0])
+            ? [batchedOutputs]
+            : batchedOutputs;
+
+        const resultsByOriginal = { distractor: {}, truth: {} };
+        
+        for (let i = 0; i < normalizedOutputs.length; i++) {
+          const map = mapping[i];
+          const out = normalizedOutputs[i];
+          const scores = getEntailmentScores(out, `${map.type} (${map.dir})`);
           
-          const res = await evaluateBidirectional(truth, "Truth");
-          totalEntailment += res.entailment;
-          
-          if (res.entailment > maxDistractorScore && res.isEntailment) {
-              hits++;
+          if (!resultsByOriginal[map.type][map.text]) {
+             resultsByOriginal[map.type][map.text] = { forward: null, backward: null };
           }
+          resultsByOriginal[map.type][map.text][map.dir] = scores;
+        }
+
+        for (const dist of distractorField) {
+           const resInfo = resultsByOriginal.distractor[dist];
+           if (resInfo && resInfo.forward && resInfo.backward) {
+              const avgEnt = (resInfo.forward.entailment + resInfo.backward.entailment) / 2;
+              if (avgEnt > maxDistractorScore) {
+                  maxDistractorScore = avgEnt;
+                  closestIncorrectText = dist === compositeDistractor ? "Composite Distractor" : dist;
+              }
+           }
+        }
+
+        for (const truth of validTruths) {
+           const cleanTruth = truth.trim().toLowerCase();
+           if (cleanInput === cleanTruth) continue; 
+           const resInfo = resultsByOriginal.truth[truth];
+           if (resInfo && resInfo.forward && resInfo.backward) {
+              const avgEnt = (resInfo.forward.entailment + resInfo.backward.entailment) / 2;
+              const isEnt = resInfo.forward.isEntailment || resInfo.backward.isEntailment;
+              totalEntailment += avgEnt;
+              if (avgEnt > maxDistractorScore && isEnt) {
+                 hits++;
+              }
+           }
+        }
       }
 
       const avgEntailment = validTruths.length > 0 ? totalEntailment / validTruths.length : 0;
