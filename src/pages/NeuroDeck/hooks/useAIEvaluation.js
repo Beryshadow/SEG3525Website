@@ -28,7 +28,8 @@ export const useAIEvaluation = ({ model, getEmbeddings, t, currentLangKey }) => 
     }
     
     const isEntailment = topLabel.includes('ENTAIL') || topLabel === 'LABEL_1' || topLabel === 'LABEL_0';
-    return { entailment: entailmentScore, isEntailment };
+    const isContradiction = topLabel.includes('CONTRADICTION') || topLabel === 'LABEL_2';
+    return { entailment: entailmentScore, isEntailment, isContradiction };
   };
 
   const evaluateInput = async (userInput, question, correctAnswersArray) => {
@@ -86,6 +87,7 @@ export const useAIEvaluation = ({ model, getEmbeddings, t, currentLangKey }) => 
 
       let maxDistractorScore = 0;
       let closestIncorrectText = null;
+      let isStrongContradiction = false;
 
       if (pairsToEvaluate.length > 0) {
         const batchedOutputs = await model(pairsToEvaluate, { top_k: 5, topk: 5 });
@@ -124,6 +126,11 @@ export const useAIEvaluation = ({ model, getEmbeddings, t, currentLangKey }) => 
            if (resInfo && resInfo.forward && resInfo.backward) {
               const avgEnt = (resInfo.forward.entailment + resInfo.backward.entailment) / 2;
               const isEnt = resInfo.forward.isEntailment || resInfo.backward.isEntailment;
+              
+              if (resInfo.forward.isContradiction && resInfo.backward.isContradiction) {
+                 isStrongContradiction = true;
+              }
+              
               totalEntailment += avgEnt;
               if (avgEnt > maxDistractorScore && isEnt) {
                  hits++;
@@ -132,23 +139,7 @@ export const useAIEvaluation = ({ model, getEmbeddings, t, currentLangKey }) => 
         }
       }
 
-      const avgEntailment = validTruths.length > 0 ? totalEntailment / validTruths.length : 0;
-      
-      let mappedScore10 = 0;
-      if (hits === validTruths.length && validTruths.length > 0) {
-          mappedScore10 = 5 + ((avgEntailment - maxDistractorScore) / Math.max(0.01, 1 - maxDistractorScore)) * 5;
-          if (avgEntailment >= 0.90) mappedScore10 = 10.0;
-      } else if (hits > 0) {
-          const hitRatio = hits / validTruths.length;
-          mappedScore10 = 5.0 + (hitRatio * 4.9);
-      } else {
-          const ratio = maxDistractorScore > 0 ? (avgEntailment / Math.max(0.01, maxDistractorScore)) : avgEntailment;
-          mappedScore10 = ratio * 4.9;
-          mappedScore10 = Math.min(4.9, mappedScore10);
-      }
-
-      mappedScore10 = Math.max(0, Math.min(10, mappedScore10)); 
-
+      // --- EMBEDDING RESCUE LOGIC ---
       let maxEmbeddingSim = 0;
       if (getEmbeddings && validTruths.length > 0) {
         try {
@@ -166,6 +157,32 @@ export const useAIEvaluation = ({ model, getEmbeddings, t, currentLangKey }) => 
         }
       }
 
+      const avgEntailment = validTruths.length > 0 ? totalEntailment / validTruths.length : 0;
+      
+      let effectiveTruthScore = avgEntailment;
+      
+      if (maxEmbeddingSim >= 0.85 && !isStrongContradiction) {
+         effectiveTruthScore = Math.max(avgEntailment, maxEmbeddingSim);
+         if (hits === 0 && effectiveTruthScore > maxDistractorScore) {
+             hits = 1;
+         }
+      }
+      
+      let mappedScore10 = 0;
+      if (hits === validTruths.length && validTruths.length > 0) {
+          mappedScore10 = 5 + ((effectiveTruthScore - maxDistractorScore) / Math.max(0.01, 1 - maxDistractorScore)) * 5;
+          if (effectiveTruthScore >= 0.90) mappedScore10 = 10.0;
+      } else if (hits > 0) {
+          const hitRatio = hits / validTruths.length;
+          mappedScore10 = 5.0 + (hitRatio * 4.9);
+      } else {
+          const ratio = maxDistractorScore > 0 ? (effectiveTruthScore / Math.max(0.01, maxDistractorScore)) : effectiveTruthScore;
+          mappedScore10 = ratio * 4.9;
+          mappedScore10 = Math.min(4.9, mappedScore10);
+      }
+
+      mappedScore10 = Math.max(0, Math.min(10, mappedScore10)); 
+
       if (hits === validTruths.length && validTruths.length > 0) {
         return { status: "success", score: mappedScore10, hotColdScore: maxEmbeddingSim };
       } else if (hits > 0) {
@@ -176,7 +193,7 @@ export const useAIEvaluation = ({ model, getEmbeddings, t, currentLangKey }) => 
            customMessage: `${t?.partialMatch || "Partial Match!"} ${hits}/${validTruths.length} ${t?.correctConcepts || "correct concepts identified. Keep going!"}`
         };
       } else {
-        if (maxDistractorScore > avgEntailment) {
+        if (maxDistractorScore > effectiveTruthScore) {
           return {
              status: "leaning_wrong",
              score: mappedScore10,
