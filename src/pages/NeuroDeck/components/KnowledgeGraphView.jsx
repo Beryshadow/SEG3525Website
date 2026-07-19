@@ -11,6 +11,7 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
   const [isSimulating, setIsSimulating] = useState(true);
   const [clusterThreshold, setClusterThreshold] = useState(0.85);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   
   const cameraRef = useRef({ x: 0, y: 0, scale: 1 });
   const isDraggingRef = useRef(false);
@@ -315,6 +316,8 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
     const rect = canvasRef.current.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
+    
+    setMousePos({ x: mouseX, y: mouseY });
 
     if (isDraggingRef.current) {
       cameraRef.current.x += e.clientX - dragStartRef.current.x;
@@ -451,12 +454,12 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
             className="w-full h-full touch-none"
           />
           
-          {hoveredNode && (
+          {hoveredNode && !isDraggingRef.current && (
             <div 
               className="absolute pointer-events-none neu-panel p-4 z-20 max-w-sm sm:max-w-md"
               style={{
-                left: Math.min(hoveredNode.x + 15, dimensions.width - 320),
-                top: Math.min(hoveredNode.y + 15, dimensions.height - 120)
+                left: Math.min(mousePos.x + 15, dimensions.width - 320),
+                top: Math.min(mousePos.y + 15, dimensions.height - 120)
               }}
             >
               <div className="text-[10px] font-black uppercase tracking-widest mb-2 text-[var(--text-muted)] flex items-center justify-between">
