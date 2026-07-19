@@ -404,18 +404,18 @@ export const SettingsView = ({
         </p>
         <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 flex-wrap">
           <button onClick={onExportProgress} className="neu-btn flex-1 min-w-[120px] py-2 sm:py-4 font-black uppercase tracking-wider text-[var(--accent)] flex items-center justify-center text-[10px] sm:text-sm rounded-lg sm:rounded-2xl">
-            <DownloadIcon className="mr-2 sm:mr-3" /> {t.exportBackup || "Export JSON (With Progress)"}
+            <UploadIcon className="mr-2 sm:mr-3" /> {t.exportBackup || "Export JSON (With Progress)"}
           </button>
           <button onClick={onExportWithoutProgress} className="neu-btn flex-1 min-w-[120px] py-2 sm:py-4 font-black uppercase tracking-wider text-[var(--accent)] flex items-center justify-center text-[10px] sm:text-sm rounded-lg sm:rounded-2xl">
-            <DownloadIcon className="mr-2 sm:mr-3" /> Export JSON (Clean)
+            <UploadIcon className="mr-2 sm:mr-3" /> Export JSON (Clean)
           </button>
           <button onClick={() => fileInputRef.current.click()} className="neu-btn flex-1 min-w-[120px] py-2 sm:py-4 font-black uppercase tracking-wider text-[var(--text-muted)] flex items-center justify-center text-[10px] sm:text-sm rounded-lg sm:rounded-2xl">
-            <UploadIcon className="mr-2 sm:mr-3" /> {t.importBackup || "Import (JSON/CSV)"}
+            <DownloadIcon className="mr-2 sm:mr-3" /> {t.importBackup || "Import (JSON/CSV)"}
           </button>
         </div>
         <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 flex-wrap mt-4">
           <button onClick={handleAnkiExport} className="neu-btn flex-1 min-w-[120px] py-2 sm:py-4 font-black uppercase tracking-wider text-[var(--text-muted)] flex items-center justify-center text-[10px] sm:text-sm rounded-lg sm:rounded-2xl">
-            <DownloadIcon className="mr-2 sm:mr-3" /> {t.exportAnki || "Export Anki (CSV)"}
+            <UploadIcon className="mr-2 sm:mr-3" /> {t.exportAnki || "Export Anki (CSV)"}
           </button>
           <button onClick={() => onShareToCode(true)} className="neu-btn flex-1 min-w-[120px] py-2 sm:py-4 font-black uppercase tracking-wider text-[color:var(--color-success)] flex items-center justify-center text-[10px] sm:text-sm rounded-lg sm:rounded-2xl">
             <UploadIcon className="mr-2 sm:mr-3" /> Share to Code (With Progress)
