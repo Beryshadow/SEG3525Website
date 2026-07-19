@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSharedLogic } from '../../utilities/shared';
 import { useNLIModel } from '../../hooks/useNLIModel';
-import TRANSLATIONS from '../../../data/translations';
+import { TRANSLATIONS } from '../../data/flashcardData';
 
 import { SettingsView } from './components/SettingsView';
 import { DashboardView } from './components/DashboardView';
