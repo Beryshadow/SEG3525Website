@@ -36,19 +36,25 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
       embedding: cardEmbeddings[q.id]
     }));
 
-    const edges = [];
+    const allEdges = [];
     for (let i = 0; i < nodes.length; i++) {
       for (let j = i + 1; j < nodes.length; j++) {
         const n1 = nodes[i];
         const n2 = nodes[j];
         if (n1.embedding && n2.embedding) {
           const sim = cosineSimilarity(n1.embedding, n2.embedding);
-          if (sim > SIMILARITY_THRESHOLD) {
-            edges.push({ source: n1, target: n2, weight: sim });
-          }
+          allEdges.push({ source: n1, target: n2, weight: sim });
         }
       }
     }
+    
+    // Sort descending by weight
+    allEdges.sort((a, b) => b.weight - a.weight);
+    
+    // Dynamically sparsify graph to prevent "ball of yarn" overload
+    // Keep a strict maximum of ~2.5 edges per node on average
+    const maxEdges = Math.min(allEdges.length, Math.floor(nodes.length * 2.5));
+    const edges = allEdges.slice(0, maxEdges);
 
     nodesRef.current = nodes;
     edgesRef.current = edges;
@@ -210,13 +216,18 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
 
       ctx.clearRect(0, 0, dimensions.width, dimensions.height);
 
-      ctx.lineWidth = 1;
       for (const edge of edges) {
         ctx.beginPath();
         ctx.moveTo(edge.source.x, edge.source.y);
         ctx.lineTo(edge.target.x, edge.target.y);
         ctx.strokeStyle = themeColors.textMuted;
-        ctx.globalAlpha = edge.weight * 0.4;
+        
+        // Dynamically map semantic similarity to visual weight
+        // Cubing the weight naturally suppresses weak links and heavily emphasizes strong ones
+        const visualWeight = Math.pow(Math.max(0, edge.weight), 3);
+        ctx.lineWidth = 0.5 + (visualWeight * 3);
+        ctx.globalAlpha = 0.1 + (visualWeight * 0.6);
+        
         ctx.stroke();
       }
       ctx.globalAlpha = 1.0;
