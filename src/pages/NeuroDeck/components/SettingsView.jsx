@@ -434,31 +434,35 @@ export const SettingsView = ({
           {t.dataBackupDesc || "Export your progress or import a backup"}
         </p>
         <div className="mb-8">
-          <label className="text-xs font-bold text-[var(--text-muted)] block mb-2 uppercase tracking-widest">Export & Share</label>
+          <label className="text-xs font-bold text-[var(--text-muted)] block mb-2 uppercase tracking-widest flex items-center">
+            <UploadIcon className="mr-2" /> {t.exportShareTitle || "Export & Share"}
+          </label>
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 flex-wrap">
             <button onClick={onExportProgress} className="neu-btn flex-1 min-w-[120px] py-2 sm:py-4 font-black uppercase tracking-wider text-[var(--accent)] flex items-center justify-center text-[10px] sm:text-sm rounded-lg sm:rounded-2xl">
-              <UploadIcon className="mr-2 sm:mr-3" /> {t.exportBackup || "Export JSON (With Progress)"}
+              {t.exportBackup || "Export JSON (With Progress)"}
             </button>
             <button onClick={onExportWithoutProgress} className="neu-btn flex-1 min-w-[120px] py-2 sm:py-4 font-black uppercase tracking-wider text-[var(--accent)] flex items-center justify-center text-[10px] sm:text-sm rounded-lg sm:rounded-2xl">
-              <UploadIcon className="mr-2 sm:mr-3" /> Export JSON (Clean)
+              {t.exportBackupClean || "Export JSON (Clean)"}
             </button>
             <button onClick={handleAnkiExport} className="neu-btn flex-1 min-w-[120px] py-2 sm:py-4 font-black uppercase tracking-wider text-[var(--text-muted)] flex items-center justify-center text-[10px] sm:text-sm rounded-lg sm:rounded-2xl">
-              <UploadIcon className="mr-2 sm:mr-3" /> {t.exportAnki || "Export Anki (CSV)"}
+              {t.exportAnki || "Export Anki (CSV)"}
             </button>
             <button onClick={() => onShareToCode(true)} className="neu-btn flex-1 min-w-[120px] py-2 sm:py-4 font-black uppercase tracking-wider text-[color:var(--color-success)] flex items-center justify-center text-[10px] sm:text-sm rounded-lg sm:rounded-2xl">
-              <UploadIcon className="mr-2 sm:mr-3" /> Share (With Progress)
+              {t.shareProgress || "Share (With Progress)"}
             </button>
             <button onClick={() => onShareToCode(false)} className="neu-btn flex-1 min-w-[120px] py-2 sm:py-4 font-black uppercase tracking-wider text-[color:var(--color-success)] flex items-center justify-center text-[10px] sm:text-sm rounded-lg sm:rounded-2xl">
-              <UploadIcon className="mr-2 sm:mr-3" /> Share (Clean)
+              {t.shareClean || "Share (Clean)"}
             </button>
           </div>
         </div>
 
         <div>
-          <label className="text-xs font-bold text-[var(--text-muted)] block mb-2 uppercase tracking-widest">Import & Load</label>
+          <label className="text-xs font-bold text-[var(--text-muted)] block mb-2 uppercase tracking-widest flex items-center">
+            <DownloadIcon className="mr-2" /> {t.importLoadTitle || "Import & Load"}
+          </label>
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 flex-wrap mb-4">
             <button onClick={() => fileInputRef.current.click()} className="neu-btn flex-none sm:flex-1 min-w-[120px] py-3 sm:py-4 font-black uppercase tracking-wider text-[var(--text-muted)] flex items-center justify-center text-xs sm:text-sm rounded-lg sm:rounded-2xl">
-              <DownloadIcon className="mr-2 sm:mr-3" /> {t.importBackup || "Import File (JSON/CSV)"}
+              {t.importFile || "Import File (JSON/CSV)"}
             </button>
           </div>
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
@@ -474,7 +478,7 @@ export const SettingsView = ({
               disabled={!importCode}
               className="neu-btn flex-1 sm:flex-none px-8 py-3 rounded-xl font-bold text-xs sm:text-sm uppercase whitespace-nowrap disabled:opacity-50 text-[var(--text-main)]"
             >
-              <DownloadIcon className="mr-2 inline" /> Import Code
+              {t.importCodeBtn || "Import Code"}
             </button>
           </div>
         </div>
