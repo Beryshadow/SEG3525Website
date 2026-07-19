@@ -16,6 +16,7 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
   const cameraRef = useRef({ x: 0, y: 0, scale: 1 });
   const isDraggingRef = useRef(false);
   const dragStartRef = useRef({ x: 0, y: 0 });
+  const lastPinchDistRef = useRef(null);
 
   const REPULSION = 300;
   const SPRING_LENGTH = 150;
@@ -375,6 +376,36 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
     setHoveredNode(null);
   };
   
+  const handleTouchMove = (e) => {
+    if (!canvasRef.current) return;
+    if (e.touches && e.touches.length === 2) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      
+      if (lastPinchDistRef.current !== null) {
+        const zoom = dist / lastPinchDistRef.current;
+        const pinchX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+        const pinchY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+        const rect = canvasRef.current.getBoundingClientRect();
+        const mouseX = pinchX - rect.left;
+        const mouseY = pinchY - rect.top;
+
+        cameraRef.current.x = mouseX - (mouseX - cameraRef.current.x) * zoom;
+        cameraRef.current.y = mouseY - (mouseY - cameraRef.current.y) * zoom;
+        cameraRef.current.scale *= zoom;
+      }
+      lastPinchDistRef.current = dist;
+      return;
+    }
+    handleMouseMove(e);
+  };
+  
+  const handleTouchEnd = (e) => {
+    lastPinchDistRef.current = null;
+    handleMouseUp();
+  };
+  
   const handleWheel = (e) => {
     if (!canvasRef.current) return;
     e.preventDefault();
@@ -399,17 +430,17 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
   };
 
   return (
-    <div className="w-full h-full min-h-[700px] animate-fade-in flex flex-col">
+    <div className="w-full h-[calc(100dvh-120px)] animate-fade-in flex flex-col">
       <div className="neu-panel p-4 sm:p-8 flex-1 flex flex-col relative">
         <div className="flex justify-between items-center mb-4 z-10 relative pointer-events-none">
           <h2 className="text-lg sm:text-2xl font-black text-[var(--text-main)] flex items-center uppercase tracking-widest">
             <ActivityIcon className="mr-2 sm:mr-4 text-[var(--accent)] text-lg sm:text-2xl" /> 
             {t.knowledgeGraphTitle || "Neuro-Map"}
           </h2>
-          <div className="flex items-center space-x-4 pointer-events-auto">
-            <div className="hidden sm:flex flex-col items-end">
+          <div className="flex items-center space-x-2 sm:space-x-4 pointer-events-auto">
+            <div className="flex flex-col items-end">
                <label className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mb-1">
-                 Clustering: Top {Math.round((1 - clusterThreshold) * 100)}%
+                 <span className="hidden sm:inline">Clustering: </span>Top {Math.round((1 - clusterThreshold) * 100)}%
                </label>
                <input 
                  type="range" 
@@ -418,7 +449,7 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
                  step="0.01" 
                  value={clusterThreshold} 
                  onChange={(e) => setClusterThreshold(parseFloat(e.target.value))}
-                 className="w-32 accent-[var(--accent)] opacity-80 hover:opacity-100 transition-opacity cursor-pointer"
+                 className="w-20 sm:w-32 accent-[var(--accent)] opacity-80 hover:opacity-100 transition-opacity cursor-pointer"
                  title={`Set the threshold for semantic clustering. Currently keeping the top ${Math.round((1 - clusterThreshold) * 100)}% of links.`}
                />
             </div>
@@ -434,7 +465,7 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
           </div>
         </div>
 
-        <div ref={wrapperRef} className="absolute inset-0 top-16 bottom-4 left-4 right-4 rounded-xl overflow-hidden cursor-crosshair">
+        <div ref={wrapperRef} className="relative flex-1 rounded-xl overflow-hidden cursor-crosshair">
           {deck && deck.some(q => !cardEmbeddings[q.id]) && (
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[var(--bg-main)] bg-opacity-80 backdrop-blur-sm rounded-2xl">
               <NetworkIcon className="text-4xl text-[var(--accent)] mb-4 animate-pulse" />
@@ -464,10 +495,10 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
             onMouseDown={handleMouseDown}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseLeave}
-            onTouchMove={handleMouseMove}
+            onTouchMove={handleTouchMove}
             onTouchStart={handleMouseDown}
-            onTouchEnd={handleMouseUp}
-            onTouchCancel={handleMouseLeave}
+            onTouchEnd={handleTouchEnd}
+            onTouchCancel={handleTouchEnd}
             onWheel={handleWheel}
             onClick={handleMouseClick}
             className="w-full h-full touch-none"
