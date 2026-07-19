@@ -12,7 +12,7 @@ import { BrainIcon, SettingsIcon, ActivityIcon, CpuIcon, FireIcon } from './comp
 export default function NeuroDeck() {
   const [view, setView] = useState("study");
   const navigate = useNavigate();
-  const { appTheme, theme, toggleTheme, lang } = useSharedLogic([]);
+  const { appTheme, theme, toggleTheme, lang, toggleLang } = useSharedLogic([]);
 
   const currentLangKey = (lang || 'EN').toUpperCase();
   const t = TRANSLATIONS[currentLangKey] || TRANSLATIONS.EN;
@@ -369,6 +369,9 @@ export default function NeuroDeck() {
               <span className={streak > 0 ? "text-[var(--text-main)]" : "text-[var(--text-muted)]"}>{streak}</span>
             </div>
 
+            <button onClick={toggleLang} className="neu-btn w-10 h-10 flex items-center justify-center rounded-full font-black text-xs text-[var(--text-main)] uppercase" title="Toggle Language">
+              {lang}
+            </button>
             <button onClick={toggleTheme} className="neu-btn w-10 h-10 flex items-center justify-center rounded-full text-[var(--text-main)]">
               {theme === 'dark' ? <i className="fas fa-sun"></i> : <i className="fas fa-moon"></i>}
             </button>
