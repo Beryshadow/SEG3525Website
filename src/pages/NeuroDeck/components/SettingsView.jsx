@@ -621,5 +621,6 @@ export const SettingsView = ({
         </div>
       </div>
     </div>
+    </div>
   );
 };
