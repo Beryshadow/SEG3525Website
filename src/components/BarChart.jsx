@@ -88,6 +88,28 @@ export default function BarChart({ data, metric, currency, lang, t, onBarClick }
               </linearGradient>
             </defs>
 
+            {/* Y-Axis Title */}
+            <text
+              x={-(svgHeight / 2)}
+              y={20}
+              transform="rotate(-90)"
+              textAnchor="middle"
+              className="chart-axis-title font-bold"
+              style={{ fill: 'var(--color-textMuted)', fontSize: '11px', fontWeight: 'bold' }}
+            >
+              {t[metric] || metric}
+            </text>
+
+            {/* X-Axis Title */}
+            <text
+              x={svgWidth / 2}
+              y={svgHeight - 5}
+              textAnchor="middle"
+              className="chart-axis-title font-bold"
+              style={{ fill: 'var(--color-textMuted)', fontSize: '11px', fontWeight: 'bold' }}
+            >
+              {t.entityLabel || 'Entité'}
+            </text>
             {yTicks.map((tick, i) => (
               <line
                 key={`grid-y-${i}`}

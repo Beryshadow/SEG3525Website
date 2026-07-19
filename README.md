@@ -34,14 +34,14 @@ Les plateformes de suivi des marchés boursiers sont les parfaits exemples de l'
 
 ### **(B) Les 3C (Contexte, Clutter-free, Contraste)**
 
-* **Contexte :** Les graphiques sont présentés dans deux sections distinctes (« Tendances Temporelles » et « Comparaison des Métriques »). Des filtres adjacents permettent de contextualiser immédiatement les données (ex: limiter à une catégorie spécifique comme la sculpture, ou à une devise particulière).  
+* **Contexte :** Les graphiques sont présentés dans deux sections distinctes (« Évolution temporelle » et « Comparaison des performances »). Des filtres adjacents permettent de contextualiser immédiatement les données (ex: limiter à une catégorie spécifique comme la sculpture, ou à une devise particulière).  
 * **Clutter-free (Sans encombrement) :** J'ai supprimé les lignes de grille superflues et simplifié drastiquement les axes. Les graphiques n'affichent que les points ou les barres essentiels, avec des étiquettes minimalistes pour éviter la surcharge cognitive et laisser l'espace négatif respirer, en accord avec l'esthétique générale de mon site.  
-* **Contraste :** J'ai utilisé une palette de couleurs avec une forte couleur d'accent (bleu/vert) sur un fond sombre (ou clair, selon le thème choisi), garantissant une excellente lisibilité de l'information et dirigeant l'attention vers les données importantes.
+* **Contraste :** J'ai utilisé une palette de couleurs avec une forte couleur d'accent (jaune/orange) sur un fond sombre (ou clair, selon le thème choisi), garantissant une excellente lisibilité de l'information et dirigeant l'attention vers les données importantes.
 
 ### **(C) Mise en page, titre et interactions**
 
 * **Mise en page :** Le tableau de bord utilise une disposition asymétrique à deux colonnes pour chaque section. La colonne de gauche contient les contrôles interactifs et les filtres, tandis que la colonne de droite (plus large) met en valeur les graphiques. Cela suit un flux de lecture naturel de gauche à droite (contrôle \-\> résultat).  
-* **Titre :** Analytics Dashboard / Tableau de Bord Analytique.  
+* **Titre :** Aura Analytics / Analytique Aura.  
 * **Interactions :** L'utilisateur peut modifier les métriques affichées, filtrer par catégorie, artiste, ville ou devise, et ajuster la plage d'années avec un curseur interactif. J'ai également intégré une interaction avancée (*cross-chart interaction*) qui permet de cliquer sur un point du graphique linéaire pour cibler automatiquement cette année précise dans le graphique à barres, reliant ainsi les deux visualisations.
 
 ### **(D) Internationalisation**

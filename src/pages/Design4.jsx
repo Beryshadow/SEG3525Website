@@ -386,11 +386,11 @@ export default function Design4() {
                 <p className="text-textMuted text-base lg:text-lg mb-0">
                   {currentLang === 'fr' ? (
                     <>
-                      Analyse des acquisitions et des ventes de la galerie d'art (1990 - 2026). Ces données proviennent du générateur procédural de la page <Link to="/vividly-minimal" className="text-accent font-bold hover:underline">Vividement minimal & Co</Link>.
+                      Analyse des acquisitions et des ventes de la galerie d'art (1990 - 2026). Ces données synthétiques proviennent du générateur procédural de la page <Link to="/vividly-minimal" className="text-accent font-bold hover:underline">Vividement minimal & Co</Link>.
                     </>
                   ) : (
                     <>
-                      Analysis of gallery art acquisitions and sales (1990 - 2026). This data is driven by the <Link to="/vividly-minimal" className="text-accent font-bold hover:underline">Vividly Minimal & Co</Link> page procedural generator.
+                      Analysis of gallery art acquisitions and sales (1990 - 2026). This synthetic data is driven by the <Link to="/vividly-minimal" className="text-accent font-bold hover:underline">Vividly Minimal & Co</Link> page procedural generator.
                     </>
                   )}
                 </p>
@@ -399,8 +399,8 @@ export default function Design4() {
               {/* SECTION 1: Line Chart (Trends over time) */}
               <div className="row g-4 scroll-mt-24" id="trends">
                 
-                {/* Visualizer SVG */}
-                <div className="col-12 col-xl-8" style={{ position: 'relative', zIndex: 2 }}>
+                {/* Visualizer SVG (moved to be second in DOM so it's on the right) */}
+                <div className="col-12 col-xl-8 order-xl-2" style={{ position: 'relative', zIndex: 2 }}>
                   <div className="neu-panel p-6 h-100 flex flex-col gap-2">
                     <div className="mb-2">
                       <h3 className="text-lg font-bold text-textMain mb-1">{t.trendLineTitle}</h3>
@@ -419,8 +419,8 @@ export default function Design4() {
                   </div>
                 </div>
 
-                {/* Filters sidebar card */}
-                <div className="col-12 col-xl-4" style={{ position: 'relative', zIndex: 1 }}>
+                {/* Filters sidebar card (moved to be first in DOM so it's on the left) */}
+                <div className="col-12 col-xl-4 order-xl-1" style={{ position: 'relative', zIndex: 1 }}>
                   <div className="neu-panel p-6 h-100 flex flex-col gap-4">
                     <div className="d-flex flex-col gap-4">
                       <h2 className="text-base font-bold text-accent border-bottom pb-2 mb-2">
@@ -436,7 +436,7 @@ export default function Design4() {
                           id="metric-line-select"
                           value={metricLine}
                           onChange={e => setMetricLine(e.target.value)}
-                          className="neu-pressed w-100 p-3 rounded-lg text-sm border-0 text-textMain bg-transparent"
+                          className="neu-pressed w-100 p-3 rounded-lg text-sm border-0 text-accent bg-transparent"
                         >
                           <option value="artworksCount">{t.artworksCount}</option>
                           <option value="totalUnits">{t.totalUnits}</option>
@@ -459,7 +459,7 @@ export default function Design4() {
                             id="currency-select"
                             value={currency}
                             onChange={e => setCurrency(e.target.value)}
-                            className="neu-pressed w-100 p-3 rounded-lg text-sm border-0 text-textMain bg-transparent"
+                            className="neu-pressed w-100 p-3 rounded-lg text-sm border-0 text-accent bg-transparent"
                           >
                             <option value="CAD">{t.currencyCAD}</option>
                             <option value="USD">{t.currencyUSD}</option>
@@ -477,7 +477,7 @@ export default function Design4() {
                           id="category-line-select"
                           value={categoryFilter}
                           onChange={e => setCategoryFilter(e.target.value)}
-                          className="neu-pressed w-100 p-3 rounded-lg text-sm border-0 text-textMain bg-transparent"
+                          className="neu-pressed w-100 p-3 rounded-lg text-sm border-0 text-accent bg-transparent"
                         >
                           <option value="all">{t.allProducts}</option>
                           <option value="painting">{t.painting}</option>
@@ -495,7 +495,7 @@ export default function Design4() {
                           id="city-line-select"
                           value={cityFilter}
                           onChange={e => setCityFilter(e.target.value)}
-                          className="neu-pressed w-100 p-3 rounded-lg text-sm border-0 text-textMain bg-transparent"
+                          className="neu-pressed w-100 p-3 rounded-lg text-sm border-0 text-accent bg-transparent"
                         >
                           <option value="all">{t.allCities}</option>
                           {CITY_POOL.map(city => (
@@ -515,7 +515,7 @@ export default function Design4() {
                           id="artist-line-select"
                           value={artistFilter}
                           onChange={e => setArtistFilter(e.target.value)}
-                          className="neu-pressed w-100 p-3 rounded-lg text-sm border-0 text-textMain bg-transparent"
+                          className="neu-pressed w-100 p-3 rounded-lg text-sm border-0 text-accent bg-transparent"
                         >
                           <option value="all">{t.allArtists}</option>
                           {ARTIST_POOL.map(artist => (
@@ -544,8 +544,8 @@ export default function Design4() {
               {/* SECTION 2: Bar Chart (Comparisons) */}
               <div className="row g-4 mt-2 scroll-mt-24" id="comparison">
                 
-                {/* Visualizer SVG */}
-                <div className="col-12 col-xl-8" style={{ position: 'relative', zIndex: 2 }}>
+                {/* Visualizer SVG (moved to be second in DOM so it's on the right) */}
+                <div className="col-12 col-xl-8 order-xl-2" style={{ position: 'relative', zIndex: 2 }}>
                   <div className="neu-panel p-6 h-100 flex flex-col gap-2">
                     <div className="mb-2">
                       <h3 className="text-lg font-bold text-textMain mb-1">{t.trendBarTitle}</h3>
@@ -575,8 +575,8 @@ export default function Design4() {
                   </div>
                 </div>
 
-                {/* Filters sidebar card */}
-                <div className="col-12 col-xl-4" style={{ position: 'relative', zIndex: 1 }}>
+                {/* Filters sidebar card (moved to be first in DOM so it's on the left) */}
+                <div className="col-12 col-xl-4 order-xl-1" style={{ position: 'relative', zIndex: 1 }}>
                   <div className="neu-panel p-6 h-100 flex flex-col gap-4">
                     <div className="d-flex flex-col gap-4">
                       <h2 className="text-base font-bold text-accent border-bottom pb-2 mb-2">
@@ -615,7 +615,7 @@ export default function Design4() {
                           id="metric-bar-select"
                           value={metricBar}
                           onChange={e => setMetricBar(e.target.value)}
-                          className="neu-pressed w-100 p-3 rounded-lg text-sm border-0 text-textMain bg-transparent"
+                          className="neu-pressed w-100 p-3 rounded-lg text-sm border-0 text-accent bg-transparent"
                         >
                           <option value="salesRevenue">{t.salesRevenue}</option>
                           <option value="salesVolume">{t.salesVolume}</option>
@@ -637,7 +637,7 @@ export default function Design4() {
                           id="category-bar-select"
                           value={barCategoryFilter}
                           onChange={e => setBarCategoryFilter(e.target.value)}
-                          className="neu-pressed w-100 p-3 rounded-lg text-sm border-0 text-textMain bg-transparent"
+                          className="neu-pressed w-100 p-3 rounded-lg text-sm border-0 text-accent bg-transparent"
                         >
                           <option value="all">{t.allProducts}</option>
                           <option value="painting">{t.painting}</option>
@@ -655,11 +655,11 @@ export default function Design4() {
                           id="limit-bar-select"
                           value={barLimit}
                           onChange={e => setBarLimit(Number(e.target.value))}
-                          className="neu-pressed w-100 p-3 rounded-lg text-sm border-0 text-textMain bg-transparent"
+                          className="neu-pressed w-100 p-3 rounded-lg text-sm border-0 text-accent bg-transparent"
                         >
-                          <option value={5}>Top 5</option>
-                          <option value={8}>Top 8</option>
-                          <option value={10}>Top 10</option>
+                          <option value={5}>{t.top5}</option>
+                          <option value={8}>{t.top8}</option>
+                          <option value={10}>{t.top10}</option>
                         </select>
                       </div>
 

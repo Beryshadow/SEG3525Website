@@ -41,7 +41,11 @@ export const DASHBOARD_TRANSLATIONS = {
     selectCity: "Filtrer par ville",
     selectCategory: "Filtrer par catégorie",
     clickToCompare: "Cliquer pour comparer ci-dessous",
-    clickToSeeTrend: "Cliquer pour voir la tendance ci-dessus"
+    clickToSeeTrend: "Cliquer pour voir la tendance ci-dessus",
+    topLimitLabel: "Limite",
+    top5: "Top 5",
+    top8: "Top 8",
+    top10: "Top 10"
   },
   en: {
     dashboardTitle: "Aura Analytics",
@@ -85,7 +89,11 @@ export const DASHBOARD_TRANSLATIONS = {
     selectCity: "Filter by City",
     selectCategory: "Filter by Category",
     clickToCompare: "Click to compare below",
-    clickToSeeTrend: "Click to see trend above"
+    clickToSeeTrend: "Click to see trend above",
+    topLimitLabel: "Limit",
+    top5: "Top 5",
+    top8: "Top 8",
+    top10: "Top 10"
   }
 };
 

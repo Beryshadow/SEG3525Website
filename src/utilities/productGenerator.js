@@ -202,10 +202,8 @@ export function generateProducts(count) {
   const nameCounts = new Map();
   const products = [];
   
-  // Seed based on the day of the week (0-6) to ensure week-day determinism
-  const today = new Date();
-  const dayOfWeek = today.getDay(); // 0 is Sunday, 1 is Monday, etc.
-  const SEED = `artshop-products-day-${dayOfWeek}`;
+  // Use a strictly fixed seed to ensure exact data consistency on every visit
+  const SEED = `artshop-products-fixed-seed`;
 
   for (let i = 0; i < count; i++) {
     let salt = 0;
