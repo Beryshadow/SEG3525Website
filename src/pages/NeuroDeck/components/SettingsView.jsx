@@ -99,41 +99,46 @@ export const SettingsView = ({
     e.preventDefault();
     setIsDraggingOver(false);
     
-    const file = e.dataTransfer.files[0];
-    if (!file || !file.name.endsWith('.json')) return;
-    
-    const name = file.name.replace('.json', '');
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const parsed = JSON.parse(event.target.result);
-        if (!Array.isArray(parsed)) throw new Error("Not a JSON array");
-        
-        const formattedDeck = parsed.map((q, idx) => {
-          const correctAnswersArray = q.correctAnswers || (q.correctAnswer ? [q.correctAnswer] : []);
-          return {
-            ...q,
-            correctAnswers: correctAnswersArray,
-            id: q.id || `custom-${Date.now()}-${idx}`,
-            score: 0,
-            dueTurn: 0,
-            attempts: 0,
-            isMastered: false
-          };
-        });
+    const file = e.dataTransfer.files?.[0];
+    if (file && file.name.endsWith('.json')) {
+      const name = file.name.replace('.json', '');
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const parsed = JSON.parse(event.target.result);
+          if (!Array.isArray(parsed)) throw new Error("Not a JSON array");
+          
+          const formattedDeck = parsed.map((q, idx) => {
+            const correctAnswersArray = q.correctAnswers || (q.correctAnswer ? [q.correctAnswer] : []);
+            return {
+              ...q,
+              correctAnswers: correctAnswersArray,
+              id: q.id || `custom-${Date.now()}-${idx}`,
+              score: 0,
+              dueTurn: 0,
+              attempts: 0,
+              isMastered: false
+            };
+          });
 
-        onDirectDropSave({
-          id: Date.now().toString(),
-          name: name,
-          deck: formattedDeck,
-          completed: false,
-          parentId: typeof targetParentId === 'string' ? targetParentId : null
-        });
-      } catch (err) {
-        console.error("Drop import failed", err);
+          onDirectDropSave({
+            id: Date.now().toString(),
+            name: name,
+            deck: formattedDeck,
+            completed: false,
+            parentId: typeof targetParentId === 'string' ? targetParentId : null
+          });
+        } catch (err) {
+          console.error("Drop import failed", err);
+        }
+      };
+      reader.readAsText(file);
+    } else {
+      const draggedId = e.dataTransfer.getData("text/plain");
+      if (draggedId && draggedId !== targetParentId && onMoveDeck) {
+         onMoveDeck(draggedId, targetParentId);
       }
-    };
-    reader.readAsText(file);
+    }
   };
 
   const handleCopyPrompt = () => {
