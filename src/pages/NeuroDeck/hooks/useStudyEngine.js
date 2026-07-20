@@ -4,6 +4,7 @@ export function useStudyEngine({
   currentDeck,
   setStreak,
   setCurrentIndex,
+  currentIndex,
   t
 }) {
 

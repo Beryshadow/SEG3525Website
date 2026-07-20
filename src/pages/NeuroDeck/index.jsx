@@ -189,7 +189,7 @@ export default function NeuroDeck() {
 
   const {
     computeActiveDeckPool, selectNextCard, updateCardStats, handleManualNavigation
-  } = useStudyEngine({ currentDeck, setStreak, setCurrentIndex, t });
+  } = useStudyEngine({ currentDeck, setStreak, setCurrentIndex, currentIndex, t });
 
   const {
     syncCode, setSyncCode, pairingCode, setPairingCode, isGeneratingCode, syncVersion, datasetId, handleCloudSyncDownload,
