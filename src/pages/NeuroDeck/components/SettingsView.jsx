@@ -532,7 +532,7 @@ export const SettingsView = ({
                              className={`deck-row-container p-3 sm:p-5 rounded-xl sm:rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 transition-all cursor-pointer select-none ${selectedDeckIds.has(d.id) ? 'neu-flat ring-2 ring-[var(--accent)] bg-[var(--accent)]/5' : (loadedDeckId === d.id ? 'neu-flat border-2 border-[var(--accent)] bg-[var(--accent)]/10 shadow-[inset_0_0_20px_rgba(168,85,247,0.15)]' : 'neu-pressed hover:bg-white/5')}`}
                              style={{ marginLeft: `${level * 1.5}rem` }}
                           >
-                             <div className="flex items-center gap-3 w-full sm:w-auto overflow-hidden">
+                              <div className="flex items-center gap-3 w-full sm:flex-1 overflow-hidden">
                                 <div className="flex-shrink-0 flex flex-col items-center gap-1 w-12">
                                    <span className="text-[10px] font-black text-[var(--accent)]">{d.progress}%</span>
                                    <div className="w-8 h-1 bg-[var(--text-muted)] opacity-20 rounded-full overflow-hidden">
