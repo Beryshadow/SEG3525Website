@@ -92,6 +92,19 @@ export default function NeuroDeck() {
   useEffect(() => {
     localStorage.setItem('neurodeck-focus-mode', JSON.stringify(focusMode));
   }, [focusMode]);
+
+  const [questionTypeSettings, setQuestionTypeSettings] = useState(() => {
+    try {
+      const saved = localStorage.getItem('neurodeck-question-type-settings');
+      return saved ? JSON.parse(saved) : { long: true, mcc: true, multi: true, proportional: true };
+    } catch (e) {
+      return { long: true, mcc: true, multi: true, proportional: true };
+    }
+  });
+  useEffect(() => {
+    localStorage.setItem('neurodeck-question-type-settings', JSON.stringify(questionTypeSettings));
+  }, [questionTypeSettings]);
+
   const { getEmbeddings, modelStatus: embeddingStatus, backendUsed: embeddingBackend, modelError: embeddingError, progressPercent: embeddingProgress } = useEmbeddingModel(selectedEmbeddingModel);
   const [cardEmbeddings, setCardEmbeddings] = useState({});
   const activeEmbeddingModelRef = useRef(selectedEmbeddingModel);
@@ -205,6 +218,7 @@ export default function NeuroDeck() {
          if (data.data.cardOrderMode) setCardOrderMode(data.data.cardOrderMode);
          if (data.data.selectedEmbeddingModel) setSelectedEmbeddingModel(data.data.selectedEmbeddingModel);
          if (data.data.focusMode) setFocusMode(data.data.focusMode);
+         if (data.data.questionTypeSettings) setQuestionTypeSettings(data.data.questionTypeSettings);
          setSyncVersion(data.version);
          if (manual) {
             setSyncCode(code);
@@ -226,7 +240,7 @@ export default function NeuroDeck() {
   const forcePushToCloud = useCallback(async (codeToUse) => {
       const code = codeToUse || syncCode;
       if (!code) return;
-      const payload = { myDecks, currentDeck, loadedDeckId, streak, selectedModel, cardOrderMode, selectedEmbeddingModel, focusMode };
+      const payload = { myDecks, currentDeck, loadedDeckId, streak, selectedModel, cardOrderMode, selectedEmbeddingModel, focusMode, questionTypeSettings };
       const newVersion = Date.now();
       try {
          const res = await fetch(`${SYNC_API_BASE}/${code}`, {
@@ -241,7 +255,7 @@ export default function NeuroDeck() {
       } catch (err) {
          console.error("Auto-push error", err);
       }
-  }, [syncCode, myDecks, currentDeck, loadedDeckId, streak, selectedModel, cardOrderMode, selectedEmbeddingModel, showToast]);
+  }, [syncCode, myDecks, currentDeck, loadedDeckId, streak, selectedModel, cardOrderMode, selectedEmbeddingModel, focusMode, questionTypeSettings, showToast]);
 
   const handleGenerateSyncCode = useCallback(() => {
      const newCode = Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -300,7 +314,7 @@ export default function NeuroDeck() {
        }
        if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
        syncTimeoutRef.current = setTimeout(async () => {
-          const payload = { myDecks, currentDeck, loadedDeckId, streak, selectedModel, cardOrderMode, selectedEmbeddingModel, focusMode };
+          const payload = { myDecks, currentDeck, loadedDeckId, streak, selectedModel, cardOrderMode, selectedEmbeddingModel, focusMode, questionTypeSettings };
           const newVersion = Date.now();
           try {
              const res = await fetch(`${SYNC_API_BASE}/${syncCode}`, {
@@ -316,7 +330,7 @@ export default function NeuroDeck() {
           }
        }, 2000);
     }
-  }, [currentDeck, currentIndex, streak, myDecks, loadedDeckId, syncCode, selectedModel, cardOrderMode, selectedEmbeddingModel, focusMode]);
+  }, [currentDeck, currentIndex, streak, myDecks, loadedDeckId, syncCode, selectedModel, cardOrderMode, selectedEmbeddingModel, focusMode, questionTypeSettings]);
 
   const selectNextCard = useCallback((deck) => {
     if (!deck || deck.length === 0) return 0;
@@ -343,6 +357,72 @@ export default function NeuroDeck() {
          activeDeck = deck.filter(q => validIds.has(q.id));
       }
       if (activeDeck.length === 0) activeDeck = deck; 
+    }
+
+    activeDeck = activeDeck.filter(q => {
+       const isLong = q.type === 'long' || (!q.choices || q.choices.length === 0);
+       const isMulti = q.correctAnswers && q.correctAnswers.length > 1;
+       const isMcc = !isLong && !isMulti;
+       
+       if (isLong && !questionTypeSettings.long) return false;
+       if (isMulti && !questionTypeSettings.multi) return false;
+       if (isMcc && !questionTypeSettings.mcc) return false;
+       return true;
+    });
+    if (activeDeck.length === 0) activeDeck = deck;
+
+    if (questionTypeSettings.proportional) {
+       let targetLong = 0, targetMcc = 0, targetMulti = 0;
+       let actualLong = 0, actualMcc = 0, actualMulti = 0;
+       
+       for (const q of deck) {
+          const isLong = q.type === 'long' || (!q.choices || q.choices.length === 0);
+          const isMulti = q.correctAnswers && q.correctAnswers.length > 1;
+          const isMcc = !isLong && !isMulti;
+          
+          if (isLong && questionTypeSettings.long) { targetLong++; actualLong += (q.attempts || 0); }
+          else if (isMulti && questionTypeSettings.multi) { targetMulti++; actualMulti += (q.attempts || 0); }
+          else if (isMcc && questionTypeSettings.mcc) { targetMcc++; actualMcc += (q.attempts || 0); }
+       }
+       
+       const totalTargets = targetLong + targetMcc + targetMulti;
+       const totalAttempts = actualLong + actualMcc + actualMulti;
+       
+       if (totalTargets > 0 && totalAttempts > 0) {
+          const expectedLong = (targetLong / totalTargets) * totalAttempts;
+          const expectedMcc = (targetMcc / totalTargets) * totalAttempts;
+          const expectedMulti = (targetMulti / totalTargets) * totalAttempts;
+          
+          const deficitLong = expectedLong - actualLong;
+          const deficitMcc = expectedMcc - actualMcc;
+          const deficitMulti = expectedMulti - actualMulti;
+          
+          let maxDeficit = -Infinity;
+          let targetType = null;
+          
+          if (questionTypeSettings.mcc && targetMcc > 0 && deficitMcc > maxDeficit) {
+             maxDeficit = deficitMcc; targetType = 'mcc';
+          }
+          if (questionTypeSettings.long && targetLong > 0 && deficitLong > maxDeficit) {
+             maxDeficit = deficitLong; targetType = 'long';
+          }
+          if (questionTypeSettings.multi && targetMulti > 0 && deficitMulti > maxDeficit) {
+             maxDeficit = deficitMulti; targetType = 'multi';
+          }
+          
+          if (targetType) {
+             const filteredProportional = activeDeck.filter(q => {
+                const isLong = q.type === 'long' || (!q.choices || q.choices.length === 0);
+                const isMulti = q.correctAnswers && q.correctAnswers.length > 1;
+                if (targetType === 'long') return isLong;
+                if (targetType === 'multi') return isMulti;
+                return !isLong && !isMulti;
+             });
+             if (filteredProportional.length > 0) {
+                activeDeck = filteredProportional;
+             }
+          }
+       }
     }
 
     const now = 0; 
@@ -820,6 +900,8 @@ export default function NeuroDeck() {
             onEmbeddingModelChange={setSelectedEmbeddingModel}
             cardOrderMode={cardOrderMode}
             onCardOrderChange={setCardOrderMode}
+            questionTypeSettings={questionTypeSettings}
+            setQuestionTypeSettings={setQuestionTypeSettings}
             onExportProgress={handleExportProgress}
             onImportProgress={handleImportProgress}
             onSaveDeckToCache={saveDeckToCache}

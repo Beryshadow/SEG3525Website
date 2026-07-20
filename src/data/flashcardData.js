@@ -154,7 +154,13 @@ export const TRANSLATIONS = {
     thresholdMode: "Seuil",
     topNMode: "Top N",
     knowledgeGraphTitle: "Neuro-Carte",
-    recenter: "Recalculer"
+    recenter: "Recalculer",
+    questionTypesLabel: "Types de Questions",
+    typeLong: "Questions Longues",
+    typeMcc: "Choix Unique (MCC)",
+    typeMulti: "Choix Multiple (Multi-MCC)",
+    proportionalLabel: "Distribution Proportionnelle des Types",
+    proportionalDesc: "Sert dynamiquement les questions pour correspondre parfaitement au ratio de votre paquet (ex: 10% longues, 90% MCC) basé sur vos réponses à vie."
   },
   EN: {
     appTitle: "NeuroDeck",
@@ -311,7 +317,13 @@ export const TRANSLATIONS = {
     thresholdMode: "Threshold",
     topNMode: "Top N",
     knowledgeGraphTitle: "Neuro-Map",
-    recenter: "Recalculate"
+    recenter: "Recalculate",
+    questionTypesLabel: "Question Types",
+    typeLong: "Long Form Questions",
+    typeMcc: "Single Choice (MCC)",
+    typeMulti: "Multiple Choice (Multi-MCC)",
+    proportionalLabel: "Proportional Type Distribution",
+    proportionalDesc: "Dynamically serves questions to perfectly match the ratio of your deck (e.g. 10% long, 90% MCC) based on your lifetime answers."
   }
 };
 

@@ -5,6 +5,7 @@ export const SettingsView = ({
   currentDeck, onImport, selectedModel, onModelChange,
   selectedEmbeddingModel, onEmbeddingModelChange,
   cardOrderMode, onCardOrderChange,
+  questionTypeSettings, setQuestionTypeSettings,
   onExportProgress, onImportProgress,
   myDecks, loadedDeckId, onSaveDeckToCache, onOverwriteDeck, onLoadDeckFromCache, 
   onDeleteDeckFromCache, onToggleDeckCompleted, onRenameDeck, onDirectDropSave,
@@ -423,6 +424,45 @@ export const SettingsView = ({
               <span className="font-black uppercase tracking-widest text-xs sm:text-base">{mode.name}</span>
             </label>
           ))}
+        </div>
+
+        <div className="mt-8 border-t border-white/5 pt-8">
+           <h3 className="text-sm sm:text-base font-black text-[var(--text-main)] mb-4 flex items-center uppercase tracking-widest">
+             <i className="fas fa-filter mr-2 sm:mr-4 text-[var(--accent)]"></i> {t.questionTypesLabel || "Question Types"}
+           </h3>
+           <div className="flex flex-col gap-3 sm:gap-4 mb-6">
+              {[
+                { id: "long", name: t.typeLong || "Long Form Questions", icon: "fa-align-left" },
+                { id: "mcc", name: t.typeMcc || "Single Choice (MCC)", icon: "fa-check-circle" },
+                { id: "multi", name: t.typeMulti || "Multiple Choice (Multi-MCC)", icon: "fa-check-square" }
+              ].map(type => (
+                <label key={type.id} className={`p-3 sm:p-4 rounded-xl cursor-pointer flex items-center justify-between text-left transition-all duration-300 ${questionTypeSettings[type.id] ? "neu-pressed border border-[var(--accent)]" : "neu-btn text-[var(--text-muted)]"}`}>
+                  <div className="flex items-center">
+                     <i className={`fas ${type.icon} mr-3 sm:mr-4 text-lg ${questionTypeSettings[type.id] ? "text-[var(--accent)]" : "opacity-50"}`}></i>
+                     <span className={`font-bold uppercase tracking-widest text-xs sm:text-sm ${questionTypeSettings[type.id] ? "text-[var(--accent)]" : ""}`}>{type.name}</span>
+                  </div>
+                  <input type="checkbox" checked={!!questionTypeSettings[type.id]} onChange={(e) => setQuestionTypeSettings({ ...questionTypeSettings, [type.id]: e.target.checked })} className="hidden" />
+                  <div className={`w-10 h-5 rounded-full relative transition-colors ${questionTypeSettings[type.id] ? 'bg-[var(--accent)]' : 'bg-black/30'}`}>
+                     <div className={`absolute top-0.5 bottom-0.5 w-4 bg-white rounded-full transition-all ${questionTypeSettings[type.id] ? 'left-5' : 'left-1'}`}></div>
+                  </div>
+                </label>
+              ))}
+           </div>
+
+           <label className={`p-4 sm:p-5 rounded-xl sm:rounded-2xl cursor-pointer flex items-center justify-between text-left transition-all duration-300 ${questionTypeSettings.proportional ? "neu-pressed border-l-4 border-[var(--accent)]" : "neu-btn border-l-4 border-transparent text-[var(--text-muted)]"}`}>
+              <div className="flex-1 mr-4">
+                 <div className={`font-black uppercase tracking-widest text-xs sm:text-sm mb-1 ${questionTypeSettings.proportional ? "text-[var(--text-main)]" : ""}`}>
+                    {t.proportionalLabel || "Proportional Type Distribution"}
+                 </div>
+                 <div className="text-[10px] sm:text-xs font-medium opacity-70">
+                    {t.proportionalDesc || "Dynamically serves questions to perfectly match the ratio of your deck (e.g. 10% long, 90% MCC) based on your lifetime answers."}
+                 </div>
+              </div>
+              <input type="checkbox" checked={!!questionTypeSettings.proportional} onChange={(e) => setQuestionTypeSettings({ ...questionTypeSettings, proportional: e.target.checked })} className="hidden" />
+              <div className={`w-12 h-6 rounded-full relative transition-colors ${questionTypeSettings.proportional ? 'bg-[var(--accent)]' : 'bg-black/30'}`}>
+                 <div className={`absolute top-1 bottom-1 w-4 bg-white rounded-full transition-all ${questionTypeSettings.proportional ? 'left-7' : 'left-1'}`}></div>
+              </div>
+           </label>
         </div>
       </div>
 
