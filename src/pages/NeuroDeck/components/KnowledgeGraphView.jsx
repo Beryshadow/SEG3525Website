@@ -10,10 +10,10 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
   const [hoveredNode, setHoveredNode] = useState(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
   const [isSimulating, setIsSimulating] = useState(true);
-  const [clusterThreshold, setClusterThreshold] = useState(0.85);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [previewFocalNode, setPreviewFocalNode] = useState(null);
-  const [previewThreshold, setPreviewThreshold] = useState(focusMode?.threshold || 0.85);
+  const [previewMode, setPreviewMode] = useState(focusMode?.mode || 'threshold');
+  const [previewThreshold, setPreviewThreshold] = useState(focusMode?.threshold !== undefined ? focusMode.threshold : 0.85);
+  const [previewTopN, setPreviewTopN] = useState(focusMode?.topN || 5);
   
   const cameraRef = useRef({ x: 0, y: 0, scale: 1 });
   const isDraggingRef = useRef(false);
@@ -267,12 +267,25 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
       let inClusterIds = new Set();
       if (previewFocalNode) {
         inClusterIds.add(previewFocalNode.id);
+        
+        let similarities = [];
         for (const n of nodes) {
            if (n.id !== previewFocalNode.id && n.embedding && previewFocalNode.embedding) {
               const sim = cosineSimilarity(n.embedding, previewFocalNode.embedding);
-              if (sim >= previewThreshold) {
-                 inClusterIds.add(n.id);
+              similarities.push({ id: n.id, sim });
+           }
+        }
+        
+        if (previewMode === 'threshold') {
+           similarities.forEach(item => {
+              if (item.sim >= previewThreshold) {
+                 inClusterIds.add(item.id);
               }
+           });
+        } else if (previewMode === 'topN') {
+           similarities.sort((a, b) => b.sim - a.sim);
+           for (let i = 0; i < Math.min(previewTopN - 1, similarities.length); i++) {
+              inClusterIds.add(similarities[i].id);
            }
         }
       }
@@ -348,7 +361,7 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
       isRunning = false;
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
     };
-  }, [dimensions, isSimulating, hoveredNode, themeColors, previewFocalNode, previewThreshold]);
+  }, [dimensions, isSimulating, hoveredNode, themeColors, previewFocalNode, previewThreshold, previewMode, previewTopN]);
 
   const getClientPos = (e) => {
     if (e.touches && e.touches.length > 0) {
@@ -598,55 +611,104 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
           {previewFocalNode && (() => {
              let clusterCount = 1; 
              if (cardEmbeddings && deck && previewFocalNode.embedding) {
-                deck.forEach(q => {
-                   if (q.id !== previewFocalNode.id && cardEmbeddings[q.id]) {
-                      if (cosineSimilarity(cardEmbeddings[q.id], previewFocalNode.embedding) >= previewThreshold) {
-                         clusterCount++;
+                if (previewMode === 'threshold') {
+                   deck.forEach(q => {
+                      if (q.id !== previewFocalNode.id && cardEmbeddings[q.id]) {
+                         if (cosineSimilarity(cardEmbeddings[q.id], previewFocalNode.embedding) >= previewThreshold) {
+                            clusterCount++;
+                         }
                       }
-                   }
-                });
+                   });
+                } else {
+                   clusterCount = Math.min(previewTopN, deck.length);
+                }
              }
              return (
                <div className="absolute bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-96 neu-panel p-4 z-30 flex flex-col pointer-events-auto animate-fade-in shadow-xl">
                  <div className="text-[10px] font-black uppercase tracking-widest text-[var(--accent)] mb-2 flex justify-between">
-                    <span>Focus Preview</span>
-                    <span>{clusterCount} Cards</span>
+                    <span>{t.focusPreview || "Focus Preview"}</span>
+                    <span>{clusterCount} {t.cardsPreview || "Cards"}</span>
                  </div>
                  <div className="text-sm font-medium text-[var(--text-main)] mb-4 line-clamp-2" title={previewFocalNode.question}>
                     {previewFocalNode.question}
                  </div>
-                 <div className="flex flex-col mb-4">
-                    <div className="flex justify-between items-center mb-1">
-                       <label className="text-xs font-bold text-[var(--text-muted)]">Similarity Threshold</label>
-                       <span className="text-xs font-bold text-[var(--text-main)]">{previewThreshold.toFixed(2)}</span>
-                    </div>
-                    <input 
-                      type="range" 
-                      min="0.30" 
-                      max="0.99" 
-                      step="0.01" 
-                      value={previewThreshold} 
-                      onChange={(e) => setPreviewThreshold(parseFloat(e.target.value))}
-                      className="w-full accent-[var(--accent)] cursor-pointer"
-                    />
+                 
+                 <div className="flex gap-2 mb-4 bg-[var(--bg-main)] p-1 rounded-lg border border-white/5">
+                    <button 
+                       onClick={() => setPreviewMode('threshold')}
+                       className={`flex-1 py-1.5 text-[10px] font-bold rounded uppercase tracking-widest transition-colors ${previewMode === 'threshold' ? 'bg-[var(--accent)] text-white shadow-md' : 'text-[var(--text-muted)] hover:bg-white/5'}`}
+                    >
+                       {t.thresholdMode || "Threshold"}
+                    </button>
+                    <button 
+                       onClick={() => setPreviewMode('topN')}
+                       className={`flex-1 py-1.5 text-[10px] font-bold rounded uppercase tracking-widest transition-colors ${previewMode === 'topN' ? 'bg-[var(--accent)] text-white shadow-md' : 'text-[var(--text-muted)] hover:bg-white/5'}`}
+                    >
+                       {t.topNMode || "Top N"}
+                    </button>
                  </div>
+
+                 {previewMode === 'threshold' ? (
+                   <div className="flex flex-col mb-4">
+                      <div className="flex justify-between items-center mb-1">
+                         <label className="text-xs font-bold text-[var(--text-muted)]">{t.thresholdLabel || "Similarity Threshold"}</label>
+                         <span className="text-xs font-bold text-[var(--text-main)]">
+                            {previewThreshold > 1.0 ? (t.onlyThisCard || "Only This Card") : (previewThreshold <= -1.0 ? (t.allCards || "All Cards") : previewThreshold.toFixed(2))}
+                         </span>
+                      </div>
+                      <input 
+                        type="range" 
+                        min="-1.0" 
+                        max="1.01" 
+                        step="0.01" 
+                        value={previewThreshold} 
+                        onChange={(e) => setPreviewThreshold(parseFloat(e.target.value))}
+                        className="w-full accent-[var(--accent)] cursor-pointer"
+                      />
+                      <div className="flex justify-between text-[8px] text-[var(--text-muted)] mt-1 uppercase font-bold">
+                         <span>{t.broadAll || "Broad (All)"}</span>
+                         <span>{t.strictSelf || "Strict (Self)"}</span>
+                      </div>
+                   </div>
+                 ) : (
+                   <div className="flex flex-col mb-4">
+                      <div className="flex justify-between items-center mb-1">
+                         <label className="text-xs font-bold text-[var(--text-muted)]">{t.topNLabel || "Number of Cards"}</label>
+                         <span className="text-xs font-bold text-[var(--text-main)]">{previewTopN}</span>
+                      </div>
+                      <input 
+                        type="range" 
+                        min="1" 
+                        max={deck ? deck.length : 10} 
+                        step="1" 
+                        value={previewTopN} 
+                        onChange={(e) => setPreviewTopN(parseInt(e.target.value))}
+                        className="w-full accent-[var(--accent)] cursor-pointer"
+                      />
+                      <div className="flex justify-between text-[8px] text-[var(--text-muted)] mt-1 uppercase font-bold">
+                         <span>{t.justThis || "Just This"}</span>
+                         <span>{t.everything || "Everything"}</span>
+                      </div>
+                   </div>
+                 )}
+
                  <div className="flex justify-between items-center mt-auto">
                     <button 
                       onClick={() => setPreviewFocalNode(null)} 
                       className="px-3 py-2 text-xs font-bold text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors"
                     >
-                      CANCEL
+                      {t.cancelBtn || "CANCEL"}
                     </button>
                     <button 
                       onClick={() => {
                          if (setFocusMode) {
-                            setFocusMode({ active: true, focalNodeId: previewFocalNode.id, threshold: previewThreshold });
+                            setFocusMode({ active: true, focalNodeId: previewFocalNode.id, mode: previewMode, threshold: previewThreshold, topN: previewTopN });
                          }
                          if (onStartFocusStudy) onStartFocusStudy();
                       }}
                       className="neu-btn px-4 py-2 text-xs font-bold uppercase tracking-widest text-[var(--accent)] rounded-lg flex items-center"
                     >
-                      <ActivityIcon className="mr-2" /> STUDY CLUSTER
+                      <ActivityIcon className="mr-2" /> {t.studyCluster || "STUDY CLUSTER"}
                     </button>
                  </div>
                </div>

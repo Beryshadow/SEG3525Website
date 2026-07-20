@@ -324,11 +324,24 @@ export default function NeuroDeck() {
     let activeDeck = deck;
     if (focusMode.active && focusMode.focalNodeId && cardEmbeddings[focusMode.focalNodeId]) {
       const focalEmbedding = cardEmbeddings[focusMode.focalNodeId];
-      activeDeck = deck.filter(q => {
-        if (q.id === focusMode.focalNodeId) return true;
-        if (!cardEmbeddings[q.id]) return false;
-        return cosineSimilarity(cardEmbeddings[q.id], focalEmbedding) >= focusMode.threshold;
+      const mode = focusMode.mode || 'threshold';
+      
+      let similarities = deck.map(q => {
+         if (q.id === focusMode.focalNodeId) return { id: q.id, sim: 2.0 };
+         if (!cardEmbeddings[q.id]) return { id: q.id, sim: -2.0 };
+         return { id: q.id, sim: cosineSimilarity(cardEmbeddings[q.id], focalEmbedding) };
       });
+
+      if (mode === 'threshold') {
+         const thresh = focusMode.threshold !== undefined ? focusMode.threshold : 0.85;
+         const validIds = new Set(similarities.filter(s => s.sim >= thresh || s.id === focusMode.focalNodeId).map(s => s.id));
+         activeDeck = deck.filter(q => validIds.has(q.id));
+      } else if (mode === 'topN') {
+         similarities.sort((a, b) => b.sim - a.sim);
+         const topN = focusMode.topN || 5;
+         const validIds = new Set(similarities.slice(0, topN).map(s => s.id));
+         activeDeck = deck.filter(q => validIds.has(q.id));
+      }
       if (activeDeck.length === 0) activeDeck = deck; 
     }
 

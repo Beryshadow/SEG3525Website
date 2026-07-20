@@ -136,7 +136,25 @@ export const TRANSLATIONS = {
     generateCode: "Générer",
     connectBtn: "Connecter",
     syncUpload: "Envoyer au Cloud",
-    syncDownload: "Récupérer du Cloud"
+    syncDownload: "Récupérer du Cloud",
+    focusModeActive: "Mode Focus Actif",
+    thresholdLabel: "Seuil de similarité",
+    topNLabel: "Nombre de cartes",
+    onlyThisCard: "Seulement cette carte",
+    allCards: "Toutes les cartes",
+    broadAll: "Large (Toutes)",
+    strictSelf: "Strict (Seule)",
+    justThis: "Juste celle-ci",
+    everything: "Tout",
+    studyCluster: "ÉTUDIER LE GROUPE",
+    cancelBtn: "ANNULER",
+    focusPreview: "Aperçu du Focus",
+    cardsPreview: "Cartes",
+    clearBtn: "EFFACER",
+    thresholdMode: "Seuil",
+    topNMode: "Top N",
+    knowledgeGraphTitle: "Neuro-Carte",
+    recenter: "Recalculer"
   },
   EN: {
     appTitle: "NeuroDeck",
@@ -275,7 +293,25 @@ export const TRANSLATIONS = {
     generateCode: "Generate",
     connectBtn: "Connect",
     syncUpload: "Upload to Cloud",
-    syncDownload: "Download from Cloud"
+    syncDownload: "Download from Cloud",
+    focusModeActive: "Focus Mode Active",
+    thresholdLabel: "Similarity Threshold",
+    topNLabel: "Number of Cards",
+    onlyThisCard: "Only This Card",
+    allCards: "All Cards",
+    broadAll: "Broad (All)",
+    strictSelf: "Strict (Self)",
+    justThis: "Just This",
+    everything: "Everything",
+    studyCluster: "STUDY CLUSTER",
+    cancelBtn: "CANCEL",
+    focusPreview: "Focus Preview",
+    cardsPreview: "Cards",
+    clearBtn: "CLEAR",
+    thresholdMode: "Threshold",
+    topNMode: "Top N",
+    knowledgeGraphTitle: "Neuro-Map",
+    recenter: "Recalculate"
   }
 };
 

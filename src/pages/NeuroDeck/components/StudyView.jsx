@@ -290,13 +290,13 @@ export const StudyView = ({
         <div className="w-full flex items-center justify-between neu-panel px-4 py-3 sm:py-2 text-[10px] sm:text-xs font-bold uppercase tracking-widest text-[var(--accent)] border-l-4 border-[var(--accent)]">
            <div className="flex items-center text-left">
               <i className="fas fa-bullseye mr-2 sm:mr-3 animate-pulse text-sm sm:text-base"></i> 
-              Focus Mode Active (Threshold: {focusMode.threshold.toFixed(2)})
+              {t.focusModeActive || "Focus Mode Active"} ({focusMode.mode === 'topN' ? `${t.topNMode || "Top N"}: ${focusMode.topN}` : (focusMode.threshold > 1.0 ? (t.onlyThisCard || 'Single Card') : (focusMode.threshold <= -1.0 ? (t.allCards || 'All Cards') : `${t.thresholdMode || 'Threshold'}: ${focusMode.threshold.toFixed(2)}`))})
            </div>
            <button 
               onClick={() => setFocusMode({ ...focusMode, active: false })}
               className="text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors ml-2 sm:ml-4 whitespace-nowrap"
            >
-              CLEAR
+              {t.clearBtn || "CLEAR"}
            </button>
         </div>
       )}
