@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { SaveIcon, ClockIcon, RandomIcon, SeqIcon, DownloadIcon, UploadIcon, SparklesIcon, CpuIcon, CheckIcon, EditIcon, CopyIcon, BrainIcon } from './Icons';
+import { QRCodeSVG } from 'qrcode.react';
 
 export const SettingsView = ({
   currentDeck, onImport, selectedModel, onModelChange,
@@ -9,7 +10,7 @@ export const SettingsView = ({
   onExportProgress, onImportProgress,
   myDecks, loadedDeckId, onSaveDeckToCache, onOverwriteDeck, onLoadDeckFromCache, 
   onDeleteDeckFromCache, onToggleDeckCompleted, onRenameDeck, onDirectDropSave,
-  onMoveDeck, syncCode, setSyncCode, onGenerateSyncCode, onConnectSyncCode, onDisconnectSyncCode,
+  onMoveDeck, syncCode, pairingCode, isGeneratingCode, setSyncCode, onGenerateSyncCode, onConnectSyncCode, onDisconnectSyncCode, onClearCloudData,
   onExportWithoutProgress, onShareToCode, onImportFromCode, t, showToast, servingMode, onServingModeChange
 }) => {
   const [jsonInput, setJsonInput] = useState("");
@@ -17,6 +18,8 @@ export const SettingsView = ({
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [inputSyncCode, setInputSyncCode] = useState(syncCode || "");
   const [importCode, setImportCode] = useState("");
+  const [activeTab, setActiveTab] = useState('decks');
+  const [shareQrCodeData, setShareQrCodeData] = useState(null);
   
   useEffect(() => {
      setInputSyncCode(syncCode || "");
@@ -237,9 +240,17 @@ export const SettingsView = ({
     { id: 'raw', icon: <EditIcon />, label: t.rawDeckImport || "Raw Import" }
   ];
 
+  const handleShare = async (withProgress, shareHierarchy) => {
+     const code = await onShareToCode(withProgress, shareHierarchy);
+     if (code) {
+        setShareQrCodeData({ code, url: `${window.location.origin}${window.location.pathname}?share=${code}` });
+     }
+  };
+
   const scrollTo = (id) => {
+    setActiveTab(id);
     const el = document.getElementById(`settings-${id}`);
-    if (el) {
+    if (el && window.innerWidth >= 1024) {
       const y = el.getBoundingClientRect().top + window.pageYOffset - 100;
       window.scrollTo({ top: y, behavior: 'smooth' });
     }
@@ -247,12 +258,12 @@ export const SettingsView = ({
 
   return (
     <div className="flex flex-col lg:flex-row gap-6 sm:gap-8 w-full">
-      <div className="w-full lg:w-1/4 hidden lg:block">
-        <nav className="sticky top-24 flex flex-col gap-3">
+      <div className="w-full lg:w-1/4">
+        <nav className="sticky top-24 flex lg:flex-col gap-2 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 scrollbar-hide">
           {navItems.map(item => (
-            <button key={item.id} onClick={() => scrollTo(item.id)} className="neu-btn p-4 flex items-center gap-4 text-sm font-bold text-left w-full rounded-2xl transition-all hover:text-[var(--accent)]">
-              <div className="w-5 text-center text-[var(--accent)]">{item.icon}</div>
-              <span className="uppercase tracking-widest text-[10px] xl:text-xs text-[var(--text-main)] leading-tight">{item.label}</span>
+            <button key={item.id} onClick={() => scrollTo(item.id)} className={`neu-btn p-3 lg:p-4 flex-shrink-0 flex items-center gap-2 lg:gap-4 text-sm font-bold text-left rounded-2xl transition-all hover:text-[var(--accent)] ${activeTab === item.id ? 'text-[var(--accent)] neu-pressed' : ''}`}>
+              <div className="w-4 lg:w-5 text-center">{item.icon}</div>
+              <span className="uppercase tracking-widest text-[10px] xl:text-xs leading-tight whitespace-nowrap lg:whitespace-normal text-[var(--text-main)]">{item.label}</span>
             </button>
           ))}
         </nav>
@@ -260,7 +271,7 @@ export const SettingsView = ({
       <div className="w-full lg:w-3/4 space-y-4 sm:space-y-8">
       <div 
         id="settings-decks"
-        className={`neu-panel p-4 sm:p-8 md:p-12 transition-all border-2 ${isDraggingOver ? 'border-[var(--accent)] bg-[var(--accent)] bg-opacity-5' : 'border-transparent'}`}
+        className={`neu-panel p-4 sm:p-8 md:p-12 transition-all border-2 ${isDraggingOver ? 'border-[var(--accent)] bg-[var(--accent)] bg-opacity-5' : 'border-transparent'} ${activeTab === 'decks' ? 'block' : 'hidden lg:block'}`}
         onDragOver={(e) => { e.preventDefault(); setIsDraggingOver(true); }}
         onDragLeave={(e) => { e.preventDefault(); setIsDraggingOver(false); }}
         onDrop={handleDrop}
@@ -470,7 +481,7 @@ export const SettingsView = ({
         )}
       </div>
 
-      <div id="settings-algorithm" className="neu-panel p-4 sm:p-8 md:p-12">
+      <div id="settings-algorithm" className={`neu-panel p-4 sm:p-8 md:p-12 ${activeTab === 'algorithm' ? 'block' : 'hidden lg:block'}`}>
         <h2 className="text-lg sm:text-2xl font-black text-[var(--text-main)] mb-4 sm:mb-8 flex items-center uppercase tracking-widest">
           <ClockIcon className="mr-2 sm:mr-4 text-[var(--accent)] text-lg sm:text-2xl" /> Card Delivery Modifier
         </h2>
@@ -553,7 +564,7 @@ export const SettingsView = ({
         </div>
       </div>
 
-      <div id="settings-backup" className="neu-panel p-4 sm:p-8 md:p-12">
+      <div id="settings-backup" className={`neu-panel p-4 sm:p-8 md:p-12 ${activeTab === 'backup' ? 'block' : 'hidden lg:block'}`}>
         <h2 className="text-lg sm:text-2xl font-black text-[var(--text-main)] mb-3 sm:mb-6 flex items-center uppercase tracking-widest">
           <DownloadIcon className="mr-2 sm:mr-4 text-[var(--accent)] text-lg sm:text-2xl" /> {t.dataBackup || "Data Backup"}
         </h2>
@@ -574,16 +585,34 @@ export const SettingsView = ({
             <button onClick={handleAnkiExport} className="neu-btn flex-1 min-w-[120px] py-2 sm:py-4 font-black uppercase tracking-wider text-[var(--text-muted)] flex items-center justify-center text-[10px] sm:text-sm rounded-lg sm:rounded-2xl">
               {t.exportAnki || "Export Anki (CSV)"}
             </button>
-            <button onClick={() => onShareToCode(true)} className="neu-btn flex-1 min-w-[120px] py-2 sm:py-4 font-black uppercase tracking-wider text-[color:var(--color-success)] flex items-center justify-center text-[10px] sm:text-sm rounded-lg sm:rounded-2xl">
-              {t.shareProgress || "Share (With Progress)"}
+            <button onClick={() => handleShare(true, false)} className="neu-btn flex-1 min-w-[120px] py-2 sm:py-4 font-black uppercase tracking-wider text-[color:var(--color-success)] flex items-center justify-center text-[10px] sm:text-sm rounded-lg sm:rounded-2xl">
+              {t.shareProgress || "Share Deck (With Progress)"}
             </button>
-            <button onClick={() => onShareToCode(false)} className="neu-btn flex-1 min-w-[120px] py-2 sm:py-4 font-black uppercase tracking-wider text-[color:var(--color-success)] flex items-center justify-center text-[10px] sm:text-sm rounded-lg sm:rounded-2xl">
-              {t.shareClean || "Share (Clean)"}
+            <button onClick={() => handleShare(false, false)} className="neu-btn flex-1 min-w-[120px] py-2 sm:py-4 font-black uppercase tracking-wider text-[color:var(--color-success)] flex items-center justify-center text-[10px] sm:text-sm rounded-lg sm:rounded-2xl">
+              {t.shareClean || "Share Deck (Clean)"}
+            </button>
+            <button onClick={() => handleShare(true, true)} className="neu-btn flex-1 min-w-[120px] py-2 sm:py-4 font-black uppercase tracking-wider text-[color:var(--color-success)] flex items-center justify-center text-[10px] sm:text-sm rounded-lg sm:rounded-2xl">
+              Share Hierarchy (With Progress)
+            </button>
+            <button onClick={() => handleShare(false, true)} className="neu-btn flex-1 min-w-[120px] py-2 sm:py-4 font-black uppercase tracking-wider text-[color:var(--color-success)] flex items-center justify-center text-[10px] sm:text-sm rounded-lg sm:rounded-2xl">
+              Share Hierarchy (Clean)
             </button>
           </div>
+          {shareQrCodeData && (
+             <div className="mt-6 p-4 neu-pressed rounded-2xl max-w-sm mx-auto lg:mx-0 flex flex-col items-center">
+                <div className="flex justify-between w-full items-center mb-4">
+                  <span className="text-sm font-black uppercase tracking-widest text-[var(--accent)]">Share Code: {shareQrCodeData.code}</span>
+                  <button onClick={() => setShareQrCodeData(null)} className="text-[var(--text-muted)] hover:text-white"><i className="fas fa-times"></i></button>
+                </div>
+                <div className="bg-white p-3 rounded-xl mb-3">
+                   <QRCodeSVG value={shareQrCodeData.url} size={200} />
+                </div>
+                <span className="text-xs font-bold text-center text-[var(--text-muted)]">Scan this code or open the link to import the shared cards.</span>
+             </div>
+          )}
         </div>
 
-        <div>
+        <div className="mt-8 pt-8 border-t border-white/5">
           <label className="text-xs font-bold text-[var(--text-muted)] block mb-2 uppercase tracking-widest flex items-center">
             <DownloadIcon className="mr-2" /> {t.importLoadTitle || "Import & Load"}
           </label>
@@ -598,7 +627,7 @@ export const SettingsView = ({
               value={importCode} 
               onChange={e => setImportCode(e.target.value)} 
               className="neu-pressed flex-1 px-4 py-3 rounded-xl bg-transparent text-[var(--text-main)] font-black outline-none uppercase min-w-[150px]"
-              placeholder="ENTER SHARE CODE"
+              placeholder="ENTER SYNC OR SHARE CODE"
             />
             <button 
               onClick={() => { onImportFromCode(importCode); setImportCode(""); }}
@@ -634,7 +663,7 @@ export const SettingsView = ({
           />
       </div>
 
-      <div id="settings-nli" className="neu-panel p-4 sm:p-8 md:p-12">
+      <div id="settings-nli" className={`neu-panel p-4 sm:p-8 md:p-12 ${activeTab === 'nli' ? 'block' : 'hidden lg:block'}`}>
         <h2 className="text-lg sm:text-2xl font-black text-[var(--text-main)] mb-4 sm:mb-8 flex items-center uppercase tracking-widest">
           <CpuIcon className="mr-2 sm:mr-4 text-[var(--accent)] text-lg sm:text-2xl" /> {t.aiModelTitle || "NLI Model (Grading)"}
         </h2>
@@ -651,7 +680,7 @@ export const SettingsView = ({
         </div>
       </div>
 
-      <div id="settings-embedding" className="neu-panel p-4 sm:p-8 md:p-12">
+      <div id="settings-embedding" className={`neu-panel p-4 sm:p-8 md:p-12 ${activeTab === 'embedding' ? 'block' : 'hidden lg:block'}`}>
         <h2 className="text-lg sm:text-2xl font-black text-[var(--text-main)] mb-4 sm:mb-8 flex items-center uppercase tracking-widest">
           <BrainIcon className="mr-2 sm:mr-4 text-[var(--accent)] text-lg sm:text-2xl" /> {t.embeddingModelTitle || "Embedding Model (Semantic Focus & Graph)"}
         </h2>
@@ -668,7 +697,7 @@ export const SettingsView = ({
         </div>
       </div>
 
-      <div id="settings-generator" className="neu-panel p-4 sm:p-8 md:p-12 flex flex-col sm:flex-row justify-between items-center gap-6">
+      <div id="settings-generator" className={`neu-panel p-4 sm:p-8 md:p-12 flex flex-col sm:flex-row justify-between items-center gap-6 ${activeTab === 'generator' ? 'block' : 'hidden lg:flex'}`}>
         <div className="text-left">
           <h2 className="text-lg sm:text-2xl font-black text-[var(--text-main)] mb-2 flex items-center justify-start uppercase tracking-widest">
             <SparklesIcon className="mr-2 sm:mr-4 text-[var(--accent)] text-lg sm:text-2xl" /> {t.llmGeneratorTitle || "AI Deck Generator"}
@@ -687,7 +716,7 @@ export const SettingsView = ({
         </div>
       </div>
 
-      <div id="settings-sync" className="neu-panel p-4 sm:p-8 md:p-12">
+      <div id="settings-sync" className={`neu-panel p-4 sm:p-8 md:p-12 ${activeTab === 'sync' ? 'block' : 'hidden lg:block'}`}>
         <h2 className="text-lg sm:text-2xl font-black text-[var(--text-main)] mb-4 sm:mb-8 flex items-center uppercase tracking-widest">
           <UploadIcon className="mr-2 sm:mr-4 text-[var(--accent)] text-lg sm:text-2xl" /> {t.cloudSyncTitle || "P2P Cloud Sync"}
         </h2>
@@ -700,7 +729,7 @@ export const SettingsView = ({
                 value={inputSyncCode} 
                 onChange={e => setInputSyncCode(e.target.value)} 
                 className="neu-pressed flex-1 px-4 py-3 rounded-xl bg-transparent text-[var(--text-main)] font-black outline-none uppercase min-w-[150px]"
-                placeholder="ENTER CODE"
+                placeholder="ENTER SYNC OR SHARE CODE"
               />
               <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
                 {syncCode && (
@@ -718,22 +747,47 @@ export const SettingsView = ({
                 >
                   {t.connectBtn || "Connect"}
                 </button>
-                <button 
+                                <button 
                   onClick={onGenerateSyncCode} 
-                  className="neu-btn flex-1 sm:flex-none px-4 py-3 rounded-xl font-bold text-xs uppercase whitespace-nowrap text-[color:var(--color-success)]"
+                  disabled={isGeneratingCode}
+                  className="neu-btn flex-1 sm:flex-none px-4 py-3 rounded-xl font-bold text-xs uppercase whitespace-nowrap text-[color:var(--color-success)] disabled:opacity-50"
                 >
-                  {t.generateCode || "Generate"}
+                  {isGeneratingCode ? "Generating your new code..." : (t.generateCode || "Generate")}
                 </button>
               </div>
             </div>
             <p className="text-[10px] text-[var(--text-muted)] mt-2">
-              {syncCode ? "Auto-sync is enabled. Changes will be pushed and pulled automatically in the background." : "Enter a code to enable automatic cross-device sync (expires after 12h of inactivity)."}
+              {syncCode ? (t?.syncDescActive || "Auto-sync is enabled. Changes will be pushed and pulled automatically in the background.") : (t?.syncDescInactive || "Enter a code to enable automatic cross-device sync (expires after 5 minutes of inactivity). Share codes expire after 3 days.")}
             </p>
+            {syncCode && (
+              <div className="mt-6 flex flex-col items-center p-4 neu-pressed rounded-2xl max-w-xs mx-auto lg:mx-0">
+                {pairingCode && (
+                   <div className="mb-4 text-center">
+                     <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] block mb-1">Pairing Code (Expires in 5m)</span>
+                     <span className="font-mono text-3xl font-black tracking-widest text-[var(--accent)]">{pairingCode}</span>
+                   </div>
+                )}
+                <span className="text-xs font-bold uppercase tracking-widest mb-3 text-[var(--text-main)]">{t?.scanToSync || "Scan to Sync"}</span>
+                <div className="bg-white p-2 rounded-xl">
+                  <QRCodeSVG value={`${window.location.origin}${window.location.pathname}?sync=${syncCode}`} size={150} />
+                </div>
+              </div>
+            )}
+            
+            <div className="mt-8 pt-8 border-t border-white/5">
+              <label className="text-xs font-bold text-[color:var(--color-danger)] block mb-2 uppercase tracking-widest">{t?.dangerZone || "Danger Zone"}</label>
+              <button 
+                onClick={onClearCloudData} 
+                className="neu-btn px-4 py-3 rounded-xl font-bold text-xs uppercase text-[color:var(--color-danger)] flex items-center justify-center"
+              >
+                {t?.clearCloudData || "Clear All Cloud Data (Remote Wipe)"}
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-      <div id="settings-raw" className="neu-panel p-4 sm:p-8 md:p-12">
+      <div id="settings-raw" className={`neu-panel p-4 sm:p-8 md:p-12 ${activeTab === 'raw' ? 'block' : 'hidden lg:block'}`}>
         <h2 className="text-lg sm:text-2xl font-black text-[var(--text-main)] mb-3 sm:mb-6 flex items-center uppercase tracking-widest">
           <UploadIcon className="mr-2 sm:mr-4 text-[var(--accent)] text-lg sm:text-2xl" /> {t.rawDeckImport || "Raw Deck Import"}
         </h2>

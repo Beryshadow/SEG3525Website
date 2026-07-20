@@ -1,11 +1,15 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useSharedLogic } from '../../utilities/shared';
 import { useNLIModel } from '../../hooks/useNLIModel';
 import { useEmbeddingModel } from '../../hooks/useEmbeddingModel';
 import { TRANSLATIONS, DEFAULT_DECK } from '../../data/flashcardData';
 import { cosineSimilarity } from '../../utilities/shared';
 
+
+import { useNeuroSync } from './hooks/useNeuroSync';
+import { useDeckManager } from './hooks/useDeckManager';
+import { useStudyEngine } from './hooks/useStudyEngine';
 import { SettingsView } from './components/SettingsView';
 import { DashboardView } from './components/DashboardView';
 import { StudyView } from './components/StudyView';
@@ -17,6 +21,7 @@ const SYNC_API_BASE = import.meta.env.DEV ? 'http://localhost:3001/api/sync' : '
 export default function NeuroDeck() {
   const [view, setView] = useState("study");
   const navigate = useNavigate();
+  const location = useLocation();
   const { appTheme, theme, toggleTheme, lang, toggleLang } = useSharedLogic([]);
 
   const currentLangKey = (lang || 'EN').toUpperCase();
@@ -148,23 +153,6 @@ export default function NeuroDeck() {
 
   const [toastMessage, setToastMessage] = useState("");
   const toastTimeoutRef = useRef(null);
-  const syncTimeoutRef = useRef(null);
-
-  const [syncCode, setSyncCode] = useState(() => {
-    return localStorage.getItem('neurodeck-sync-code') || "";
-  });
-  
-  const [syncVersion, setSyncVersion] = useState(() => {
-    return parseInt(localStorage.getItem('neurodeck-sync-version')) || 0;
-  });
-
-  useEffect(() => {
-    localStorage.setItem('neurodeck-sync-code', syncCode);
-  }, [syncCode]);
-  
-  useEffect(() => {
-    localStorage.setItem('neurodeck-sync-version', syncVersion.toString());
-  }, [syncVersion]);
 
   const showToast = useCallback((msg) => {
     if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
@@ -191,656 +179,28 @@ export default function NeuroDeck() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [navigate, view]);
 
-  const isPullingRef = useRef(false);
 
-  useEffect(() => {
-    return () => {
-      if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
-      if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
-    }
-  }, []);
+  const {
+    saveDeckToCache, overwriteDeckCache, loadDeckFromCache, deleteDeckFromCache,
+    renameDeck, handleDirectDropSave, handleMoveDeck, handleUpdateCards,
+    handleDeleteCards, handleToggleDeckCompleted, handleExportProgress,
+    handleExportWithoutProgress, handleImport, handleImportProgress
+  } = useDeckManager({ myDecks, setMyDecks, currentDeck, setCurrentDeck, loadedDeckId, setLoadedDeckId, streak, setStreak, showToast, t });
 
-  const handleCloudSyncDownload = useCallback(async (code, manual = false) => {
-    if (!code) return;
-    try {
-      const res = await fetch(`${SYNC_API_BASE}/${code}`);
-      if (res.status === 404) {
-         showToast("Sync code expired or not found.");
-         setSyncCode("");
-         return;
-      }
-      if (!res.ok) {
-         console.warn("Failed to pull sync data");
-         if (manual) showToast("Failed to pull sync data.");
-         return;
-      }
-      const data = await res.json();
-      if (data && data.version > syncVersion) {
-         isPullingRef.current = true;
-         if (data.data.myDecks) setMyDecks(data.data.myDecks);
-         if (data.data.currentDeck) setCurrentDeck(data.data.currentDeck);
-         if (data.data.loadedDeckId !== undefined) setLoadedDeckId(data.data.loadedDeckId);
-         if (data.data.streak !== undefined) setStreak(data.data.streak);
-         if (data.data.selectedModel) setSelectedModel(data.data.selectedModel);
-         if (data.data.cardOrderMode) setCardOrderMode(data.data.cardOrderMode);
-         if (data.data.servingMode) setServingMode(data.data.servingMode);
-         if (data.data.selectedEmbeddingModel) setSelectedEmbeddingModel(data.data.selectedEmbeddingModel);
-         if (data.data.focusMode) setFocusMode(data.data.focusMode);
-         if (data.data.questionTypeSettings) setQuestionTypeSettings(data.data.questionTypeSettings);
-         setSyncVersion(data.version);
-         if (manual) {
-            setSyncCode(code);
-         }
-         showToast("Cloud sync: Data pulled successfully.");
-      } else if (manual) {
-         showToast("Connected! You are already up to date.");
-      }
-    } catch (err) {
-       console.error("Auto-pull error", err);
-       if (manual) showToast("Connection failed.");
-    }
-  }, [syncVersion, showToast]);
+  const {
+    computeActiveDeckPool, selectNextCard, updateCardStats, handleManualNavigation
+  } = useStudyEngine({ currentDeck, setStreak, setCurrentIndex, t });
 
-  const handleConnectSyncCode = useCallback((codeToConnect) => {
-      handleCloudSyncDownload(codeToConnect, true);
-  }, [handleCloudSyncDownload]);
-
-  const forcePushToCloud = useCallback(async (codeToUse) => {
-      const code = codeToUse || syncCode;
-      if (!code) return;
-      const payload = { myDecks, currentDeck, loadedDeckId, streak, selectedModel, cardOrderMode, servingMode, selectedEmbeddingModel, focusMode, questionTypeSettings };
-      const newVersion = Date.now();
-      try {
-         const res = await fetch(`${SYNC_API_BASE}/${code}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ data: payload, version: newVersion })
-         });
-         if (res.ok) {
-            setSyncVersion(newVersion);
-            showToast("Cloud sync: Data pushed initially.");
-         }
-      } catch (err) {
-         console.error("Auto-push error", err);
-      }
-  }, [syncCode, myDecks, currentDeck, loadedDeckId, streak, selectedModel, cardOrderMode, servingMode, selectedEmbeddingModel, focusMode, questionTypeSettings, showToast]);
-
-  const handleGenerateSyncCode = useCallback(() => {
-     const newCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-     setSyncCode(newCode);
-     forcePushToCloud(newCode);
-  }, [forcePushToCloud]);
-
-  useEffect(() => {
-    let intervalId;
-    if (syncCode) {
-       intervalId = setInterval(async () => {
-          try {
-             const res = await fetch(`${SYNC_API_BASE}/${syncCode}/version`);
-             if (res.status === 404) {
-                 showToast("Sync code expired. Please generate a new one.");
-                 setSyncCode("");
-                 return;
-             }
-             if (res.ok) {
-                const data = await res.json();
-                if (data && data.version > syncVersion) {
-                   handleCloudSyncDownload(syncCode);
-                }
-             }
-          } catch (err) {}
-       }, 5000);
-    }
-    return () => { if (intervalId) clearInterval(intervalId); }
-  }, [syncCode, syncVersion, handleCloudSyncDownload, showToast]);
-
-  useEffect(() => {
-    const onFocus = () => {
-       if (syncCode) {
-          handleCloudSyncDownload(syncCode);
-       }
-    };
-    window.addEventListener('focus', onFocus);
-    return () => window.removeEventListener('focus', onFocus);
-  }, [syncCode, handleCloudSyncDownload]);
-
-  useEffect(() => {
-    localStorage.setItem('neurodeck-progress', JSON.stringify(currentDeck));
-    localStorage.setItem('neurodeck-current-index', currentIndex.toString());
-    localStorage.setItem('neurodeck-streak', streak.toString());
-    localStorage.setItem('neurodeck-my-decks', JSON.stringify(myDecks));
-    if (loadedDeckId) {
-      localStorage.setItem('neurodeck-loaded-deck-id', loadedDeckId);
-    } else {
-      localStorage.removeItem('neurodeck-loaded-deck-id');
-    }
-
-    if (syncCode) {
-       if (isPullingRef.current) {
-          isPullingRef.current = false;
-          return;
-       }
-       if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
-       syncTimeoutRef.current = setTimeout(async () => {
-          const payload = { myDecks, currentDeck, loadedDeckId, streak, selectedModel, cardOrderMode, servingMode, selectedEmbeddingModel, focusMode, questionTypeSettings };
-          const newVersion = Date.now();
-          try {
-             const res = await fetch(`${SYNC_API_BASE}/${syncCode}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ data: payload, version: newVersion })
-             });
-             if (res.ok) {
-                setSyncVersion(newVersion);
-             }
-          } catch (err) {
-             console.error("Auto-push error", err);
-          }
-       }, 2000);
-    }
-  }, [currentDeck, currentIndex, streak, myDecks, loadedDeckId, syncCode, selectedModel, cardOrderMode, servingMode, selectedEmbeddingModel, focusMode, questionTypeSettings]);
-
-  const computeActiveDeckPool = useCallback((deck) => {
-    if (!deck || deck.length === 0) return [];
-    
-    let activeDeck = deck;
-    if (focusMode.active && focusMode.focalNodeId && cardEmbeddings[focusMode.focalNodeId]) {
-      const focalEmbedding = cardEmbeddings[focusMode.focalNodeId];
-      const mode = focusMode.mode || 'threshold';
-      
-      let similarities = deck.map(q => {
-         if (q.id === focusMode.focalNodeId) return { id: q.id, sim: 2.0 };
-         if (!cardEmbeddings[q.id]) return { id: q.id, sim: -2.0 };
-         return { id: q.id, sim: cosineSimilarity(cardEmbeddings[q.id], focalEmbedding) };
-      });
-
-      if (mode === 'threshold') {
-         const thresh = focusMode.threshold !== undefined ? focusMode.threshold : 0.85;
-         const validIds = new Set(similarities.filter(s => s.sim >= thresh || s.id === focusMode.focalNodeId).map(s => s.id));
-         activeDeck = deck.filter(q => validIds.has(q.id));
-      } else if (mode === 'topN') {
-         similarities.sort((a, b) => b.sim - a.sim);
-         const topN = focusMode.topN || 5;
-         const validIds = new Set(similarities.slice(0, topN).map(s => s.id));
-         activeDeck = deck.filter(q => validIds.has(q.id));
-      }
-      if (activeDeck.length === 0) activeDeck = deck; 
-    }
-
-    activeDeck = activeDeck.filter(q => {
-       const isLong = q.type === 'long' || (!q.choices || q.choices.length === 0);
-       const isMulti = q.correctAnswers && q.correctAnswers.length > 1;
-       const isMcc = !isLong && !isMulti;
-       
-       if (isLong && !questionTypeSettings.long) return false;
-       if (isMulti && !questionTypeSettings.multi) return false;
-       if (isMcc && !questionTypeSettings.mcc) return false;
-       return true;
-    });
-    if (activeDeck.length === 0) activeDeck = deck;
-    return activeDeck;
-  }, [focusMode, cardEmbeddings, questionTypeSettings.long, questionTypeSettings.multi, questionTypeSettings.mcc]);
-
-  const selectNextCard = useCallback((deck) => {
-    if (!deck || deck.length === 0) return 0;
-    
-    let activeDeck = computeActiveDeckPool(deck);
-
-
-    if (questionTypeSettings.proportional) {
-       let targetLong = 0, targetMcc = 0, targetMulti = 0;
-       let actualLong = 0, actualMcc = 0, actualMulti = 0;
-       
-       for (const q of deck) {
-          const isLong = q.type === 'long' || (!q.choices || q.choices.length === 0);
-          const isMulti = q.correctAnswers && q.correctAnswers.length > 1;
-          const isMcc = !isLong && !isMulti;
-          
-          if (isLong && questionTypeSettings.long) { targetLong++; actualLong += (q.attempts || 0); }
-          else if (isMulti && questionTypeSettings.multi) { targetMulti++; actualMulti += (q.attempts || 0); }
-          else if (isMcc && questionTypeSettings.mcc) { targetMcc++; actualMcc += (q.attempts || 0); }
-       }
-       
-       const totalTargets = targetLong + targetMcc + targetMulti;
-       const totalAttempts = actualLong + actualMcc + actualMulti;
-       
-       if (totalTargets > 0 && totalAttempts > 0) {
-          const expectedLong = (targetLong / totalTargets) * totalAttempts;
-          const expectedMcc = (targetMcc / totalTargets) * totalAttempts;
-          const expectedMulti = (targetMulti / totalTargets) * totalAttempts;
-          
-          const deficitLong = expectedLong - actualLong;
-          const deficitMcc = expectedMcc - actualMcc;
-          const deficitMulti = expectedMulti - actualMulti;
-          
-          let maxDeficit = -Infinity;
-          let targetType = null;
-          
-          if (questionTypeSettings.mcc && targetMcc > 0 && deficitMcc > maxDeficit) {
-             maxDeficit = deficitMcc; targetType = 'mcc';
-          }
-          if (questionTypeSettings.long && targetLong > 0 && deficitLong > maxDeficit) {
-             maxDeficit = deficitLong; targetType = 'long';
-          }
-          if (questionTypeSettings.multi && targetMulti > 0 && deficitMulti > maxDeficit) {
-             maxDeficit = deficitMulti; targetType = 'multi';
-          }
-          
-          if (targetType) {
-             const filteredProportional = activeDeck.filter(q => {
-                const isLong = q.type === 'long' || (!q.choices || q.choices.length === 0);
-                const isMulti = q.correctAnswers && q.correctAnswers.length > 1;
-                if (targetType === 'long') return isLong;
-                if (targetType === 'multi') return isMulti;
-                return !isLong && !isMulti;
-             });
-             if (filteredProportional.length > 0) {
-                activeDeck = filteredProportional;
-             }
-          }
-       }
-    }
-
-    const now = 0; 
-    let dueCards = activeDeck.filter(q => q.dueTurn <= now && !q.isMastered);
-
-    if (dueCards.length === 0) {
-      dueCards = activeDeck.filter(q => !q.isMastered);
-    }
-    if (dueCards.length === 0) {
-      return deck.findIndex(q => q.id === (activeDeck[0] ? activeDeck[0].id : deck[0].id)); 
-    }
-
-    dueCards.sort((a, b) => a.score - b.score);
-    const lowestScore = dueCards[0].score;
-    const lowestScoreCards = dueCards.filter(q => q.score === lowestScore);
-
-    if (cardOrderMode === 'random') {
-      const selected = lowestScoreCards[Math.floor(Math.random() * lowestScoreCards.length)];
-      return deck.findIndex(q => q.id === selected.id);
-    } else if (cardOrderMode === 'semantic') {
-      let attempted = deck.filter(q => q.attempts > 0 && !q.isMastered);
-      let targetEmbeddings = [];
-      if (attempted.length > 0) {
-         attempted.sort((a,b) => a.score - b.score);
-         const lowestAttemptedScore = attempted[0].score;
-         const weakestCards = attempted.filter(q => q.score === lowestAttemptedScore);
-         targetEmbeddings = weakestCards.map(q => cardEmbeddings[q.id]).filter(Boolean);
-      }
-      
-      if (targetEmbeddings.length > 0) {
-          const weaknessVector = new Array(targetEmbeddings[0].length).fill(0);
-          for(const emb of targetEmbeddings) {
-             for(let i=0; i<emb.length; i++) weaknessVector[i] += emb[i];
-          }
-          for(let i=0; i<weaknessVector.length; i++) weaknessVector[i] /= targetEmbeddings.length;
-
-          const sortedBySimilarity = [...lowestScoreCards].sort((a, b) => {
-             const simA = cardEmbeddings[a.id] ? cosineSimilarity(cardEmbeddings[a.id], weaknessVector) : 0;
-             const simB = cardEmbeddings[b.id] ? cosineSimilarity(cardEmbeddings[b.id], weaknessVector) : 0;
-             return simB - simA; 
-          });
-          return deck.findIndex(q => q.id === sortedBySimilarity[0].id);
-      } else {
-          const selected = lowestScoreCards[Math.floor(Math.random() * lowestScoreCards.length)];
-          return deck.findIndex(q => q.id === selected.id);
-      }
-    } else {
-      return deck.findIndex(q => q.id === lowestScoreCards[0].id);
-    }
-  }, [cardOrderMode, cardEmbeddings, focusMode, questionTypeSettings.proportional, computeActiveDeckPool]);
-
-  const updateCardStats = useCallback((id, newScore, firstTry, skipped) => {
-    setCurrentDeck(prev => {
-      const nextDeck = [...prev];
-      const idx = nextDeck.findIndex(q => q.id === id);
-      if (idx === -1) return prev;
-
-      const card = { ...nextDeck[idx] };
-      card.score = newScore;
-      card.attempts = (card.attempts || 0) + 1;
-      
-      const interval = Math.max(1, Math.floor(Math.pow(2, newScore - 5))); 
-      card.dueTurn = 0 + interval; 
-
-      if (newScore >= 8) card.isMastered = true;
-      else card.isMastered = false;
-
-      nextDeck[idx] = card;
-      
-      if (loadedDeckId) {
-         setMyDecks(currDecks => currDecks.map(d => {
-            if (d.id === loadedDeckId) {
-               return { ...d, deck: nextDeck };
-            }
-            return d;
-         }));
-      }
-
-      return nextDeck;
-    });
-
-    if (skipped) {
-      setStreak(0);
-      showToast(t.skippedCard || "Card Skipped. Review Later.");
-    } else if (firstTry && newScore >= 8) {
-      setStreak(s => s + 1);
-      showToast(t.perfectRecall || "Perfect Recall! Mastering rapidly.");
-    } else if (firstTry) {
-      setStreak(s => s + 1);
-      showToast(t.correctAnswer || "Correct!");
-    } else {
-      setStreak(0);
-    }
-
-    setCurrentIndex(prevIdx => {
-      const updatedDeck = [...currentDeck];
-      const idx = updatedDeck.findIndex(q => q.id === id);
-      if (idx > -1) {
-         updatedDeck[idx].score = newScore;
-         if (newScore >= 8) updatedDeck[idx].isMastered = true;
-         else updatedDeck[idx].isMastered = false;
-      }
-      return selectNextCard(updatedDeck);
-    });
-  }, [t, showToast, currentDeck, loadedDeckId, selectNextCard]);
-
-  const handleManualNavigation = useCallback((dir) => {
-    if (currentDeck.length === 0) return;
-    const pool = computeActiveDeckPool(currentDeck);
-    const activeDeckPool = pool.length > 0 ? pool : currentDeck;
-    const currentCard = currentDeck[currentIndex];
-    
-    let poolIdx = activeDeckPool.findIndex(q => q.id === currentCard?.id);
-    if (poolIdx === -1) poolIdx = 0;
-    
-    let nextPoolIdx = poolIdx + dir;
-    if (nextPoolIdx < 0) nextPoolIdx = activeDeckPool.length - 1;
-    if (nextPoolIdx >= activeDeckPool.length) nextPoolIdx = 0;
-    
-    const nextCard = activeDeckPool[nextPoolIdx];
-    const nextIdx = currentDeck.findIndex(q => q.id === nextCard.id);
-    setCurrentIndex(nextIdx !== -1 ? nextIdx : 0);
-  }, [currentDeck, currentIndex, computeActiveDeckPool]);
-
-  const handleImport = (jsonStr) => {
-    try {
-      const parsed = JSON.parse(jsonStr);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        const formatted = parsed.map((q, idx) => {
-          const correctAnswersArray = q.correctAnswers || (q.correctAnswer ? [q.correctAnswer] : []);
-          return {
-            ...q,
-            correctAnswers: correctAnswersArray,
-            id: q.id || Date.now().toString() + Math.random().toString(),
-            score: 0,
-            dueTurn: 0,
-            attempts: 0,
-            isMastered: false
-          };
-        });
-        setCurrentDeck(formatted);
-        setCurrentIndex(0);
-        setLoadedDeckId(null);
-        showToast(t.importSuccess || "Deck imported successfully!");
-      } else {
-        showToast(t.invalidJson || "Invalid JSON array.");
-      }
-    } catch (e) {
-      showToast(t.parseError || "Failed to parse JSON.");
-    }
-  };
-
-  const saveDeckToCache = (name, forceEmpty = false) => {
-    if (!forceEmpty && currentDeck.length === 0) {
-       showToast(t.noDeckToSave || "No active deck to save!");
-       return;
-    }
-    const newDeck = {
-       id: Date.now().toString(),
-       name: name || `Deck ${myDecks.length + 1}`,
-       deck: forceEmpty ? [] : currentDeck,
-       completed: false,
-       parentId: null
-    };
-    setMyDecks(prev => [newDeck, ...prev]);
-    if (!forceEmpty) {
-       setLoadedDeckId(newDeck.id);
-    }
-    showToast(`${t.deckSaved || "Deck saved as"} "${newDeck.name}"`);
-  };
-
-  const overwriteDeckCache = () => {
-    if (!loadedDeckId || currentDeck.length === 0) return;
-    
-    setMyDecks(prev => {
-       const updatedDecks = [...prev];
-       
-       const cardsByDeck = {};
-       currentDeck.forEach(card => {
-          const originalId = card.originalDeckId || loadedDeckId;
-          if (!cardsByDeck[originalId]) cardsByDeck[originalId] = [];
-          
-          const cardCopy = { ...card };
-          delete cardCopy.originalDeckId;
-          cardsByDeck[originalId].push(cardCopy);
-       });
-       
-       return updatedDecks.map(d => {
-          if (cardsByDeck[d.id]) {
-             return { ...d, deck: cardsByDeck[d.id] };
-          }
-          if (d.id === loadedDeckId && !cardsByDeck[d.id]) {
-             return { ...d, deck: [] };
-          }
-          return d;
-       });
-    });
-    
-    showToast(t.progressSaved || "Progress saved to cached deck.");
-  };
-
-  const getFlattenedDeck = (deckId, decksList) => {
-    let flattened = [];
-    const deck = decksList.find(d => d.id === deckId);
-    if (!deck) return flattened;
-    
-    if (deck.deck && deck.deck.length > 0) {
-      flattened = deck.deck.map(card => ({ ...card, originalDeckId: deck.id }));
-    }
-    
-    const children = decksList.filter(d => d.parentId === deck.id);
-    for (const child of children) {
-      flattened = [...flattened, ...getFlattenedDeck(child.id, decksList)];
-    }
-    return flattened;
-  };
-
-  const loadDeckFromCache = (id) => {
-    const deckToLoad = myDecks.find(d => d.id === id);
-    if (deckToLoad) {
-       const flattenedCards = getFlattenedDeck(id, myDecks);
-       setCurrentDeck(flattenedCards);
-       setLoadedDeckId(id);
-       setCurrentIndex(selectNextCard(flattenedCards));
-       setView('study');
-       showToast(`${t.loadedDeckMsg || "Loaded deck"} "${deckToLoad.name}"`);
-    }
-  };
-
-  const deleteDeckFromCache = (id) => {
-    const getDescendants = (deckId, decksList) => {
-       const children = decksList.filter(d => d.parentId === deckId);
-       let descendants = [...children];
-       for (const child of children) {
-          descendants = [...descendants, ...getDescendants(child.id, decksList)];
-       }
-       return descendants;
-    };
-    
-    const descendants = getDescendants(id, myDecks);
-    const idsToDelete = [id, ...descendants.map(d => d.id)];
-    
-    setMyDecks(prev => prev.filter(d => !idsToDelete.includes(d.id)));
-    if (idsToDelete.includes(loadedDeckId)) {
-       setLoadedDeckId(null);
-    }
-    showToast(t.deckDeleted || "Deck deleted.");
-  };
-  
-  const renameDeck = (id, newName) => {
-    setMyDecks(prev => prev.map(d => d.id === id ? { ...d, name: newName } : d));
-    showToast(t.deckRenamed || "Deck renamed.");
-  };
-
-  const handleDirectDropSave = (deckObj) => {
-    setMyDecks(prev => [{...deckObj, parentId: deckObj.parentId || null}, ...prev]);
-    showToast(`${t.deckSaved || "Deck saved as"} "${deckObj.name}"`);
-  };
-
-  const handleMoveDeck = (draggedId, targetParentId) => {
-    setMyDecks(prev => prev.map(d => d.id === draggedId ? { ...d, parentId: targetParentId } : d));
-  };
-
-  const handleUpdateCards = (updates) => {
-    setCurrentDeck(prev => {
-      const next = [...prev];
-      updates.forEach(u => {
-        const idx = next.findIndex(c => c.id === u.id);
-        if (idx > -1) {
-          next[idx] = { ...next[idx], ...u.changes };
-          if (next[idx].score >= 8) next[idx].isMastered = true;
-          else if (next[idx].score < 8) next[idx].isMastered = false;
-        }
-      });
-      if (loadedDeckId) {
-         setMyDecks(currDecks => currDecks.map(d => {
-            if (d.id === loadedDeckId) return { ...d, deck: next };
-            return d;
-         }));
-      }
-      return next;
-    });
-    showToast(t.cardsUpdated || "Cards updated successfully.");
-  };
-
-  const handleDeleteCards = (idsToDelete) => {
-    setCurrentDeck(prev => {
-      const next = prev.filter(c => !idsToDelete.includes(c.id));
-      if (loadedDeckId) {
-         setMyDecks(currDecks => currDecks.map(d => {
-            if (d.id === loadedDeckId) return { ...d, deck: next };
-            return d;
-         }));
-      }
-      return next;
-    });
-    setCurrentIndex(0);
-    showToast(t.cardsDeleted || "Cards deleted.");
-  };
-
-  const handleExportProgress = () => {
-    const dataStr = JSON.stringify({ myDecks, currentDeck, loadedDeckId, streak }, null, 2);
-    const blob = new Blob([dataStr], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `neurodeck-backup-${new Date().toISOString().split("T")[0]}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const handleExportWithoutProgress = () => {
-    const strippedDeck = currentDeck.map(q => ({
-      ...q,
-      score: 0,
-      attempts: 0,
-      isMastered: false
-    }));
-    const dataStr = JSON.stringify([{ ...strippedDeck }], null, 2);
-    // Wait, the standard array format for raw decks is just the array of cards
-    const blob = new Blob([JSON.stringify(strippedDeck, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `neurodeck-clean-export-${new Date().toISOString().split("T")[0]}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const handleShareToCode = async (withProgress) => {
-    const newCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-    const deckToShare = withProgress ? currentDeck : currentDeck.map(q => ({
-      ...q,
-      score: 0,
-      attempts: 0,
-      isMastered: false
-    }));
-    
-    const payload = { sharedDeck: deckToShare, sharedName: `Shared Deck ${newCode}` };
-    const newVersion = Date.now();
-    try {
-      const res = await fetch(`${SYNC_API_BASE}/${newCode}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ data: payload, version: newVersion })
-      });
-      if (res.ok) {
-        showToast(`Deck shared! Code: ${newCode} (Copied to clipboard)`);
-        navigator.clipboard.writeText(newCode).catch(() => {});
-      }
-    } catch (err) {
-      console.error("Share error", err);
-      showToast("Failed to generate share code.");
-    }
-  };
-
-  const handleImportFromCode = async (code) => {
-    if (!code) return;
-    try {
-      const res = await fetch(`${SYNC_API_BASE}/${code}/version`);
-      if (res.status === 404) {
-        showToast("Share code expired or invalid.");
-        return;
-      }
-      if (res.ok) {
-        const dataRes = await fetch(`${SYNC_API_BASE}/${code}`);
-        const data = await dataRes.json();
-        if (data && data.data && data.data.sharedDeck) {
-          const newDeck = data.data.sharedDeck;
-          if (window.confirm("Would you like to append these shared cards to your current deck, or save as a new deck in 'My Decks'?\n\nOK = Append\nCancel = New Deck")) {
-            handleAppendToCurrentDeck(newDeck);
-          } else {
-            handleDirectDropSave({
-              id: Date.now().toString(),
-              name: data.data.sharedName || `Imported Deck ${code}`,
-              deck: newDeck,
-              completed: false
-            });
-            showToast("Saved as new deck in My Decks!");
-          }
-        } else {
-          showToast("Code does not contain a shared deck.");
-        }
-      }
-    } catch (err) {
-      console.error(err);
-      showToast("Failed to fetch share code.");
-    }
-  };
-
-  const handleImportProgress = (jsonStr) => {
-    try {
-      const parsed = JSON.parse(jsonStr);
-      if (parsed.myDecks) setMyDecks(parsed.myDecks);
-      if (parsed.currentDeck) setCurrentDeck(parsed.currentDeck);
-      if (parsed.loadedDeckId !== undefined) setLoadedDeckId(parsed.loadedDeckId);
-      if (parsed.streak !== undefined) setStreak(parsed.streak);
-      showToast(t.backupRestored || "Backup restored successfully!");
-    } catch (e) {
-      showToast(t.parseError || "Failed to parse backup.");
-    }
-  };
+  const {
+    syncCode, setSyncCode, pairingCode, setPairingCode, isGeneratingCode, syncVersion, datasetId, handleCloudSyncDownload,
+    handleConnectSyncCode, forcePushToCloud, handleGenerateSyncCode,
+    handleClearCloudData, handleShareToCode, handleImportFromCode
+  } = useNeuroSync({
+    myDecks, setMyDecks, currentDeck, setCurrentDeck, loadedDeckId, setLoadedDeckId,
+    streak, setStreak, selectedModel, setSelectedModel, cardOrderMode, setCardOrderMode,
+    servingMode, setServingMode, selectedEmbeddingModel, setSelectedEmbeddingModel,
+    focusMode, setFocusMode, questionTypeSettings, setQuestionTypeSettings, showToast, currentIndex, t
+  });
 
   const themeClass = appTheme === 'light' ? 'light-mode' : (appTheme === 'dark' ? '' : `theme-${appTheme}`);
   const isDeckMastered = currentDeck.length > 0 && currentDeck.every(q => q.isMastered);
@@ -999,10 +359,13 @@ export default function NeuroDeck() {
             onDirectDropSave={handleDirectDropSave}
             onMoveDeck={handleMoveDeck}
             syncCode={syncCode}
+            pairingCode={pairingCode}
+            isGeneratingCode={isGeneratingCode}
             setSyncCode={setSyncCode}
             onGenerateSyncCode={handleGenerateSyncCode}
             onConnectSyncCode={handleConnectSyncCode}
             onDisconnectSyncCode={() => setSyncCode("")}
+            onClearCloudData={handleClearCloudData}
             onExportWithoutProgress={handleExportWithoutProgress}
             onShareToCode={handleShareToCode}
             onImportFromCode={handleImportFromCode}

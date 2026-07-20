@@ -165,7 +165,17 @@ export const TRANSLATIONS = {
     typeMcc: "Choix Unique (MCC)",
     typeMulti: "Choix Multiple (Multi-MCC)",
     proportionalLabel: "Distribution Proportionnelle des Types",
-    proportionalDesc: "Sert dynamiquement les questions pour correspondre parfaitement au ratio de votre paquet (ex: 10% longues, 90% MCC) basé sur vos réponses à vie."
+    proportionalDesc: "Sert dynamiquement les questions pour correspondre parfaitement au ratio de votre paquet (ex: 10% longues, 90% MCC) basé sur vos réponses à vie.",
+    dangerZone: "Zone de Danger",
+    clearCloudData: "Effacer Toutes les Données Cloud (Effacement à Distance)",
+    syncDescActive: "La synchronisation automatique est activée. Les modifications seront appliquées en arrière-plan.",
+    syncDescInactive: "Entrez un code pour activer la synchronisation automatique (expire après 5 minutes d'inactivité). Les codes de partage expirent après 3 jours.",
+    scanToSync: "Scanner pour Synchroniser",
+    syncStreamConnected: "Synchronisation Cloud : Connecté au flux.",
+    syncUpToDate: "Connecté ! Vous êtes déjà à jour.",
+    syncNetError: "Échec de la connexion réseau.",
+    syncError: "Une erreur inattendue s'est produite.",
+    shareSuccess: "Partagé avec succès ! Code :"
   },
   EN: {
     appTitle: "NeuroDeck",
@@ -333,7 +343,17 @@ export const TRANSLATIONS = {
     typeMcc: "Single Choice (MCC)",
     typeMulti: "Multiple Choice (Multi-MCC)",
     proportionalLabel: "Proportional Type Distribution",
-    proportionalDesc: "Dynamically serves questions to perfectly match the ratio of your deck (e.g. 10% long, 90% MCC) based on your lifetime answers."
+    proportionalDesc: "Dynamically serves questions to perfectly match the ratio of your deck (e.g. 10% long, 90% MCC) based on your lifetime answers.",
+    dangerZone: "Danger Zone",
+    clearCloudData: "Clear All Cloud Data (Remote Wipe)",
+    syncDescActive: "Auto-sync is enabled. Changes will be pushed and pulled automatically in the background.",
+    syncDescInactive: "Enter a code to enable automatic cross-device sync (expires after 5 minutes of inactivity). Share codes expire after 3 days.",
+    scanToSync: "Scan to Sync",
+    syncStreamConnected: "Cloud sync: Connected to stream.",
+    syncUpToDate: "Connected! You are already up to date.",
+    syncNetError: "Network connection failed.",
+    syncError: "An unexpected error occurred.",
+    shareSuccess: "Shared successfully! Code:"
   }
 };
 

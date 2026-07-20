@@ -6,39 +6,77 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 app.use(cors());
-// 100mb limit to prevent huge payloads DoS
-app.use(express.json({ limit: '100mb' }));
+// 10mb limit to prevent huge payloads DoS
+app.use(express.json({ limit: '10mb' }));
 
 // In-memory store for synced data
-// Structure: Map<syncCode, { data: Object, timestamp: Number, version: Number }>
+// Structure: Map<syncCode, { data: Object, timestamp: Number, version: Number, datasetId: String, type: String }>
 const syncStore = new Map();
-const MAX_STORE_SIZE = 10; // Prevent memory exhaustion DoS
+const MAX_STORE_SIZE = 30; // Prevent memory exhaustion DoS
 
+const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
 const TWELVE_HOURS_MS = 12 * 60 * 60 * 1000;
+const migrationStore = new Map(); // Tracks migrations
 
-// Cleanup interval to remove data older than 12 hours
+const FIVE_MINUTES_MS = 5 * 60 * 1000;
+
+let queueLength = 0;
+const MAX_QUEUE_LENGTH = 4;
+let nextAvailableTime = 0;
+
+// Cleanup interval to remove data older than 3 days, and migrations older than 12 hours
 setInterval(() => {
     const now = Date.now();
     for (const [code, entry] of syncStore.entries()) {
-        if (now - entry.timestamp > TWELVE_HOURS_MS) {
+        const expiryTime = entry.type === 'pairing' ? FIVE_MINUTES_MS : THREE_DAYS_MS;
+        if (now - entry.timestamp > expiryTime) {
             syncStore.delete(code);
-            console.log(`[CLEANUP] Deleted expired sync data for code: ${code}`);
+            console.log(`[CLEANUP] Deleted expired ${entry.type} data for code: ${code}`);
+        }
+    }
+    for (const [code, entry] of migrationStore.entries()) {
+        if (now - entry.timestamp > TWELVE_HOURS_MS) {
+            migrationStore.delete(code);
+            console.log(`[CLEANUP] Deleted expired migration for code: ${code}`);
         }
     }
 }, 60 * 1000); // Check every minute
 
 // Validate sync code to prevent NoSQL/Path Traversal/Prototype pollution style attacks
-const isValidCode = (code) => {
-    return typeof code === 'string' && /^[a-zA-Z0-9_-]{1,32}$/.test(code);
+function isValidCode(code) {
+    return typeof code === 'string' && code.length >= 4 && code.length <= 64 && /^[a-zA-Z0-9]+$/.test(code);
 };
 
 // POST: Save or update sync data
-app.post('/api/sync/:code', (req, res) => {
+app.post('/api/sync/:code', async (req, res) => {
     const { code } = req.params;
-    const { data, version } = req.body;
+    const { data, version, datasetId, type = 'sync' } = req.body;
 
     if (!isValidCode(code)) {
         return res.status(400).json({ error: 'Invalid sync code format' });
+    }
+
+    // New code creation queue logic
+    if (!syncStore.has(code)) {
+        if (queueLength >= MAX_QUEUE_LENGTH) {
+            return res.status(429).json({ error: 'Try again later, we are experiencing high demand.' });
+        }
+        
+        queueLength++;
+        const now = Date.now();
+        let waitTime = 0;
+        
+        if (now < nextAvailableTime) {
+            waitTime = nextAvailableTime - now;
+            nextAvailableTime += 2000;
+        } else {
+            nextAvailableTime = now + 2000;
+        }
+        
+        if (waitTime > 0) {
+            await new Promise(resolve => setTimeout(resolve, waitTime));
+        }
+        queueLength--;
     }
 
     if (!data || typeof data !== 'object' || Array.isArray(data)) {
@@ -71,11 +109,61 @@ app.post('/api/sync/:code', (req, res) => {
     syncStore.set(code, {
         data: data,
         timestamp: Date.now(),
-        version: newVersion
+        version: newVersion,
+        datasetId: datasetId || null,
+        type: type // 'pairing', 'sync', or 'share'
     });
 
-    console.log(`[SYNC] Saved data for code: ${code}, version: ${newVersion}`);
+    console.log(`[SYNC] Saved ${type} data for code: ${code}, version: ${newVersion}`);
     res.json({ success: true, version: newVersion });
+});
+
+// POST: Migrate sync code
+app.post('/api/sync/:code/migrate', (req, res) => {
+    const { code } = req.params;
+    const { newCode, datasetId } = req.body;
+
+    if (!isValidCode(code) || !isValidCode(newCode)) {
+        return res.status(400).json({ error: 'Invalid sync code format' });
+    }
+
+    migrationStore.set(code, {
+        newCode: newCode,
+        timestamp: Date.now(),
+        datasetId: datasetId || null
+    });
+
+    if (syncStore.has(code)) {
+        syncStore.delete(code); // Clean up the old data immediately to save space
+    }
+
+    console.log(`[MIGRATE] Code ${code} migrated to ${newCode}`);
+    res.json({ success: true });
+});
+
+// DELETE: Clear all sync data for a dataset
+app.delete('/api/sync/clear/:datasetId', (req, res) => {
+    const { datasetId } = req.params;
+    if (!datasetId || typeof datasetId !== 'string') {
+        return res.status(400).json({ error: 'Invalid datasetId' });
+    }
+
+    let deletedCount = 0;
+    for (const [code, entry] of syncStore.entries()) {
+        if (entry.datasetId === datasetId) {
+            syncStore.delete(code);
+            deletedCount++;
+        }
+    }
+    for (const [code, entry] of migrationStore.entries()) {
+        if (entry.datasetId === datasetId) {
+            migrationStore.delete(code);
+            deletedCount++;
+        }
+    }
+
+    console.log(`[CLEAR] Deleted ${deletedCount} entries for dataset: ${datasetId}`);
+    res.json({ success: true, deletedCount });
 });
 
 // GET: Retrieve sync data
@@ -84,6 +172,15 @@ app.get('/api/sync/:code', (req, res) => {
     
     if (!isValidCode(code)) {
         return res.status(400).json({ error: 'Invalid sync code format' });
+    }
+
+    if (migrationStore.has(code)) {
+        const migratedTo = migrationStore.get(code).newCode;
+        return res.json({
+            data: { newSyncCode: migratedTo },
+            version: Date.now(),
+            timestamp: Date.now()
+        });
     }
 
     const entry = syncStore.get(code);
@@ -109,6 +206,10 @@ app.get('/api/sync/:code/version', (req, res) => {
         return res.status(400).json({ error: 'Invalid sync code format' });
     }
 
+    if (migrationStore.has(code)) {
+        return res.json({ version: Date.now() }); // Force a pull so the client receives the migration payload
+    }
+
     const entry = syncStore.get(code);
 
     if (!entry) {
@@ -128,5 +229,6 @@ app.get('/*path', (req, res) => {
 
 app.listen(PORT, () => {
     console.log(`P2P Sync Server running on port ${PORT}`);
-    console.log(`Sync data will automatically expire after 12 hours of inactivity.`);
+    console.log(`Sync data automatically expires after 5 minutes of inactivity.`);
+    console.log(`Share data automatically expires after 3 days of inactivity.`);
 });
