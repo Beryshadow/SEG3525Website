@@ -540,29 +540,14 @@ export const SettingsView = ({
                                    </div>
                                 </div>
 
-                                <div className="flex-1 flex items-center gap-2 overflow-hidden">
-                                   <div className="truncate">
-                                      <h3 className="font-black text-sm sm:text-base truncate flex items-center gap-2">
-                                         {d.name}
-                                         {loadedDeckId === d.id && false && (
-                                            <span className="px-1.5 py-0.5 text-[8px] sm:text-[10px] bg-[var(--accent)] text-white rounded font-bold uppercase tracking-widest animate-pulse">
-                                               Active
-                                            </span>
-                                         )}
-                                      </h3>
-                                      <p className="text-[9px] sm:text-xs text-[var(--text-muted)] font-medium">
-                                         {d.totalCards} {t.cardsLabel || "cards"} • Avg: {d.avgScore.toFixed(1)}/10
-                                      </p>
-                                   </div>
-                                </div>
-                                
                                 {editingDeckId === d.id ? (
-                                   <div className="flex flex-1 items-center gap-2">
+                                   <div className="flex-1 flex items-center gap-2 overflow-hidden">
                                       <input
                                          type="text"
                                          value={editingDeckName}
                                          onChange={(e) => setEditingDeckName(e.target.value)}
                                          autoFocus
+                                         onClick={(e) => e.stopPropagation()}
                                          className="neu-pressed w-full px-3 py-1 rounded bg-transparent text-[var(--text-main)] text-sm font-black outline-none focus:ring-1 focus:ring-[var(--accent)]"
                                          onKeyDown={(e) => {
                                            if (e.key === 'Enter') {
@@ -573,24 +558,32 @@ export const SettingsView = ({
                                            }
                                          }}
                                       />
-                                      <button 
-                                        onClick={() => {
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
                                           if (editingDeckName.trim()) onRenameDeck(d.id, editingDeckName.trim());
                                           setEditingDeckId(null);
                                         }}
-                                        className="text-[color:var(--color-success)] hover:opacity-80 p-2"
+                                        className="text-[color:var(--color-success)] hover:opacity-80 p-2 flex-shrink-0"
                                       >
                                          <CheckIcon />
                                       </button>
                                    </div>
                                 ) : (
-                                   <div className="flex-2 flex items-center gap-2 overflow-hidden">
-                                      <button 
-                                        onClick={() => { setEditingDeckId(d.id); setEditingDeckName(d.name); }}
-                                        className="text-[var(--text-muted)] hover:text-[var(--accent)] p-2 ml-1 text-xs opacity-50 hover:opacity-100 transition-opacity"
+                                   <div className="flex-1 flex flex-col justify-center overflow-hidden min-w-0 pr-2">
+                                      <h3 
+                                        onClick={(e) => { e.stopPropagation(); setEditingDeckId(d.id); setEditingDeckName(d.name); }}
+                                        className="font-black text-sm sm:text-base truncate hover:text-[var(--accent)] transition-colors cursor-text group/title inline-flex items-center w-fit"
+                                        title="Click to edit name"
                                       >
-                                        <EditIcon />
-                                      </button>
+                                         <span className="truncate">{d.name}</span>
+                                         <span className="opacity-0 group-hover/title:opacity-50 transition-opacity ml-2 flex-shrink-0 flex items-center">
+                                            <EditIcon />
+                                         </span>
+                                      </h3>
+                                      <p className="text-[9px] sm:text-xs text-[var(--text-muted)] font-medium truncate mt-0.5">
+                                         {d.totalCards} {t.cardsLabel || "cards"} • Avg: {d.avgScore.toFixed(1)}/10
+                                      </p>
                                    </div>
                                 )}
                              </div>
