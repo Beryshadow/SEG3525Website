@@ -21,6 +21,7 @@ export const SettingsView = ({
   const [activeTab, setActiveTab] = useState('decks');
   const [shareQrCodeData, setShareQrCodeData] = useState(null);
   const [selectedDeckIds, setSelectedDeckIds] = useState(new Set());
+  const [lastSelectedId, setLastSelectedId] = useState(null);
   const [targetMoveFolderId, setTargetMoveFolderId] = useState("");
 
   const handleBatchExport = (ids) => {
@@ -106,6 +107,19 @@ export const SettingsView = ({
 
     return decks;
   }, [myDecks, searchQuery, filterMode, sortBy]);
+
+  const visualOrder = useMemo(() => {
+     const order = [];
+     const traverse = (decks) => {
+        decks.forEach(d => {
+           order.push(d.id);
+           const children = processedDecks.filter(child => child.parentId === d.id);
+           if (children.length > 0) traverse(children);
+        });
+     };
+     traverse(processedDecks.filter(d => !d.parentId));
+     return order;
+  }, [processedDecks]);
 
   const AVAILABLE_MODELS = [
     { id: "Xenova/nli-deberta-v3-small", name: "DeBERTa-v3 NLI (Small)", desc: t.fastLightweight || "High-accuracy Cross-Encoder" },
@@ -465,22 +479,35 @@ export const SettingsView = ({
                                    }
                                 }
                              }}
-                             className={`p-3 sm:p-5 rounded-xl sm:rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 transition-colors ${loadedDeckId === d.id ? 'neu-flat border-l-4 border-[var(--accent)]' : 'neu-pressed'}`}
+                             onClick={(e) => {
+                                 if (e.shiftKey && lastSelectedId) {
+                                    const idx1 = visualOrder.indexOf(lastSelectedId);
+                                    const idx2 = visualOrder.indexOf(d.id);
+                                    if (idx1 !== -1 && idx2 !== -1) {
+                                       const start = Math.min(idx1, idx2);
+                                       const end = Math.max(idx1, idx2);
+                                       const newSet = new Set(selectedDeckIds);
+                                       for (let i = start; i <= end; i++) {
+                                          newSet.add(visualOrder[i]);
+                                       }
+                                       setSelectedDeckIds(newSet);
+                                    }
+                                 } else if (e.ctrlKey || e.metaKey) {
+                                    const newSet = new Set(selectedDeckIds);
+                                    if (newSet.has(d.id)) newSet.delete(d.id);
+                                    else newSet.add(d.id);
+                                    setSelectedDeckIds(newSet);
+                                    setLastSelectedId(d.id);
+                                 } else {
+                                    onLoadDeckFromCache(d.id);
+                                    setSelectedDeckIds(new Set());
+                                    setLastSelectedId(d.id);
+                                 }
+                              }}
+                             className={`p-3 sm:p-5 rounded-xl sm:rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 transition-all cursor-pointer select-none ${selectedDeckIds.has(d.id) ? 'neu-flat ring-2 ring-[var(--accent)] bg-[var(--accent)]/5' : (loadedDeckId === d.id ? 'neu-flat border-2 border-[var(--accent)] bg-[var(--accent)]/10 shadow-[inset_0_0_20px_rgba(168,85,247,0.15)]' : 'neu-pressed hover:bg-white/5')}`}
                              style={{ marginLeft: `${level * 1.5}rem` }}
                           >
                              <div className="flex items-center gap-3 w-full sm:w-auto overflow-hidden">
-                                <input
-                                  type="checkbox"
-                                  checked={selectedDeckIds.has(d.id)}
-                                  onChange={(e) => {
-                                    const next = new Set(selectedDeckIds);
-                                    if (e.target.checked) next.add(d.id);
-                                    else next.delete(d.id);
-                                    setSelectedDeckIds(next);
-                                  }}
-                                  onClick={(e) => e.stopPropagation()}
-                                  className="w-5 h-5 rounded cursor-pointer accent-[var(--accent)]"
-                                />
                                 <div className="flex-shrink-0 flex flex-col items-center gap-1 w-12">
                                    <span className="text-[10px] font-black text-[var(--accent)]">{d.progress}%</span>
                                    <div className="w-8 h-1 bg-[var(--text-muted)] opacity-20 rounded-full overflow-hidden">
@@ -490,7 +517,14 @@ export const SettingsView = ({
 
                                 <div className="flex-1 flex items-center gap-2 overflow-hidden">
                                    <div className="truncate">
-                                      <h3 className="font-black text-sm sm:text-base truncate">{d.name}</h3>
+                                      <h3 className="font-black text-sm sm:text-base truncate flex items-center gap-2">
+                                         {d.name}
+                                         {loadedDeckId === d.id && (
+                                            <span className="px-1.5 py-0.5 text-[8px] sm:text-[10px] bg-[var(--accent)] text-white rounded font-bold uppercase tracking-widest animate-pulse">
+                                               Active
+                                            </span>
+                                         )}
+                                      </h3>
                                       <p className="text-[9px] sm:text-xs text-[var(--text-muted)] font-medium">
                                          {d.totalCards} {t.cardsLabel || "cards"} • Avg: {d.avgScore.toFixed(1)}/10
                                       </p>

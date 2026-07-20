@@ -20,7 +20,7 @@ export function useDeckManager({
     const newDeck = {
       id: Date.now().toString(),
       name: name || `Deck ${new Date().toLocaleDateString()}`,
-      deck: cleanDeck,
+      deck: forceEmpty ? [] : cleanDeck,
       completed: false,
       parentId: null
     };
