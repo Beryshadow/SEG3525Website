@@ -332,8 +332,8 @@ export default function NeuroDeck() {
     }
   }, [currentDeck, currentIndex, streak, myDecks, loadedDeckId, syncCode, selectedModel, cardOrderMode, selectedEmbeddingModel, focusMode, questionTypeSettings]);
 
-  const selectNextCard = useCallback((deck) => {
-    if (!deck || deck.length === 0) return 0;
+  const computeActiveDeckPool = useCallback((deck) => {
+    if (!deck || deck.length === 0) return [];
     
     let activeDeck = deck;
     if (focusMode.active && focusMode.focalNodeId && cardEmbeddings[focusMode.focalNodeId]) {
@@ -370,6 +370,14 @@ export default function NeuroDeck() {
        return true;
     });
     if (activeDeck.length === 0) activeDeck = deck;
+    return activeDeck;
+  }, [focusMode, cardEmbeddings, questionTypeSettings.long, questionTypeSettings.multi, questionTypeSettings.mcc]);
+
+  const selectNextCard = useCallback((deck) => {
+    if (!deck || deck.length === 0) return 0;
+    
+    let activeDeck = computeActiveDeckPool(deck);
+
 
     if (questionTypeSettings.proportional) {
        let targetLong = 0, targetMcc = 0, targetMulti = 0;
@@ -472,7 +480,7 @@ export default function NeuroDeck() {
     } else {
       return deck.findIndex(q => q.id === lowestScoreCards[0].id);
     }
-  }, [cardOrderMode, cardEmbeddings, focusMode]);
+  }, [cardOrderMode, cardEmbeddings, focusMode, questionTypeSettings.proportional, computeActiveDeckPool]);
 
   const updateCardStats = useCallback((id, newScore, firstTry, skipped) => {
     setCurrentDeck(prev => {
@@ -773,6 +781,12 @@ export default function NeuroDeck() {
   const themeClass = appTheme === 'light' ? 'light-mode' : (appTheme === 'dark' ? '' : `theme-${appTheme}`);
   const isDeckMastered = currentDeck.length > 0 && currentDeck.every(q => q.isMastered);
 
+  const activePool = useMemo(() => computeActiveDeckPool(currentDeck), [currentDeck, computeActiveDeckPool]);
+  const currentCard = currentDeck.length > 0 ? currentDeck[currentIndex] : null;
+  const activeIndex = currentCard ? activePool.findIndex(q => q.id === currentCard.id) : -1;
+  const displayIndex = Math.max(0, activeIndex);
+  const displayTotal = activePool.length || currentDeck.length;
+
   return (
     <div className={`min-h-screen relative font-sans transition-colors duration-300 ${themeClass} neurodeck-route`} style={{ backgroundColor: 'var(--bg-main)', color: 'var(--text-main)' }}>
       
@@ -842,9 +856,9 @@ export default function NeuroDeck() {
       <main className="flex flex-col items-center p-4 w-full max-w-5xl mx-auto mb-12">
         {view === "study" && (
           <StudyView
-            question={!isDeckMastered && currentDeck.length > 0 ? currentDeck[currentIndex] : null}
-            currentIndex={currentIndex}
-            totalCards={currentDeck.length}
+            question={!isDeckMastered && currentDeck.length > 0 ? currentCard : null}
+            currentIndex={displayIndex}
+            totalCards={displayTotal}
             model={model}
             modelStatus={modelStatus}
             modelError={modelError}
