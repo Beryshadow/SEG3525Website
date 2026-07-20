@@ -63,6 +63,26 @@ export default function NeuroDeck() {
     }
   });
 
+  useEffect(() => {
+    localStorage.setItem('neurodeck-my-decks', JSON.stringify(myDecks));
+  }, [myDecks]);
+
+  useEffect(() => {
+    if (loadedDeckId) {
+      localStorage.setItem('neurodeck-loaded-deck-id', loadedDeckId);
+    } else {
+      localStorage.removeItem('neurodeck-loaded-deck-id');
+    }
+  }, [loadedDeckId]);
+
+  useEffect(() => {
+    localStorage.setItem('neurodeck-progress', JSON.stringify(currentDeck));
+  }, [currentDeck]);
+
+  useEffect(() => {
+    localStorage.setItem('neurodeck-current-index', currentIndex.toString());
+  }, [currentIndex]);
+
   const [selectedModel, setSelectedModel] = useState(() => {
     return localStorage.getItem('neurodeck-ai-model') || "Xenova/nli-deberta-v3-small";
   });
@@ -150,6 +170,10 @@ export default function NeuroDeck() {
   const [streak, setStreak] = useState(() => {
     try { return parseInt(localStorage.getItem('neurodeck-streak')) || 0; } catch (e) { return 0; }
   });
+
+  useEffect(() => {
+    localStorage.setItem('neurodeck-streak', streak.toString());
+  }, [streak]);
 
   const [toastMessage, setToastMessage] = useState("");
   const toastTimeoutRef = useRef(null);
