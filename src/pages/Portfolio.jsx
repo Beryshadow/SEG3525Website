@@ -335,7 +335,7 @@ export default function Portfolio() {
                     <div className={`${theme === 'light' ? 'light-mode' : ''} neurodeck-route neu-pressed h-40 flex items-center justify-center mb-6`}>
                       <i
                         className="fas fa-floppy-disk fa-3x opacity-80 group-hover:scale-110 transition-transform duration-500"
-                        style={{ color: 'var(--color-accent)' }}
+                        style={{ color: 'var(--accent)' }}
                       ></i>
                     </div>
                     <h5 className="font-bold text-lg text-[var(--text-main)] mb-3">
