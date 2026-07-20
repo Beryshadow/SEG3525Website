@@ -123,40 +123,44 @@ export const SettingsView = ({
     e.preventDefault();
     setIsDraggingOver(false);
     
-    const file = e.dataTransfer.files?.[0];
-    if (file && file.name.endsWith('.json')) {
-      const name = file.name.replace('.json', '');
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        try {
-          const parsed = JSON.parse(event.target.result);
-          if (!Array.isArray(parsed)) throw new Error("Not a JSON array");
-          
-          const formattedDeck = parsed.map((q, idx) => {
-            const correctAnswersArray = q.correctAnswers || (q.correctAnswer ? [q.correctAnswer] : []);
-            return {
-              ...q,
-              correctAnswers: correctAnswersArray,
-              id: q.id || `custom-${Date.now()}-${idx}`,
-              score: 0,
-              dueTurn: 0,
-              attempts: 0,
-              isMastered: false
-            };
-          });
+    const files = Array.from(e.dataTransfer.files || []);
+    const jsonFiles = files.filter(f => f.name.endsWith('.json'));
+    
+    if (jsonFiles.length > 0) {
+      jsonFiles.forEach(file => {
+        const name = file.name.replace('.json', '');
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          try {
+            const parsed = JSON.parse(event.target.result);
+            if (!Array.isArray(parsed)) throw new Error("Not a JSON array");
+            
+            const formattedDeck = parsed.map((q, idx) => {
+              const correctAnswersArray = q.correctAnswers || (q.correctAnswer ? [q.correctAnswer] : []);
+              return {
+                ...q,
+                correctAnswers: correctAnswersArray,
+                id: q.id || `custom-${Date.now()}-${idx}-${Math.random()}`,
+                score: 0,
+                dueTurn: 0,
+                attempts: 0,
+                isMastered: false
+              };
+            });
 
-          onDirectDropSave({
-            id: Date.now().toString(),
-            name: name,
-            deck: formattedDeck,
-            completed: false,
-            parentId: typeof targetParentId === 'string' ? targetParentId : null
-          });
-        } catch (err) {
-          console.error("Drop import failed", err);
-        }
-      };
-      reader.readAsText(file);
+            onDirectDropSave({
+              id: Date.now().toString() + Math.random().toString(),
+              name: name,
+              deck: formattedDeck,
+              completed: false,
+              parentId: typeof targetParentId === 'string' ? targetParentId : null
+            });
+          } catch (err) {
+            console.error("Drop import failed for file", file.name, err);
+          }
+        };
+        reader.readAsText(file);
+      });
     } else {
       const draggedData = e.dataTransfer.getData("text/plain");
       try {
@@ -442,8 +446,9 @@ export const SettingsView = ({
                              onDrop={(e) => {
                                 e.preventDefault(); 
                                 e.stopPropagation();
-                                const file = e.dataTransfer.files?.[0];
-                                if (file && file.name.endsWith('.json')) {
+                                const files = Array.from(e.dataTransfer.files || []);
+                                const jsonFiles = files.filter(f => f.name.endsWith('.json'));
+                                if (jsonFiles.length > 0) {
                                    handleDrop(e, d.id);
                                 } else {
                                    const draggedData = e.dataTransfer.getData("text/plain");
