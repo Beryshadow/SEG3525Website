@@ -350,7 +350,7 @@ export default function NeuroDeck() {
             focusMode={focusMode}
             setFocusMode={setFocusMode}
             onStartFocusStudy={() => {
-              setCurrentIndex(selectNextCard(currentDeck));
+              selectNextCard(currentDeck);
               setView("study");
             }}
           />
