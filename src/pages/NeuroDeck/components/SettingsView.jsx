@@ -259,7 +259,7 @@ export const SettingsView = ({
   return (
     <div className="flex flex-col lg:flex-row gap-6 sm:gap-8 w-full">
       <div className="w-full lg:w-1/4">
-        <nav className="sticky top-24 flex lg:flex-col gap-2 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 scrollbar-hide">
+        <nav className="sticky top-24 flex lg:flex-col gap-3 lg:gap-2 overflow-x-auto lg:overflow-visible py-4 px-4 -mx-4 lg:p-0 lg:m-0 scrollbar-hide">
           {navItems.map(item => (
             <button key={item.id} onClick={() => scrollTo(item.id)} className={`neu-btn p-3 lg:p-4 flex-shrink-0 flex items-center gap-2 lg:gap-4 text-sm font-bold text-left rounded-2xl transition-all hover:text-[var(--accent)] ${activeTab === item.id ? 'text-[var(--accent)] neu-pressed' : ''}`}>
               <div className="w-4 lg:w-5 text-center">{item.icon}</div>
