@@ -97,6 +97,17 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
     nodesRef.current = nodes;
     edgesRef.current = edges;
     cameraRef.current = { x: 0, y: 0, scale: 1 };
+    
+    if (focusMode?.active && focusMode?.focalNodeId) {
+      const initialFocal = nodes.find(n => n.id === focusMode.focalNodeId);
+      if (initialFocal) {
+        setPreviewFocalNode(initialFocal);
+        if (focusMode.mode) setPreviewMode(focusMode.mode);
+        if (focusMode.threshold !== undefined) setPreviewThreshold(focusMode.threshold);
+        if (focusMode.topN !== undefined) setPreviewTopN(focusMode.topN);
+      }
+    }
+
     setIsSimulating(true);
   };
 

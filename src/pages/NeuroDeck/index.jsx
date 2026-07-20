@@ -539,11 +539,21 @@ export default function NeuroDeck() {
 
   const handleManualNavigation = useCallback((dir) => {
     if (currentDeck.length === 0) return;
-    let nextIdx = currentIndex + dir;
-    if (nextIdx < 0) nextIdx = currentDeck.length - 1;
-    if (nextIdx >= currentDeck.length) nextIdx = 0;
-    setCurrentIndex(nextIdx);
-  }, [currentDeck, currentIndex]);
+    const pool = computeActiveDeckPool(currentDeck);
+    const activeDeckPool = pool.length > 0 ? pool : currentDeck;
+    const currentCard = currentDeck[currentIndex];
+    
+    let poolIdx = activeDeckPool.findIndex(q => q.id === currentCard?.id);
+    if (poolIdx === -1) poolIdx = 0;
+    
+    let nextPoolIdx = poolIdx + dir;
+    if (nextPoolIdx < 0) nextPoolIdx = activeDeckPool.length - 1;
+    if (nextPoolIdx >= activeDeckPool.length) nextPoolIdx = 0;
+    
+    const nextCard = activeDeckPool[nextPoolIdx];
+    const nextIdx = currentDeck.findIndex(q => q.id === nextCard.id);
+    setCurrentIndex(nextIdx !== -1 ? nextIdx : 0);
+  }, [currentDeck, currentIndex, computeActiveDeckPool]);
 
   const handleImport = (jsonStr) => {
     try {
