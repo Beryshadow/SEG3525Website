@@ -583,42 +583,98 @@ export default function NeuroDeck() {
     }
   };
 
-  const saveDeckToCache = (name) => {
-    if (currentDeck.length === 0) {
+  const saveDeckToCache = (name, forceEmpty = false) => {
+    if (!forceEmpty && currentDeck.length === 0) {
        showToast(t.noDeckToSave || "No active deck to save!");
        return;
     }
     const newDeck = {
        id: Date.now().toString(),
        name: name || `Deck ${myDecks.length + 1}`,
-       deck: currentDeck,
-       completed: false
+       deck: forceEmpty ? [] : currentDeck,
+       completed: false,
+       parentId: null
     };
     setMyDecks(prev => [newDeck, ...prev]);
-    setLoadedDeckId(newDeck.id);
+    if (!forceEmpty) {
+       setLoadedDeckId(newDeck.id);
+    }
     showToast(`${t.deckSaved || "Deck saved as"} "${newDeck.name}"`);
   };
 
   const overwriteDeckCache = () => {
     if (!loadedDeckId || currentDeck.length === 0) return;
-    setMyDecks(prev => prev.map(d => d.id === loadedDeckId ? { ...d, deck: currentDeck } : d));
+    
+    setMyDecks(prev => {
+       const updatedDecks = [...prev];
+       
+       const cardsByDeck = {};
+       currentDeck.forEach(card => {
+          const originalId = card.originalDeckId || loadedDeckId;
+          if (!cardsByDeck[originalId]) cardsByDeck[originalId] = [];
+          
+          const cardCopy = { ...card };
+          delete cardCopy.originalDeckId;
+          cardsByDeck[originalId].push(cardCopy);
+       });
+       
+       return updatedDecks.map(d => {
+          if (cardsByDeck[d.id]) {
+             return { ...d, deck: cardsByDeck[d.id] };
+          }
+          if (d.id === loadedDeckId && !cardsByDeck[d.id]) {
+             return { ...d, deck: [] };
+          }
+          return d;
+       });
+    });
+    
     showToast(t.progressSaved || "Progress saved to cached deck.");
+  };
+
+  const getFlattenedDeck = (deckId, decksList) => {
+    let flattened = [];
+    const deck = decksList.find(d => d.id === deckId);
+    if (!deck) return flattened;
+    
+    if (deck.deck && deck.deck.length > 0) {
+      flattened = deck.deck.map(card => ({ ...card, originalDeckId: deck.id }));
+    }
+    
+    const children = decksList.filter(d => d.parentId === deck.id);
+    for (const child of children) {
+      flattened = [...flattened, ...getFlattenedDeck(child.id, decksList)];
+    }
+    return flattened;
   };
 
   const loadDeckFromCache = (id) => {
     const deckToLoad = myDecks.find(d => d.id === id);
     if (deckToLoad) {
-       setCurrentDeck(deckToLoad.deck);
+       const flattenedCards = getFlattenedDeck(id, myDecks);
+       setCurrentDeck(flattenedCards);
        setLoadedDeckId(id);
-       setCurrentIndex(selectNextCard(deckToLoad.deck));
+       setCurrentIndex(selectNextCard(flattenedCards));
        setView('study');
        showToast(`${t.loadedDeckMsg || "Loaded deck"} "${deckToLoad.name}"`);
     }
   };
 
   const deleteDeckFromCache = (id) => {
-    setMyDecks(prev => prev.filter(d => d.id !== id));
-    if (loadedDeckId === id) {
+    const getDescendants = (deckId, decksList) => {
+       const children = decksList.filter(d => d.parentId === deckId);
+       let descendants = [...children];
+       for (const child of children) {
+          descendants = [...descendants, ...getDescendants(child.id, decksList)];
+       }
+       return descendants;
+    };
+    
+    const descendants = getDescendants(id, myDecks);
+    const idsToDelete = [id, ...descendants.map(d => d.id)];
+    
+    setMyDecks(prev => prev.filter(d => !idsToDelete.includes(d.id)));
+    if (idsToDelete.includes(loadedDeckId)) {
        setLoadedDeckId(null);
     }
     showToast(t.deckDeleted || "Deck deleted.");
@@ -630,22 +686,12 @@ export default function NeuroDeck() {
   };
 
   const handleDirectDropSave = (deckObj) => {
-    setMyDecks(prev => [deckObj, ...prev]);
+    setMyDecks(prev => [{...deckObj, parentId: deckObj.parentId || null}, ...prev]);
     showToast(`${t.deckSaved || "Deck saved as"} "${deckObj.name}"`);
   };
 
-  const handleAppendToCurrentDeck = (newCardsArray) => {
-    setCurrentDeck(prev => {
-      const next = [...prev, ...newCardsArray];
-      if (loadedDeckId) {
-        setMyDecks(currDecks => currDecks.map(d => {
-           if (d.id === loadedDeckId) return { ...d, deck: next };
-           return d;
-        }));
-      }
-      return next;
-    });
-    showToast(`Appended ${newCardsArray.length} cards to the current deck.`);
+  const handleMoveDeck = (draggedId, targetParentId) => {
+    setMyDecks(prev => prev.map(d => d.id === draggedId ? { ...d, parentId: targetParentId } : d));
   };
 
   const handleUpdateCards = (updates) => {
@@ -939,7 +985,7 @@ export default function NeuroDeck() {
             }}
             onRenameDeck={renameDeck}
             onDirectDropSave={handleDirectDropSave}
-            onAppendToCurrentDeck={handleAppendToCurrentDeck}
+            onMoveDeck={handleMoveDeck}
             syncCode={syncCode}
             setSyncCode={setSyncCode}
             onGenerateSyncCode={handleGenerateSyncCode}

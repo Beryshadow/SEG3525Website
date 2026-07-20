@@ -9,7 +9,7 @@ export const SettingsView = ({
   onExportProgress, onImportProgress,
   myDecks, loadedDeckId, onSaveDeckToCache, onOverwriteDeck, onLoadDeckFromCache, 
   onDeleteDeckFromCache, onToggleDeckCompleted, onRenameDeck, onDirectDropSave,
-  onAppendToCurrentDeck, syncCode, setSyncCode, onGenerateSyncCode, onConnectSyncCode, onDisconnectSyncCode,
+  onMoveDeck, syncCode, setSyncCode, onGenerateSyncCode, onConnectSyncCode, onDisconnectSyncCode,
   onExportWithoutProgress, onShareToCode, onImportFromCode, t, showToast
 }) => {
   const [jsonInput, setJsonInput] = useState("");
@@ -38,12 +38,33 @@ export const SettingsView = ({
   }, [currentDeck]);
 
   const processedDecks = useMemo(() => {
+    const deckStats = {};
+    myDecks.forEach(d => {
+       const total = d.deck ? d.deck.length : 0;
+       const mastered = d.deck ? d.deck.filter(q => q.score >= 8 || q.isMastered).length : 0;
+       const scoreSum = total > 0 ? d.deck.reduce((s, q) => s + (q.isMastered ? 10 : q.score), 0) : 0;
+       deckStats[d.id] = { total, mastered, scoreSum };
+    });
+
+    const getStats = (deckId) => {
+       const children = myDecks.filter(d => d.parentId === deckId);
+       let t = deckStats[deckId].total;
+       let m = deckStats[deckId].mastered;
+       let s = deckStats[deckId].scoreSum;
+       for (const child of children) {
+          const childStats = getStats(child.id);
+          t += childStats.t;
+          m += childStats.m;
+          s += childStats.s;
+       }
+       return { t, m, s };
+    };
+
     let decks = myDecks.map(d => {
-       const total = d.deck.length;
-       const mastered = d.deck.filter(q => q.score >= 8 || q.isMastered).length;
-       const avgScore = total > 0 ? (d.deck.reduce((s, q) => s + (q.isMastered ? 10 : q.score), 0) / total) : 0;
-       const progress = total > 0 ? Math.round((mastered / total) * 100) : 0;
-       return { ...d, mastered, avgScore, progress };
+       const agg = getStats(d.id);
+       const avgScore = agg.t > 0 ? (agg.s / agg.t) : 0;
+       const progress = agg.t > 0 ? Math.round((agg.m / agg.t) * 100) : 0;
+       return { ...d, totalCards: agg.t, mastered: agg.m, avgScore, progress };
     });
 
     decks = decks.filter(d => {
@@ -74,7 +95,7 @@ export const SettingsView = ({
     { id: "Xenova/bge-base-en-v1.5", name: "BGE Base EN (High Quality)", desc: t.embeddingHQ || "State of the art accuracy (438MB)" }
   ];
 
-  const handleDrop = (e) => {
+  const handleDrop = (e, targetParentId = null) => {
     e.preventDefault();
     setIsDraggingOver(false);
     
@@ -101,18 +122,13 @@ export const SettingsView = ({
           };
         });
 
-        if (window.confirm(t.deckAppendPrompt || "Would you like to create a new deck or append these questions to the current working deck?\n\nOK = Append\nCancel = New Deck")) {
-          if (onAppendToCurrentDeck) {
-             onAppendToCurrentDeck(formattedDeck);
-          }
-        } else {
-          onDirectDropSave({
-            id: Date.now().toString(),
-            name: name,
-            deck: formattedDeck,
-            completed: false
-          });
-        }
+        onDirectDropSave({
+          id: Date.now().toString(),
+          name: name,
+          deck: formattedDeck,
+          completed: false,
+          parentId: typeof targetParentId === 'string' ? targetParentId : null
+        });
       } catch (err) {
         console.error("Drop import failed", err);
       }
@@ -167,18 +183,13 @@ export const SettingsView = ({
         });
         
         if (parsedDeck.length > 0) {
-           if (window.confirm(t.deckAppendPrompt || "Would you like to create a new deck or append these questions to the current working deck?\n\nOK = Append\nCancel = New Deck")) {
-              if (onAppendToCurrentDeck) {
-                 onAppendToCurrentDeck(parsedDeck);
-              }
-           } else {
-              onDirectDropSave({
-                 id: Date.now().toString(),
-                 name: filename.replace(/\.(csv|txt)$/i, ''),
-                 deck: parsedDeck,
-                 completed: false
-              });
-           }
+           onDirectDropSave({
+              id: Date.now().toString(),
+              name: filename.replace(/\.(csv|txt)$/i, ''),
+              deck: parsedDeck,
+              completed: false,
+              parentId: null
+           });
            showToast(`Imported ${parsedDeck.length} cards from Anki`);
         } else {
            showToast("No valid cards found in Anki file");
@@ -293,7 +304,20 @@ export const SettingsView = ({
           <button
              onClick={() => {
                if (newDeckName.trim()) {
-                 onSaveDeckToCache(newDeckName.trim());
+                 onSaveDeckToCache(newDeckName.trim(), true);
+                 setNewDeckName("");
+               }
+             }}
+             disabled={!newDeckName.trim()}
+             className="neu-btn px-4 sm:px-8 py-3 sm:py-4 font-black uppercase tracking-widest text-[var(--accent)] rounded-lg sm:rounded-2xl disabled:opacity-50 text-[10px] sm:text-sm active:scale-95 transition-all whitespace-nowrap"
+          >
+            {t.createEmptyFolderBtn || "Create Folder"}
+          </button>
+          
+          <button
+             onClick={() => {
+               if (newDeckName.trim()) {
+                 onSaveDeckToCache(newDeckName.trim(), false);
                  setNewDeckName("");
                }
              }}
@@ -315,88 +339,124 @@ export const SettingsView = ({
 
        {processedDecks && processedDecks.length > 0 ? (
           <div className="space-y-3 sm:space-y-4">
-            {processedDecks.map(d => (
-               <div key={d.id} className={`p-3 sm:p-5 rounded-xl sm:rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 transition-colors ${loadedDeckId === d.id ? 'neu-flat border-l-4 border-[var(--accent)]' : 'neu-pressed'}`}>
-                  <div className="flex items-center gap-3 w-full sm:w-auto overflow-hidden">
-                     <div className="flex-shrink-0 flex flex-col items-center gap-1 w-12">
-                        <span className="text-[10px] font-black text-[var(--accent)]">{d.progress}%</span>
-                        <div className="w-8 h-1 bg-[var(--text-muted)] opacity-20 rounded-full overflow-hidden">
-                           <div className="h-full bg-[var(--accent)]" style={{ width: `${d.progress}%` }}></div>
-                        </div>
-                     </div>
-
-                     <div className="flex-1 flex items-center gap-2 overflow-hidden">
-                        <div className="truncate">
-                           <h3 className="font-black text-sm sm:text-base truncate">{d.name}</h3>
-                           <p className="text-[9px] sm:text-xs text-[var(--text-muted)] font-medium">
-                              {d.deck.length} {t.cardsLabel || "cards"} • Avg: {d.avgScore.toFixed(1)}/10
-                           </p>
-                        </div>
-                     </div>
-                     
-                     {editingDeckId === d.id ? (
-                        <div className="flex flex-1 items-center gap-2">
-                           <input
-                              type="text"
-                              value={editingDeckName}
-                              onChange={(e) => setEditingDeckName(e.target.value)}
-                              autoFocus
-                              className="neu-pressed w-full px-3 py-1 rounded bg-transparent text-[var(--text-main)] text-sm font-black outline-none focus:ring-1 focus:ring-[var(--accent)]"
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                   if (editingDeckName.trim()) onRenameDeck(d.id, editingDeckName.trim());
-                                   setEditingDeckId(null);
-                                } else if (e.key === 'Escape') {
-                                   setEditingDeckId(null);
+            {(() => {
+               const renderDeckTree = (decksToRender, level = 0) => {
+                 return decksToRender.map(d => {
+                    const children = processedDecks.filter(child => child.parentId === d.id);
+                    return (
+                       <div key={d.id} className="flex flex-col gap-2">
+                          <div 
+                             draggable 
+                             onDragStart={(e) => { e.stopPropagation(); e.dataTransfer.setData("text/plain", d.id); }}
+                             onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                             onDrop={(e) => {
+                                e.preventDefault(); 
+                                e.stopPropagation();
+                                const file = e.dataTransfer.files?.[0];
+                                if (file && file.name.endsWith('.json')) {
+                                   handleDrop(e, d.id);
+                                } else {
+                                   const draggedId = e.dataTransfer.getData("text/plain");
+                                   if (draggedId && draggedId !== d.id && onMoveDeck) {
+                                      onMoveDeck(draggedId, d.id);
+                                   }
                                 }
-                              }}
-                           />
-                           <button 
-                             onClick={() => {
-                               if (editingDeckName.trim()) onRenameDeck(d.id, editingDeckName.trim());
-                               setEditingDeckId(null);
                              }}
-                             className="text-[color:var(--color-success)] hover:opacity-80 p-2"
-                           >
-                              <CheckIcon />
-                           </button>
-                        </div>
-                     ) : (
-                        <div className="flex-2 flex items-center gap-2 overflow-hidden">
-                           <button 
-                             onClick={() => { setEditingDeckId(d.id); setEditingDeckName(d.name); }}
-                             className="text-[var(--text-muted)] hover:text-[var(--accent)] p-2 ml-1 text-xs opacity-50 hover:opacity-100 transition-opacity"
-                           >
-                             <EditIcon />
-                           </button>
-                        </div>
-                     )}
-                  </div>
-                  <div className="flex items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0 flex-shrink-0">
-                     <button 
-                        onClick={() => onLoadDeckFromCache(d.id)} 
-                        disabled={loadedDeckId === d.id}
-                        className={`neu-btn flex-1 sm:flex-none px-3 sm:px-6 py-2 sm:py-3 text-[10px] sm:text-sm font-bold uppercase tracking-widest rounded-lg transition-colors ${loadedDeckId === d.id ? 'opacity-50 text-[var(--text-muted)]' : 'text-[color:var(--color-success)]'}`}
-                     >
-                        {loadedDeckId === d.id ? (t.loadedDeck || "Loaded") : (t.loadBtn || "Load")}
-                     </button>
-                     <button
-                        onClick={() => {
-                          if (confirmDeleteId === d.id) {
-                            onDeleteDeckFromCache(d.id);
-                            setConfirmDeleteId(null);
-                          } else {
-                            setConfirmDeleteId(d.id);
-                            setTimeout(() => setConfirmDeleteId(null), 3000);
-                          }
-                        }}
-                        className={`neu-btn flex-1 sm:flex-none px-3 sm:px-6 py-2 sm:py-3 text-[10px] sm:text-sm font-bold uppercase tracking-widest rounded-lg transition-colors ${confirmDeleteId === d.id ? 'bg-[var(--color-danger)] text-white' : 'text-[color:var(--color-danger)]'}`}
-                     >
-                        {confirmDeleteId === d.id ? (t.confirmDeleteBtn || "Sure?") : (t.deleteBtn || "Delete")}
-                     </button>
-                  </div>
-               </div>
-            ))}
+                             className={`p-3 sm:p-5 rounded-xl sm:rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 transition-colors ${loadedDeckId === d.id ? 'neu-flat border-l-4 border-[var(--accent)]' : 'neu-pressed'}`}
+                             style={{ marginLeft: `${level * 1.5}rem` }}
+                          >
+                             <div className="flex items-center gap-3 w-full sm:w-auto overflow-hidden">
+                                <div className="flex-shrink-0 flex flex-col items-center gap-1 w-12">
+                                   <span className="text-[10px] font-black text-[var(--accent)]">{d.progress}%</span>
+                                   <div className="w-8 h-1 bg-[var(--text-muted)] opacity-20 rounded-full overflow-hidden">
+                                      <div className="h-full bg-[var(--accent)]" style={{ width: `${d.progress}%` }}></div>
+                                   </div>
+                                </div>
+
+                                <div className="flex-1 flex items-center gap-2 overflow-hidden">
+                                   <div className="truncate">
+                                      <h3 className="font-black text-sm sm:text-base truncate">{d.name}</h3>
+                                      <p className="text-[9px] sm:text-xs text-[var(--text-muted)] font-medium">
+                                         {d.totalCards} {t.cardsLabel || "cards"} • Avg: {d.avgScore.toFixed(1)}/10
+                                      </p>
+                                   </div>
+                                </div>
+                                
+                                {editingDeckId === d.id ? (
+                                   <div className="flex flex-1 items-center gap-2">
+                                      <input
+                                         type="text"
+                                         value={editingDeckName}
+                                         onChange={(e) => setEditingDeckName(e.target.value)}
+                                         autoFocus
+                                         className="neu-pressed w-full px-3 py-1 rounded bg-transparent text-[var(--text-main)] text-sm font-black outline-none focus:ring-1 focus:ring-[var(--accent)]"
+                                         onKeyDown={(e) => {
+                                           if (e.key === 'Enter') {
+                                              if (editingDeckName.trim()) onRenameDeck(d.id, editingDeckName.trim());
+                                              setEditingDeckId(null);
+                                           } else if (e.key === 'Escape') {
+                                              setEditingDeckId(null);
+                                           }
+                                         }}
+                                      />
+                                      <button 
+                                        onClick={() => {
+                                          if (editingDeckName.trim()) onRenameDeck(d.id, editingDeckName.trim());
+                                          setEditingDeckId(null);
+                                        }}
+                                        className="text-[color:var(--color-success)] hover:opacity-80 p-2"
+                                      >
+                                         <CheckIcon />
+                                      </button>
+                                   </div>
+                                ) : (
+                                   <div className="flex-2 flex items-center gap-2 overflow-hidden">
+                                      <button 
+                                        onClick={() => { setEditingDeckId(d.id); setEditingDeckName(d.name); }}
+                                        className="text-[var(--text-muted)] hover:text-[var(--accent)] p-2 ml-1 text-xs opacity-50 hover:opacity-100 transition-opacity"
+                                      >
+                                        <EditIcon />
+                                      </button>
+                                   </div>
+                                )}
+                             </div>
+                             <div className="flex items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0 flex-shrink-0">
+                                <button 
+                                   onClick={() => onLoadDeckFromCache(d.id)} 
+                                   disabled={loadedDeckId === d.id}
+                                   className={`neu-btn flex-1 sm:flex-none px-3 sm:px-6 py-2 sm:py-3 text-[10px] sm:text-sm font-bold uppercase tracking-widest rounded-lg transition-colors ${loadedDeckId === d.id ? 'opacity-50 text-[var(--text-muted)]' : 'text-[color:var(--color-success)]'}`}
+                                >
+                                   {loadedDeckId === d.id ? (t.loadedDeck || "Loaded") : (t.loadBtn || "Load")}
+                                </button>
+                                <button
+                                   onClick={() => {
+                                     if (confirmDeleteId === d.id) {
+                                       onDeleteDeckFromCache(d.id);
+                                       setConfirmDeleteId(null);
+                                     } else {
+                                       setConfirmDeleteId(d.id);
+                                       setTimeout(() => setConfirmDeleteId(null), 3000);
+                                     }
+                                   }}
+                                   className={`neu-btn flex-1 sm:flex-none px-3 sm:px-6 py-2 sm:py-3 text-[10px] sm:text-sm font-bold uppercase tracking-widest rounded-lg transition-colors ${confirmDeleteId === d.id ? 'bg-[var(--color-danger)] text-white' : 'text-[color:var(--color-danger)]'}`}
+                                >
+                                   {confirmDeleteId === d.id ? (t.confirmDeleteBtn || "Sure?") : (t.deleteBtn || "Delete")}
+                                </button>
+                             </div>
+                          </div>
+                          {children.length > 0 && searchQuery === "" && (
+                             <div className="flex flex-col gap-2 mt-2">
+                                {renderDeckTree(children, level + 1)}
+                             </div>
+                          )}
+                       </div>
+                    );
+                 });
+               };
+               
+               const rootDecks = searchQuery !== "" ? processedDecks : processedDecks.filter(d => !d.parentId);
+               return renderDeckTree(rootDecks);
+            })()}
           </div>
         ) : (
           <p className="text-[var(--text-muted)] text-xs sm:text-sm font-medium text-center py-8 neu-pressed rounded-xl border border-dashed border-white/10">
