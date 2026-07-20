@@ -396,10 +396,11 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
       setHoveredNode(null);
       return;
     }
+    const { clientX, clientY } = getClientPos(e);
+    dragStartRef.current = { x: clientX, y: clientY };
+    
     if (!hoveredNode) {
-      const { clientX, clientY } = getClientPos(e);
       isDraggingRef.current = true;
-      dragStartRef.current = { x: clientX, y: clientY };
     }
   };
 
