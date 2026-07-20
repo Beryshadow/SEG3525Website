@@ -36,6 +36,7 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
       originalIndex: index,
       question: q.question,
       score: q.isMastered ? 10 : (q.score || 0),
+      subgroup: q.subgroup || q.category || q.deckId || null,
       x: Math.random() * dimensions.width,
       y: Math.random() * dimensions.height,
       vx: 0,
@@ -171,6 +172,15 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
          b = b2 + t * (b3 - b2);
      }
      return `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`;
+  };
+
+  const getPastelColor = (str) => {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+         hash = str.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      const h = Math.abs(hash) % 360;
+      return `hsl(${h}, 85%, 75%)`;
   };
 
   useEffect(() => {
@@ -353,8 +363,13 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
         ctx.fillStyle = grad;
         ctx.fill();
 
-        ctx.lineWidth = isFocusedNode ? 3 : 1;
-        ctx.strokeStyle = isFocusedNode ? '#ffffff' : (hoveredNode && hoveredNode.id === n.id ? '#ffffff' : themeColors.shadowD);
+        if (n.subgroup) {
+          ctx.lineWidth = isFocusedNode ? 3 : (hoveredNode && hoveredNode.id === n.id ? 2.5 : 2);
+          ctx.strokeStyle = isFocusedNode ? '#ffffff' : (hoveredNode && hoveredNode.id === n.id ? '#ffffff' : getPastelColor(n.subgroup));
+        } else {
+          ctx.lineWidth = isFocusedNode ? 3 : 1;
+          ctx.strokeStyle = isFocusedNode ? '#ffffff' : (hoveredNode && hoveredNode.id === n.id ? '#ffffff' : themeColors.shadowD);
+        }
         ctx.stroke();
         
         ctx.globalAlpha = 1.0;
