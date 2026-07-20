@@ -214,7 +214,11 @@ export default function NeuroDeck() {
 
   const {
     computeActiveDeckPool, selectNextCard, updateCardStats, handleManualNavigation
-  } = useStudyEngine({ currentDeck, setStreak, setCurrentIndex, currentIndex, t });
+  } = useStudyEngine({
+    currentDeck, setCurrentDeck, setStreak, setCurrentIndex, currentIndex, t,
+    focusMode, questionTypeSettings, cardEmbeddings, cardOrderMode,
+    loadedDeckId, setMyDecks, showToast
+  });
 
   const {
     syncCode, setSyncCode, pairingCode, setPairingCode, isGeneratingCode, syncVersion, datasetId, handleCloudSyncDownload,
@@ -234,7 +238,13 @@ export default function NeuroDeck() {
   const currentCard = currentDeck.length > 0 ? currentDeck[currentIndex] : null;
   const activeIndex = currentCard ? activePool.findIndex(q => q.id === currentCard.id) : -1;
   const displayIndex = Math.max(0, activeIndex);
-  const displayTotal = activePool.length || currentDeck.length;
+  const displayTotal = activePool.length > 0 ? activePool.length : currentDeck.length;
+
+  useEffect(() => {
+    if (activePool.length > 0 && activeIndex === -1 && currentDeck.length > 0) {
+      selectNextCard(currentDeck);
+    }
+  }, [activePool.length, activeIndex, currentDeck, selectNextCard]);
 
   return (
     <div className={`min-h-screen relative font-sans transition-colors duration-300 ${themeClass} neurodeck-route`} style={{ backgroundColor: 'var(--bg-main)', color: 'var(--text-main)' }}>
@@ -312,7 +322,11 @@ export default function NeuroDeck() {
             modelStatus={modelStatus}
             modelError={modelError}
             progressPercent={progressPercent}
-            onComplete={updateCardStats}
+            onComplete={(id, newScore, firstTry, skipped) => {
+              const newDeck = updateCardStats(id, newScore, firstTry, skipped);
+              setCurrentDeck(newDeck);
+              selectNextCard(newDeck);
+            }}
             onNavigate={handleManualNavigation}
             hintPref={focusMode.active ? 'strict' : 'ablation'}
             servingMode={servingMode}
