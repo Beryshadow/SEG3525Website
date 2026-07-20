@@ -13,10 +13,14 @@ export function useDeckManager({
       showToast("Cannot save an empty deck.");
       return;
     }
+    const cleanDeck = currentDeck.map(q => {
+       const { _sourceDeckId, ...rest } = q;
+       return rest;
+    });
     const newDeck = {
       id: Date.now().toString(),
       name: name || `Deck ${new Date().toLocaleDateString()}`,
-      deck: currentDeck,
+      deck: cleanDeck,
       completed: false,
       parentId: null
     };
@@ -29,14 +33,60 @@ export function useDeckManager({
       showToast("No deck loaded to overwrite.");
       return;
     }
-    setMyDecks(prev => prev.map(d => d.id === loadedDeckId ? { ...d, deck: currentDeck } : d));
+    
+    setMyDecks(prev => {
+       const getDescendantDecks = (deckId) => {
+          const children = prev.filter(d => d.parentId === deckId);
+          let all = [...children];
+          for (const child of children) {
+             all = [...all, ...getDescendantDecks(child.id)];
+          }
+          return all;
+       };
+       
+       const hierarchyIds = new Set([loadedDeckId, ...getDescendantDecks(loadedDeckId).map(d => d.id)]);
+       const groupedCards = {};
+       for (const id of hierarchyIds) groupedCards[id] = [];
+       
+       for (const card of currentDeck) {
+          const targetId = card._sourceDeckId && hierarchyIds.has(card._sourceDeckId) ? card._sourceDeckId : loadedDeckId;
+          const { _sourceDeckId, ...cleanCard } = card;
+          groupedCards[targetId].push(cleanCard);
+       }
+       
+       return prev.map(d => {
+          if (hierarchyIds.has(d.id)) {
+             return { ...d, deck: groupedCards[d.id] };
+          }
+          return d;
+       });
+    });
+    
     showToast("Deck updated successfully!");
   }, [loadedDeckId, currentDeck, setMyDecks, showToast]);
 
   const loadDeckFromCache = useCallback((id) => {
     const selected = myDecks.find(d => d.id === id);
     if (selected) {
-      setCurrentDeck(selected.deck || []);
+      const getDescendantDecks = (deckId) => {
+         const children = myDecks.filter(d => d.parentId === deckId);
+         let all = [...children];
+         for (const child of children) {
+            all = [...all, ...getDescendantDecks(child.id)];
+         }
+         return all;
+      };
+      
+      const allDecks = [selected, ...getDescendantDecks(id)];
+      let combinedDeck = [];
+      for (const d of allDecks) {
+         if (d.deck && Array.isArray(d.deck)) {
+             const taggedCards = d.deck.map(card => ({ ...card, _sourceDeckId: d.id }));
+             combinedDeck = [...combinedDeck, ...taggedCards];
+         }
+      }
+      
+      setCurrentDeck(combinedDeck);
       setLoadedDeckId(id);
       showToast(`Loaded deck: ${selected.name}`);
     }
@@ -127,12 +177,15 @@ export function useDeckManager({
   }, [myDecks, currentDeck, loadedDeckId, streak]);
 
   const handleExportWithoutProgress = useCallback(() => {
-    const strippedDeck = currentDeck.map(q => ({
-      ...q,
-      score: 0,
-      attempts: 0,
-      isMastered: false
-    }));
+    const strippedDeck = currentDeck.map(q => {
+      const { _sourceDeckId, ...rest } = q;
+      return {
+        ...rest,
+        score: 0,
+        attempts: 0,
+        isMastered: false
+      };
+    });
     const blob = new Blob([JSON.stringify(strippedDeck, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");

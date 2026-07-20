@@ -36,7 +36,7 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
       originalIndex: index,
       question: q.question,
       score: q.isMastered ? 10 : (q.score || 0),
-      subgroup: q.subgroup || q.category || q.deckId || null,
+      subgroup: q._sourceDeckId || q.subgroup || q.category || q.deckId || null,
       x: Math.random() * dimensions.width,
       y: Math.random() * dimensions.height,
       vx: 0,
