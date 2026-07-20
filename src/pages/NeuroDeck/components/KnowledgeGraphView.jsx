@@ -470,7 +470,14 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
               }}
             >
               <div className="text-[10px] font-black uppercase tracking-widest mb-2 text-[var(--text-muted)] flex items-center justify-between">
-                 <span>{t.cardLabel || "Card"}</span>
+                 <div className="flex items-center gap-2">
+                   <span>{t.cardLabel || "Card"}</span>
+                   {hoveredNode.subgroup && (
+                     <span className="px-2 py-0.5 rounded-md truncate max-w-[120px]" style={{ backgroundColor: getPastelColor(hoveredNode.subgroup), color: 'rgba(0,0,0,0.7)' }}>
+                       {hoveredNode.subgroup}
+                     </span>
+                   )}
+                 </div>
                  <span style={{ color: getGradientColor(hoveredNode.score) }}>
                     {hoveredNode.score}/10
                  </span>
