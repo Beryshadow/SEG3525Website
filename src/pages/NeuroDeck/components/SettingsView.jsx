@@ -577,7 +577,7 @@ export const SettingsView = ({
                                         title="Click to edit name"
                                       >
                                          <span className="truncate">{d.name}</span>
-                                         <span className="opacity-0 group-hover/title:opacity-50 transition-opacity ml-2 flex-shrink-0 flex items-center">
+                                         <span className="opacity-40 md:opacity-0 group-hover/title:opacity-50 transition-opacity ml-2 flex-shrink-0 flex items-center">
                                             <EditIcon />
                                          </span>
                                       </h3>
