@@ -119,7 +119,8 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
     gradD: 'rgba(0,0,0,0.2)',
     colorBad: [244, 63, 94],
     colorMid: [251, 146, 60],
-    colorGood: [52, 211, 153]
+    colorGood: [52, 211, 153],
+    colorMastered: [168, 85, 247]
   });
 
   useEffect(() => {
