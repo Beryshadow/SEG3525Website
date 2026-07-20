@@ -26,14 +26,28 @@ export const SettingsView = ({
 
   const handleBatchExport = (ids) => {
      ids.forEach(id => {
-        const deckToExport = myDecks.find(d => d.id === id);
-        if (!deckToExport) return;
-        const strippedDeck = (deckToExport.deck || []).map(q => ({ ...q, score: 0, attempts: 0, isMastered: false }));
-        const blob = new Blob([JSON.stringify(strippedDeck, null, 2)], { type: "application/json" });
+        const rootDeck = myDecks.find(d => d.id === id);
+        if (!rootDeck) return;
+
+        const getDescendants = (parentId) => {
+           let children = myDecks.filter(d => d.parentId === parentId);
+           let all = [...children];
+           children.forEach(child => {
+              all = all.concat(getDescendants(child.id));
+           });
+           return all;
+        };
+
+        const hierarchyDecks = [rootDeck, ...getDescendants(id)].map(d => {
+           const strippedDeck = (d.deck || []).map(q => ({ ...q, score: 0, attempts: 0, isMastered: false }));
+           return { ...d, deck: strippedDeck };
+        });
+
+        const blob = new Blob([JSON.stringify(hierarchyDecks, null, 2)], { type: "application/json" });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        const prefix = deckToExport.name ? deckToExport.name.replace(/[^a-z0-9]/gi, '_').toLowerCase() : 'deck';
+        const prefix = rootDeck.name ? rootDeck.name.replace(/[^a-z0-9]/gi, '_').toLowerCase() : 'deck';
         a.download = `${prefix}-${new Date().toISOString().split("T")[0]}.json`;
         document.body.appendChild(a);
         a.click();
@@ -149,26 +163,32 @@ export const SettingsView = ({
             const parsed = JSON.parse(event.target.result);
             if (!Array.isArray(parsed)) throw new Error("Not a JSON array");
             
-            const formattedDeck = parsed.map((q, idx) => {
-              const correctAnswersArray = q.correctAnswers || (q.correctAnswer ? [q.correctAnswer] : []);
-              return {
-                ...q,
-                correctAnswers: correctAnswersArray,
-                id: q.id || `custom-${Date.now()}-${idx}-${Math.random()}`,
-                score: 0,
-                dueTurn: 0,
-                attempts: 0,
-                isMastered: false
-              };
-            });
+            if (parsed.length > 0 && parsed[0].deck !== undefined) {
+               if (onBatchImportDecks) {
+                  onBatchImportDecks(parsed, typeof targetParentId === 'string' ? targetParentId : null);
+               }
+            } else {
+               const formattedDeck = parsed.map((q, idx) => {
+                 const correctAnswersArray = q.correctAnswers || (q.correctAnswer ? [q.correctAnswer] : []);
+                 return {
+                   ...q,
+                   correctAnswers: correctAnswersArray,
+                   id: q.id || `custom-${Date.now()}-${idx}-${Math.random()}`,
+                   score: 0,
+                   dueTurn: 0,
+                   attempts: 0,
+                   isMastered: false
+                 };
+               });
 
-            onDirectDropSave({
-              id: Date.now().toString() + Math.random().toString(),
-              name: name,
-              deck: formattedDeck,
-              completed: false,
-              parentId: typeof targetParentId === 'string' ? targetParentId : null
-            });
+               onDirectDropSave({
+                 id: Date.now().toString() + Math.random().toString(),
+                 name: name,
+                 deck: formattedDeck,
+                 completed: false,
+                 parentId: typeof targetParentId === 'string' ? targetParentId : null
+               });
+            }
           } catch (err) {
             console.error("Drop import failed for file", file.name, err);
           }
@@ -322,6 +342,11 @@ export const SettingsView = ({
         onDragOver={(e) => { e.preventDefault(); setIsDraggingOver(true); }}
         onDragLeave={(e) => { e.preventDefault(); setIsDraggingOver(false); }}
         onDrop={handleDrop}
+        onClick={(e) => {
+           if (e.target.closest('.deck-row-container') || e.target.closest('button') || e.target.closest('input')) return;
+           setSelectedDeckIds(new Set());
+           setLastSelectedId(null);
+        }}
       >
         <div className="flex justify-between items-center mb-4 sm:mb-8">
           <h2 className="text-lg sm:text-2xl font-black text-[var(--text-main)] flex items-center uppercase tracking-widest">
@@ -504,7 +529,7 @@ export const SettingsView = ({
                                     setLastSelectedId(d.id);
                                  }
                               }}
-                             className={`p-3 sm:p-5 rounded-xl sm:rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 transition-all cursor-pointer select-none ${selectedDeckIds.has(d.id) ? 'neu-flat ring-2 ring-[var(--accent)] bg-[var(--accent)]/5' : (loadedDeckId === d.id ? 'neu-flat border-2 border-[var(--accent)] bg-[var(--accent)]/10 shadow-[inset_0_0_20px_rgba(168,85,247,0.15)]' : 'neu-pressed hover:bg-white/5')}`}
+                             className={`deck-row-container p-3 sm:p-5 rounded-xl sm:rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 transition-all cursor-pointer select-none ${selectedDeckIds.has(d.id) ? 'neu-flat ring-2 ring-[var(--accent)] bg-[var(--accent)]/5' : (loadedDeckId === d.id ? 'neu-flat border-2 border-[var(--accent)] bg-[var(--accent)]/10 shadow-[inset_0_0_20px_rgba(168,85,247,0.15)]' : 'neu-pressed hover:bg-white/5')}`}
                              style={{ marginLeft: `${level * 1.5}rem` }}
                           >
                              <div className="flex items-center gap-3 w-full sm:w-auto overflow-hidden">
@@ -519,7 +544,7 @@ export const SettingsView = ({
                                    <div className="truncate">
                                       <h3 className="font-black text-sm sm:text-base truncate flex items-center gap-2">
                                          {d.name}
-                                         {loadedDeckId === d.id && (
+                                         {loadedDeckId === d.id && false && (
                                             <span className="px-1.5 py-0.5 text-[8px] sm:text-[10px] bg-[var(--accent)] text-white rounded font-bold uppercase tracking-widest animate-pulse">
                                                Active
                                             </span>

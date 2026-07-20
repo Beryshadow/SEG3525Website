@@ -340,6 +340,7 @@ export default function NeuroDeck() {
         {view === "graph" && (
           <KnowledgeGraphView
             deck={currentDeck}
+            myDecks={myDecks}
             cardEmbeddings={cardEmbeddings}
             t={t}
             onGoToCard={(idx) => { setCurrentIndex(idx); setView("study"); }}

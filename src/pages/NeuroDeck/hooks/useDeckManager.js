@@ -177,48 +177,96 @@ export function useDeckManager({
   }, [myDecks, currentDeck, loadedDeckId, streak]);
 
   const handleExportWithoutProgress = useCallback(() => {
-    const strippedDeck = currentDeck.map(q => {
-      const { _sourceDeckId, ...rest } = q;
-      return {
-        ...rest,
-        score: 0,
-        attempts: 0,
-        isMastered: false
-      };
-    });
-    const blob = new Blob([JSON.stringify(strippedDeck, null, 2)], { type: "application/json" });
+    let exportData;
+    let prefix = "neurodeck-clean-export";
+    
+    if (loadedDeckId) {
+      const rootDeck = myDecks.find(d => d.id === loadedDeckId);
+      if (rootDeck) {
+         prefix = rootDeck.name ? `${rootDeck.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}-clean-export` : prefix;
+         
+         const getDescendants = (parentId) => {
+            let children = myDecks.filter(d => d.parentId === parentId);
+            let all = [...children];
+            children.forEach(child => {
+               all = all.concat(getDescendants(child.id));
+            });
+            return all;
+         };
+         
+         exportData = [rootDeck, ...getDescendants(loadedDeckId)].map(d => {
+            const strippedDeck = (d.deck || []).map(q => {
+               const { _sourceDeckId, ...rest } = q;
+               return { ...rest, score: 0, attempts: 0, isMastered: false };
+            });
+            return { ...d, deck: strippedDeck };
+         });
+      }
+    }
+    
+    if (!exportData) {
+       exportData = currentDeck.map(q => {
+         const { _sourceDeckId, ...rest } = q;
+         return {
+           ...rest,
+           score: 0,
+           attempts: 0,
+           isMastered: false
+         };
+       });
+    }
+
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    let prefix = "neurodeck-clean-export";
-    if (loadedDeckId) {
-      const d = myDecks.find(deck => deck.id === loadedDeckId);
-      if (d && d.name) prefix = `${d.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}-clean-export`;
-    }
     a.download = `${prefix}-${new Date().toISOString().split("T")[0]}.json`;
     a.click();
     URL.revokeObjectURL(url);
   }, [currentDeck, loadedDeckId, myDecks]);
 
+  const handleBatchImportDecks = useCallback((decksData, targetParentId = null) => {
+     const idMap = {};
+     decksData.forEach(d => {
+        idMap[d.id] = Date.now().toString() + Math.random().toString();
+     });
+     
+     const newDecks = decksData.map(d => {
+        const isRootDeck = !d.parentId || !idMap[d.parentId];
+        return {
+           ...d,
+           id: idMap[d.id],
+           parentId: isRootDeck ? targetParentId : idMap[d.parentId]
+        };
+     });
+     
+     setMyDecks(prev => [...newDecks, ...prev]);
+     showToast(`Successfully imported ${newDecks.length} deck(s)`);
+  }, [setMyDecks, showToast]);
+
   const handleImport = useCallback((jsonStr) => {
     try {
       const parsed = JSON.parse(jsonStr);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        const formatted = parsed.map((q) => {
-          const correctAnswersArray = q.correctAnswers || (q.correctAnswer ? [q.correctAnswer] : []);
-          return {
-            ...q,
-            correctAnswers: correctAnswersArray,
-            id: q.id || Date.now().toString() + Math.random().toString(),
-            score: 0,
-            dueTurn: 0,
-            attempts: 0,
-            isMastered: false
-          };
-        });
-        setCurrentDeck(formatted);
-        setLoadedDeckId(null);
-        showToast(t?.importSuccess || "Deck imported successfully!");
+        if (parsed[0].deck !== undefined) {
+          handleBatchImportDecks(parsed);
+        } else {
+          const formatted = parsed.map((q) => {
+            const correctAnswersArray = q.correctAnswers || (q.correctAnswer ? [q.correctAnswer] : []);
+            return {
+              ...q,
+              correctAnswers: correctAnswersArray,
+              id: q.id || Date.now().toString() + Math.random().toString(),
+              score: 0,
+              dueTurn: 0,
+              attempts: 0,
+              isMastered: false
+            };
+          });
+          setCurrentDeck(formatted);
+          setLoadedDeckId(null);
+          showToast(t?.importSuccess || "Deck imported successfully!");
+        }
       } else {
         showToast(t?.invalidJson || "Invalid JSON array.");
       }
@@ -294,6 +342,7 @@ export function useDeckManager({
     deleteDeckFromCache,
     renameDeck,
     handleDirectDropSave,
+    handleBatchImportDecks,
     handleMoveDeck,
     handleBatchDeleteDecks,
     handleBatchMoveDecks,

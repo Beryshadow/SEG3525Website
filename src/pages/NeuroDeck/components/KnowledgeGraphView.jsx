@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { cosineSimilarity } from '../../../utilities/shared';
 import { ActivityIcon, RefreshIcon, NetworkIcon } from './Icons';
 
-export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embeddingStatus, embeddingProgress, onRecalculate, focusMode, setFocusMode, onStartFocusStudy }) => {
+export const KnowledgeGraphView = ({ deck, myDecks, cardEmbeddings, t, onGoToCard, embeddingStatus, embeddingProgress, onRecalculate, focusMode, setFocusMode, onStartFocusStudy }) => {
   const canvasRef = useRef(null);
   const wrapperRef = useRef(null);
   const animationRef = useRef(null);
@@ -36,7 +36,7 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
       originalIndex: index,
       question: q.question,
       score: q.isMastered ? 10 : (q.score || 0),
-      subgroup: q._sourceDeckId || q.subgroup || q.category || q.deckId || null,
+      subgroup: (q._sourceDeckId && myDecks ? myDecks.find(d => d.id === q._sourceDeckId)?.name : null) || q.subgroup || q.category || q.deckId || null,
       x: Math.random() * dimensions.width,
       y: Math.random() * dimensions.height,
       vx: 0,
