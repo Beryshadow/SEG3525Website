@@ -105,10 +105,15 @@ export const GraphPreviewPanel = ({
 
       <div className="flex justify-between items-center mt-auto">
          <button 
-           onClick={() => setPreviewFocalNode(null)} 
+           onClick={() => {
+              setPreviewFocalNode(null);
+              if (setFocusMode) {
+                 setFocusMode({ active: false, focalNodeId: null, threshold: 0.85 });
+              }
+           }} 
            className="px-3 py-2 text-xs font-bold text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors"
          >
-           {t.cancelBtn || "CANCEL"}
+           {t.clearSelection || "CLEAR SELECTION"}
          </button>
          <button 
            onClick={() => {
