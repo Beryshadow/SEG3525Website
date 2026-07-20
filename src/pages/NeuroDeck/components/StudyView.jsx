@@ -661,7 +661,27 @@ export const StudyView = ({
 
         {phase === "pass" && (
           <div className="mt-4 sm:mt-8 animate-fade-in">
-            <div className="mb-4 sm:mb-8 flex flex-col sm:flex-row items-center gap-4 bg-[var(--bg-main)]/50 backdrop-blur-md p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-white/5 border-l-4 border-l-[color:var(--color-info)]">
+            <div className="grid grid-cols-1 gap-3 sm:gap-4">
+              {shuffledChoices.map((choice, idx) => {
+                const isCorrect = correctAnswersArray.includes(choice);
+                if (isCorrect) {
+                  return (
+                    <div key={idx} className="w-full text-left p-3 sm:p-5 rounded-xl sm:rounded-2xl font-medium flex items-center text-xs sm:text-base neu-pressed" style={{ color: 'var(--color-success)', borderLeft: '4px solid var(--color-success)' }}>
+                      <i className="fas fa-check text-lg mr-3 sm:mr-4"></i> <span className="leading-relaxed">{choice}</span>
+                    </div>
+                  );
+                } else {
+                  return (
+                    <div key={idx} className="w-full text-left p-3 sm:p-5 rounded-xl sm:rounded-2xl font-medium flex items-center text-xs sm:text-base neu-btn text-[var(--text-main)] opacity-50">
+                      <span className="inline-block flex-shrink-0 w-5 h-5 sm:w-8 sm:h-8 mr-2 sm:mr-4 text-center rounded-md sm:rounded-xl neu-flat text-[9px] sm:text-xs leading-5 sm:leading-8 font-black text-[var(--text-muted)]">{idx + 1}</span>
+                      <span className="leading-relaxed">{choice}</span>
+                    </div>
+                  );
+                }
+              })}
+            </div>
+
+            <div className="mt-4 sm:mt-8 flex flex-col sm:flex-row items-center gap-4 bg-[var(--bg-main)]/50 backdrop-blur-md p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-white/5 border-l-4 border-l-[color:var(--color-info)]">
               <div className="flex-1 w-full flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
                 <div className="flex items-center gap-3 w-full sm:w-auto justify-center sm:justify-start">
                   <div className="text-[color:var(--color-info)] flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 neu-pressed rounded-full flex-shrink-0">
@@ -694,26 +714,6 @@ export const StudyView = ({
               >
                 {t.nextQuestion} <i className="fas fa-arrow-right ml-2"></i>
               </button>
-            </div>
-
-            <div className="grid grid-cols-1 gap-3 sm:gap-4">
-              {shuffledChoices.map((choice, idx) => {
-                const isCorrect = correctAnswersArray.includes(choice);
-                if (isCorrect) {
-                  return (
-                    <div key={idx} className="w-full text-left p-3 sm:p-5 rounded-xl sm:rounded-2xl font-medium flex items-center text-xs sm:text-base neu-pressed" style={{ color: 'var(--color-success)', borderLeft: '4px solid var(--color-success)' }}>
-                      <i className="fas fa-check text-lg mr-3 sm:mr-4"></i> <span className="leading-relaxed">{choice}</span>
-                    </div>
-                  );
-                } else {
-                  return (
-                    <div key={idx} className="w-full text-left p-3 sm:p-5 rounded-xl sm:rounded-2xl font-medium flex items-center text-xs sm:text-base neu-btn text-[var(--text-main)] opacity-50">
-                      <span className="inline-block flex-shrink-0 w-5 h-5 sm:w-8 sm:h-8 mr-2 sm:mr-4 text-center rounded-md sm:rounded-xl neu-flat text-[9px] sm:text-xs leading-5 sm:leading-8 font-black text-[var(--text-muted)]">{idx + 1}</span>
-                      <span className="leading-relaxed">{choice}</span>
-                    </div>
-                  );
-                }
-              })}
             </div>
           </div>
         )}
