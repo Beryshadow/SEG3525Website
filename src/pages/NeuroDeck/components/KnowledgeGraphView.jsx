@@ -11,7 +11,7 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
   
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
   const [isSimulating, setIsSimulating] = useState(true);
-  const [clusterThreshold, setClusterThreshold] = useState(0.85);
+  const [clusterThreshold, setClusterThreshold] = useState(0.50);
   const [previewFocalNode, setPreviewFocalNode] = useState(null);
   const [previewMode, setPreviewMode] = useState(focusMode?.mode || 'threshold');
   const [previewThreshold, setPreviewThreshold] = useState(focusMode?.threshold !== undefined ? focusMode.threshold : 0.85);
@@ -382,8 +382,8 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
                </label>
                <input 
                  type="range" 
-                 min="0.50" 
-                 max="0.98" 
+                 min="0.00" 
+                 max="0.99" 
                  step="0.01" 
                  value={clusterThreshold} 
                  onChange={(e) => setClusterThreshold(parseFloat(e.target.value))}
