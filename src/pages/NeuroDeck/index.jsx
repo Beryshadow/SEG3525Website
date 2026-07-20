@@ -206,7 +206,8 @@ export default function NeuroDeck() {
 
   const {
     saveDeckToCache, overwriteDeckCache, loadDeckFromCache, deleteDeckFromCache,
-    renameDeck, handleDirectDropSave, handleMoveDeck, handleUpdateCards,
+    renameDeck, handleDirectDropSave, handleMoveDeck, handleBatchDeleteDecks,
+    handleBatchMoveDecks, handleUpdateCards,
     handleDeleteCards, handleToggleDeckCompleted, handleExportProgress,
     handleExportWithoutProgress, handleImport, handleImportProgress
   } = useDeckManager({ myDecks, setMyDecks, currentDeck, setCurrentDeck, loadedDeckId, setLoadedDeckId, streak, setStreak, showToast, t });
@@ -382,6 +383,8 @@ export default function NeuroDeck() {
             onRenameDeck={renameDeck}
             onDirectDropSave={handleDirectDropSave}
             onMoveDeck={handleMoveDeck}
+            onBatchDeleteDecks={handleBatchDeleteDecks}
+            onBatchMoveDecks={handleBatchMoveDecks}
             syncCode={syncCode}
             pairingCode={pairingCode}
             isGeneratingCode={isGeneratingCode}

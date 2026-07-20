@@ -116,7 +116,12 @@ export function useDeckManager({
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `neurodeck-backup-${new Date().toISOString().split("T")[0]}.json`;
+    let prefix = "neurodeck-backup";
+    if (loadedDeckId) {
+      const d = myDecks.find(deck => deck.id === loadedDeckId);
+      if (d && d.name) prefix = `${d.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}-backup`;
+    }
+    a.download = `${prefix}-${new Date().toISOString().split("T")[0]}.json`;
     a.click();
     URL.revokeObjectURL(url);
   }, [myDecks, currentDeck, loadedDeckId, streak]);
@@ -132,10 +137,15 @@ export function useDeckManager({
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `neurodeck-clean-export-${new Date().toISOString().split("T")[0]}.json`;
+    let prefix = "neurodeck-clean-export";
+    if (loadedDeckId) {
+      const d = myDecks.find(deck => deck.id === loadedDeckId);
+      if (d && d.name) prefix = `${d.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}-clean-export`;
+    }
+    a.download = `${prefix}-${new Date().toISOString().split("T")[0]}.json`;
     a.click();
     URL.revokeObjectURL(url);
-  }, [currentDeck]);
+  }, [currentDeck, loadedDeckId, myDecks]);
 
   const handleImport = useCallback((jsonStr) => {
     try {
@@ -177,6 +187,53 @@ export function useDeckManager({
     }
   }, [setMyDecks, setCurrentDeck, setLoadedDeckId, setStreak, showToast, t]);
 
+  const handleBatchDeleteDecks = useCallback((ids) => {
+    if (window.confirm(`Are you sure you want to delete ${ids.length} deck(s)?`)) {
+       const deleteIds = new Set();
+       const collectDeletes = (deckId) => {
+          deleteIds.add(deckId);
+          myDecks.forEach(d => {
+             if (d.parentId === deckId) collectDeletes(d.id);
+          });
+       };
+       ids.forEach(id => collectDeletes(id));
+       
+       setMyDecks(prev => prev.filter(d => !deleteIds.has(d.id)));
+       if (deleteIds.has(loadedDeckId)) {
+          setCurrentDeck([]);
+          setLoadedDeckId(null);
+       }
+       showToast("Decks deleted.");
+    }
+  }, [myDecks, loadedDeckId, setMyDecks, setCurrentDeck, setLoadedDeckId, showToast]);
+
+  const handleBatchMoveDecks = useCallback((draggedIds, targetParentId) => {
+    setMyDecks(prev => {
+       let updatedDecks = [...prev];
+       for (const draggedId of draggedIds) {
+           if (draggedId === targetParentId) continue;
+           const draggedDeck = updatedDecks.find(d => d.id === draggedId);
+           if (!draggedDeck) continue;
+           
+           let curr = targetParentId;
+           let invalid = false;
+           while (curr) {
+              if (curr === draggedId) {
+                 invalid = true;
+                 break;
+              }
+              const parentDeck = updatedDecks.find(d => d.id === curr);
+              curr = parentDeck ? parentDeck.parentId : null;
+           }
+           if (invalid) continue;
+           
+           updatedDecks = updatedDecks.map(d => d.id === draggedId ? { ...d, parentId: targetParentId } : d);
+       }
+       return updatedDecks;
+    });
+    showToast("Decks moved.");
+  }, [setMyDecks, showToast]);
+
   return {
     saveDeckToCache,
     overwriteDeckCache,
@@ -185,6 +242,8 @@ export function useDeckManager({
     renameDeck,
     handleDirectDropSave,
     handleMoveDeck,
+    handleBatchDeleteDecks,
+    handleBatchMoveDecks,
     handleUpdateCards,
     handleDeleteCards,
     handleToggleDeckCompleted,

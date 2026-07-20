@@ -10,7 +10,7 @@ export const SettingsView = ({
   onExportProgress, onImportProgress,
   myDecks, loadedDeckId, onSaveDeckToCache, onOverwriteDeck, onLoadDeckFromCache, 
   onDeleteDeckFromCache, onToggleDeckCompleted, onRenameDeck, onDirectDropSave,
-  onMoveDeck, syncCode, pairingCode, isGeneratingCode, setSyncCode, onGenerateSyncCode, onConnectSyncCode, onDisconnectSyncCode, onClearCloudData,
+  onMoveDeck, onBatchDeleteDecks, onBatchMoveDecks, syncCode, pairingCode, isGeneratingCode, setSyncCode, onGenerateSyncCode, onConnectSyncCode, onDisconnectSyncCode, onClearCloudData,
   onExportWithoutProgress, onShareToCode, onImportFromCode, t, showToast, servingMode, onServingModeChange
 }) => {
   const [jsonInput, setJsonInput] = useState("");
@@ -20,6 +20,27 @@ export const SettingsView = ({
   const [importCode, setImportCode] = useState("");
   const [activeTab, setActiveTab] = useState('decks');
   const [shareQrCodeData, setShareQrCodeData] = useState(null);
+  const [selectedDeckIds, setSelectedDeckIds] = useState(new Set());
+  const [targetMoveFolderId, setTargetMoveFolderId] = useState("");
+
+  const handleBatchExport = (ids) => {
+     ids.forEach(id => {
+        const deckToExport = myDecks.find(d => d.id === id);
+        if (!deckToExport) return;
+        const strippedDeck = (deckToExport.deck || []).map(q => ({ ...q, score: 0, attempts: 0, isMastered: false }));
+        const blob = new Blob([JSON.stringify(strippedDeck, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        const prefix = deckToExport.name ? deckToExport.name.replace(/[^a-z0-9]/gi, '_').toLowerCase() : 'deck';
+        a.download = `${prefix}-${new Date().toISOString().split("T")[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+     });
+     showToast(`Exported ${ids.length} deck(s)`);
+  };
   
   useEffect(() => {
      setInputSyncCode(syncCode || "");
@@ -137,9 +158,17 @@ export const SettingsView = ({
       };
       reader.readAsText(file);
     } else {
-      const draggedId = e.dataTransfer.getData("text/plain");
-      if (draggedId && draggedId !== targetParentId && onMoveDeck) {
-         onMoveDeck(draggedId, targetParentId);
+      const draggedData = e.dataTransfer.getData("text/plain");
+      try {
+         const ids = JSON.parse(draggedData);
+         if (Array.isArray(ids) && onBatchMoveDecks) {
+             onBatchMoveDecks(ids, typeof targetParentId === 'string' ? targetParentId : null);
+             setSelectedDeckIds(new Set());
+         }
+      } catch (err) {
+         if (draggedData && draggedData !== targetParentId && onMoveDeck) {
+            onMoveDeck(draggedData, targetParentId);
+         }
       }
     }
   };
@@ -355,6 +384,44 @@ export const SettingsView = ({
 
        {processedDecks && processedDecks.length > 0 ? (
           <div className="space-y-3 sm:space-y-4">
+            {selectedDeckIds.size > 0 && (
+              <div className="mb-4 p-4 neu-flat rounded-2xl flex flex-wrap items-center justify-between gap-4 border-l-4 border-[var(--accent)] animate-fade-in">
+                 <div className="text-sm font-black text-[var(--text-main)] uppercase tracking-widest">
+                   {selectedDeckIds.size} Deck(s) Selected
+                 </div>
+                 <div className="flex flex-wrap items-center gap-2">
+                    <button
+                       onClick={() => {
+                          handleBatchExport(Array.from(selectedDeckIds));
+                          setSelectedDeckIds(new Set());
+                       }}
+                       className="neu-btn px-4 py-2 text-xs font-bold uppercase tracking-widest rounded-lg text-[var(--accent)]"
+                    >
+                       Export
+                    </button>
+                    <div className="flex items-center gap-2 ml-2 border-l border-white/10 pl-4">
+                       <button
+                          onClick={() => {
+                             if (onBatchMoveDecks) onBatchMoveDecks(Array.from(selectedDeckIds), null);
+                             setSelectedDeckIds(new Set());
+                          }}
+                          className="neu-btn px-4 py-2 text-xs font-bold uppercase tracking-widest rounded-lg text-[color:var(--color-success)]"
+                       >
+                          Move to Root
+                       </button>
+                    </div>
+                    <button
+                       onClick={() => {
+                          if (onBatchDeleteDecks) onBatchDeleteDecks(Array.from(selectedDeckIds));
+                          setSelectedDeckIds(new Set());
+                       }}
+                       className="neu-btn px-4 py-2 text-xs font-bold uppercase tracking-widest rounded-lg text-[color:var(--color-danger)] ml-2"
+                    >
+                       Delete
+                    </button>
+                 </div>
+              </div>
+            )}
             {(() => {
                const renderDeckTree = (decksToRender, level = 0) => {
                  return decksToRender.map(d => {
@@ -363,7 +430,14 @@ export const SettingsView = ({
                        <div key={d.id} className="flex flex-col gap-2">
                           <div 
                              draggable 
-                             onDragStart={(e) => { e.stopPropagation(); e.dataTransfer.setData("text/plain", d.id); }}
+                             onDragStart={(e) => { 
+                                e.stopPropagation(); 
+                                if (selectedDeckIds.has(d.id)) {
+                                   e.dataTransfer.setData("text/plain", JSON.stringify(Array.from(selectedDeckIds)));
+                                } else {
+                                   e.dataTransfer.setData("text/plain", JSON.stringify([d.id]));
+                                }
+                              }}
                              onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
                              onDrop={(e) => {
                                 e.preventDefault(); 
@@ -372,9 +446,17 @@ export const SettingsView = ({
                                 if (file && file.name.endsWith('.json')) {
                                    handleDrop(e, d.id);
                                 } else {
-                                   const draggedId = e.dataTransfer.getData("text/plain");
-                                   if (draggedId && draggedId !== d.id && onMoveDeck) {
-                                      onMoveDeck(draggedId, d.id);
+                                   const draggedData = e.dataTransfer.getData("text/plain");
+                                   try {
+                                      const ids = JSON.parse(draggedData);
+                                      if (Array.isArray(ids) && onBatchMoveDecks) {
+                                          onBatchMoveDecks(ids, d.id);
+                                          setSelectedDeckIds(new Set());
+                                      }
+                                   } catch (err) {
+                                      if (draggedData && draggedData !== d.id && onMoveDeck) {
+                                         onMoveDeck(draggedData, d.id);
+                                      }
                                    }
                                 }
                              }}
@@ -382,6 +464,18 @@ export const SettingsView = ({
                              style={{ marginLeft: `${level * 1.5}rem` }}
                           >
                              <div className="flex items-center gap-3 w-full sm:w-auto overflow-hidden">
+                                <input
+                                  type="checkbox"
+                                  checked={selectedDeckIds.has(d.id)}
+                                  onChange={(e) => {
+                                    const next = new Set(selectedDeckIds);
+                                    if (e.target.checked) next.add(d.id);
+                                    else next.delete(d.id);
+                                    setSelectedDeckIds(next);
+                                  }}
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="w-5 h-5 rounded cursor-pointer accent-[var(--accent)]"
+                                />
                                 <div className="flex-shrink-0 flex flex-col items-center gap-1 w-12">
                                    <span className="text-[10px] font-black text-[var(--accent)]">{d.progress}%</span>
                                    <div className="w-8 h-1 bg-[var(--text-muted)] opacity-20 rounded-full overflow-hidden">
@@ -641,21 +735,55 @@ export const SettingsView = ({
         <input
             type="file"
             ref={fileInputRef}
+            multiple
             onChange={(e) => {
-              const file = e.target.files[0];
-              if (!file) return;
-              const reader = new FileReader();
-              reader.onload = (event) => {
-                 const text = event.target.result;
-                 if (file.name.toLowerCase().endsWith('.json')) {
-                    onImportProgress(text);
-                 } else if (file.name.toLowerCase().endsWith('.csv') || file.name.toLowerCase().endsWith('.txt')) {
-                    handleAnkiImport(text, file.name);
-                 } else {
-                    showToast("Unsupported file format");
-                 }
-              };
-              reader.readAsText(file);
+              const files = Array.from(e.target.files);
+              if (files.length === 0) return;
+              
+              files.forEach(file => {
+                 const reader = new FileReader();
+                 reader.onload = (event) => {
+                    const text = event.target.result;
+                    const filename = file.name.replace(/\.(json|csv|txt)$/i, '');
+                    
+                    if (file.name.toLowerCase().endsWith('.json')) {
+                       try {
+                          const parsed = JSON.parse(text);
+                          if (Array.isArray(parsed)) {
+                             const formattedDeck = parsed.map((q, idx) => {
+                                const correctAnswersArray = q.correctAnswers || (q.correctAnswer ? [q.correctAnswer] : []);
+                                return {
+                                  ...q,
+                                  correctAnswers: correctAnswersArray,
+                                  id: q.id || `custom-${Date.now()}-${idx}-${Math.random().toString(36).substr(2, 5)}`,
+                                  score: 0,
+                                  dueTurn: 0,
+                                  attempts: 0,
+                                  isMastered: false
+                                };
+                             });
+                             onDirectDropSave({
+                               id: Date.now().toString() + Math.random().toString(),
+                               name: filename,
+                               deck: formattedDeck,
+                               completed: false,
+                               parentId: null
+                             });
+                             showToast(`Imported ${filename}`);
+                          } else if (parsed.myDecks) {
+                             onImportProgress(text);
+                          }
+                       } catch (err) {
+                          showToast(`Failed to parse ${filename}`);
+                       }
+                    } else if (file.name.toLowerCase().endsWith('.csv') || file.name.toLowerCase().endsWith('.txt')) {
+                       handleAnkiImport(text, file.name);
+                    } else {
+                       showToast("Unsupported file format");
+                    }
+                 };
+                 reader.readAsText(file);
+              });
               e.target.value = null;
             }}
             accept=".json,.csv,.txt"
