@@ -74,6 +74,13 @@ export default function NeuroDeck() {
     localStorage.setItem('neurodeck-card-order', cardOrderMode);
   }, [cardOrderMode]);
   
+  const [servingMode, setServingMode] = useState(() => {
+    return localStorage.getItem('neurodeck-serving-mode') || "full";
+  });
+  useEffect(() => {
+    localStorage.setItem('neurodeck-serving-mode', servingMode);
+  }, [servingMode]);
+  
   const [selectedEmbeddingModel, setSelectedEmbeddingModel] = useState(() => {
     return localStorage.getItem('neurodeck-embedding-model') || "Xenova/all-MiniLM-L6-v2";
   });
@@ -216,6 +223,7 @@ export default function NeuroDeck() {
          if (data.data.streak !== undefined) setStreak(data.data.streak);
          if (data.data.selectedModel) setSelectedModel(data.data.selectedModel);
          if (data.data.cardOrderMode) setCardOrderMode(data.data.cardOrderMode);
+         if (data.data.servingMode) setServingMode(data.data.servingMode);
          if (data.data.selectedEmbeddingModel) setSelectedEmbeddingModel(data.data.selectedEmbeddingModel);
          if (data.data.focusMode) setFocusMode(data.data.focusMode);
          if (data.data.questionTypeSettings) setQuestionTypeSettings(data.data.questionTypeSettings);
@@ -240,7 +248,7 @@ export default function NeuroDeck() {
   const forcePushToCloud = useCallback(async (codeToUse) => {
       const code = codeToUse || syncCode;
       if (!code) return;
-      const payload = { myDecks, currentDeck, loadedDeckId, streak, selectedModel, cardOrderMode, selectedEmbeddingModel, focusMode, questionTypeSettings };
+      const payload = { myDecks, currentDeck, loadedDeckId, streak, selectedModel, cardOrderMode, servingMode, selectedEmbeddingModel, focusMode, questionTypeSettings };
       const newVersion = Date.now();
       try {
          const res = await fetch(`${SYNC_API_BASE}/${code}`, {
@@ -255,7 +263,7 @@ export default function NeuroDeck() {
       } catch (err) {
          console.error("Auto-push error", err);
       }
-  }, [syncCode, myDecks, currentDeck, loadedDeckId, streak, selectedModel, cardOrderMode, selectedEmbeddingModel, focusMode, questionTypeSettings, showToast]);
+  }, [syncCode, myDecks, currentDeck, loadedDeckId, streak, selectedModel, cardOrderMode, servingMode, selectedEmbeddingModel, focusMode, questionTypeSettings, showToast]);
 
   const handleGenerateSyncCode = useCallback(() => {
      const newCode = Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -314,7 +322,7 @@ export default function NeuroDeck() {
        }
        if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
        syncTimeoutRef.current = setTimeout(async () => {
-          const payload = { myDecks, currentDeck, loadedDeckId, streak, selectedModel, cardOrderMode, selectedEmbeddingModel, focusMode, questionTypeSettings };
+          const payload = { myDecks, currentDeck, loadedDeckId, streak, selectedModel, cardOrderMode, servingMode, selectedEmbeddingModel, focusMode, questionTypeSettings };
           const newVersion = Date.now();
           try {
              const res = await fetch(`${SYNC_API_BASE}/${syncCode}`, {
@@ -330,7 +338,7 @@ export default function NeuroDeck() {
           }
        }, 2000);
     }
-  }, [currentDeck, currentIndex, streak, myDecks, loadedDeckId, syncCode, selectedModel, cardOrderMode, selectedEmbeddingModel, focusMode, questionTypeSettings]);
+  }, [currentDeck, currentIndex, streak, myDecks, loadedDeckId, syncCode, selectedModel, cardOrderMode, servingMode, selectedEmbeddingModel, focusMode, questionTypeSettings]);
 
   const computeActiveDeckPool = useCallback((deck) => {
     if (!deck || deck.length === 0) return [];
@@ -921,6 +929,8 @@ export default function NeuroDeck() {
             progressPercent={progressPercent}
             onComplete={updateCardStats}
             onNavigate={handleManualNavigation}
+            hintPref={focusMode.active ? 'strict' : 'ablation'}
+            servingMode={servingMode}
             t={t}
             showToast={showToast}
             currentLangKey={currentLangKey}
@@ -970,6 +980,8 @@ export default function NeuroDeck() {
             onEmbeddingModelChange={setSelectedEmbeddingModel}
             cardOrderMode={cardOrderMode}
             onCardOrderChange={setCardOrderMode}
+            servingMode={servingMode}
+            onServingModeChange={setServingMode}
             questionTypeSettings={questionTypeSettings}
             setQuestionTypeSettings={setQuestionTypeSettings}
             onExportProgress={handleExportProgress}

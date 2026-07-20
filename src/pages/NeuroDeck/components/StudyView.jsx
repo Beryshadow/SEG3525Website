@@ -5,7 +5,7 @@ import { useAIEvaluation } from '../hooks/useAIEvaluation';
 
 export const StudyView = ({
   question, currentIndex, totalCards, model, modelStatus, modelError, progressPercent, onComplete,
-  onNavigate, t, showToast, currentLangKey, getEmbeddings, focusMode, setFocusMode
+  onNavigate, t, showToast, currentLangKey, getEmbeddings, focusMode, setFocusMode, servingMode
 }) => {
   const [phase, setPhase] = useState("input");
   const [userInput, setUserInput] = useState("");
@@ -40,7 +40,16 @@ export const StudyView = ({
   }, [question]);
 
   useEffect(() => {
-    setPhase(isLongQuestion ? "long_question" : "input");
+    let initialPhase = "input";
+    if (isLongQuestion) {
+      initialPhase = "long_question";
+    } else if (servingMode === "mcq") {
+      initialPhase = "mcq";
+    } else if (servingMode === "pass") {
+      initialPhase = "pass";
+    }
+
+    setPhase(initialPhase);
     setUserInput("");
     setFeedback(null);
     setTempSimScore(0);
@@ -53,8 +62,8 @@ export const StudyView = ({
     setSkippedToMCQ(false);
     setSelectedChoices(new Set());
     setShakingChoices(new Set());
-    setCalculatedScore(0);
-  }, [question]);
+    setCalculatedScore(initialPhase === "pass" ? (question?.score || 0) : 0);
+  }, [question, servingMode, isLongQuestion]);
 
   useEffect(() => {
     if (phase === "success" && nextBtnRef.current) {
@@ -647,6 +656,64 @@ export const StudyView = ({
                 </button>
               </div>
             )}
+          </div>
+        )}
+
+        {phase === "pass" && (
+          <div className="mt-4 sm:mt-8 animate-fade-in">
+            <div className="mb-4 sm:mb-8 neu-pressed p-4 sm:p-6 rounded-xl sm:rounded-2xl flex flex-col sm:flex-row items-center justify-between" style={{ borderLeft: '4px solid var(--color-info)' }}>
+              <div className="mb-3 sm:mb-0 text-center sm:text-left flex-1">
+                <h3 className="font-black text-base sm:text-xl text-[color:var(--color-info)] flex items-center justify-center sm:justify-start uppercase tracking-widest">
+                  <i className="fas fa-eye mr-2 sm:mr-3 text-lg sm:text-2xl"></i> {t.servingModePass || "Passthrough"}
+                </h3>
+                <div className="mt-3 flex flex-col gap-2 max-w-xs mx-auto sm:mx-0">
+                  <label className="text-[10px] sm:text-sm font-bold text-[var(--text-muted)] flex justify-between uppercase tracking-widest">
+                    <span>Mastery Score</span>
+                    <span className="text-[var(--text-main)] font-black">{calculatedScore}/10</span>
+                  </label>
+                  <input 
+                    type="range" 
+                    min="0" 
+                    max="10" 
+                    value={calculatedScore}
+                    onChange={(e) => setCalculatedScore(parseInt(e.target.value))}
+                    className="w-full h-2 bg-black/30 rounded-lg appearance-none cursor-pointer accent-[var(--color-info)]"
+                  />
+                </div>
+              </div>
+              <div className="flex flex-col items-center sm:items-end w-full sm:w-auto mt-4 sm:mt-0">
+                <button
+                  ref={nextBtnRef}
+                  onClick={() => {
+                    setEvalMethod("pass");
+                    onComplete(question.id, calculatedScore, false, true);
+                  }}
+                  className="neu-btn w-full sm:w-auto px-4 sm:px-8 py-2 sm:py-4 font-black uppercase tracking-widest text-[color:var(--color-info)] mb-2 sm:mb-3 text-[10px] sm:text-sm rounded-lg sm:rounded-2xl"
+                >
+                  {t.nextQuestion} <i className="fas fa-arrow-right ml-2"></i>
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-3 sm:gap-4">
+              {shuffledChoices.map((choice, idx) => {
+                const isCorrect = correctAnswersArray.includes(choice);
+                if (isCorrect) {
+                  return (
+                    <div key={idx} className="w-full text-left p-3 sm:p-5 rounded-xl sm:rounded-2xl font-medium flex items-center text-xs sm:text-base neu-pressed" style={{ color: 'var(--color-success)', borderLeft: '4px solid var(--color-success)' }}>
+                      <i className="fas fa-check text-lg mr-3 sm:mr-4"></i> <span className="leading-relaxed">{choice}</span>
+                    </div>
+                  );
+                } else {
+                  return (
+                    <div key={idx} className="w-full text-left p-3 sm:p-5 rounded-xl sm:rounded-2xl font-medium flex items-center text-xs sm:text-base neu-btn text-[var(--text-main)] opacity-50">
+                      <span className="inline-block flex-shrink-0 w-5 h-5 sm:w-8 sm:h-8 mr-2 sm:mr-4 text-center rounded-md sm:rounded-xl neu-flat text-[9px] sm:text-xs leading-5 sm:leading-8 font-black text-[var(--text-muted)]">{idx + 1}</span>
+                      <span className="leading-relaxed">{choice}</span>
+                    </div>
+                  );
+                }
+              })}
+            </div>
           </div>
         )}
       </div>

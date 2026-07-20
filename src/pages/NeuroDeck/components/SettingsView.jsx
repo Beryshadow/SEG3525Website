@@ -10,7 +10,7 @@ export const SettingsView = ({
   myDecks, loadedDeckId, onSaveDeckToCache, onOverwriteDeck, onLoadDeckFromCache, 
   onDeleteDeckFromCache, onToggleDeckCompleted, onRenameDeck, onDirectDropSave,
   onMoveDeck, syncCode, setSyncCode, onGenerateSyncCode, onConnectSyncCode, onDisconnectSyncCode,
-  onExportWithoutProgress, onShareToCode, onImportFromCode, t, showToast
+  onExportWithoutProgress, onShareToCode, onImportFromCode, t, showToast, servingMode, onServingModeChange
 }) => {
   const [jsonInput, setJsonInput] = useState("");
   const [newDeckName, setNewDeckName] = useState("");
@@ -489,6 +489,28 @@ export const SettingsView = ({
               <span className="font-black uppercase tracking-widest text-xs sm:text-base">{mode.name}</span>
             </label>
           ))}
+        </div>
+
+        <div className="mt-8 border-t border-white/5 pt-8">
+           <h3 className="text-sm sm:text-base font-black text-[var(--text-main)] mb-4 flex items-center uppercase tracking-widest">
+             <i className="fas fa-layer-group mr-2 sm:mr-4 text-[var(--accent)]"></i> {t.servingModeLabel || "Serving Mode"}
+           </h3>
+           <p className="text-[var(--text-muted)] font-medium mb-4 sm:mb-8 leading-relaxed text-xs sm:text-base">
+             {t.servingModeDesc || "Choose how cards are presented to you."}
+           </p>
+           <div className="flex flex-col gap-3 sm:gap-4 mb-6">
+             {[
+               { id: "full", name: t.servingModeFull || "Full (Type answer then choices)", icon: "fa-keyboard" },
+               { id: "mcq", name: t.servingModeMCQ || "Multiple Choice Direct", icon: "fa-list-ul" },
+               { id: "pass", name: t.servingModePass || "Passthrough (Answers revealed)", icon: "fa-eye" }
+             ].map(mode => (
+               <label key={mode.id} className={`p-4 sm:p-6 rounded-xl sm:rounded-2xl cursor-pointer flex items-center text-left transition-all duration-300 ${servingMode === mode.id ? "neu-pressed text-[var(--accent)]" : "neu-btn text-[var(--text-main)]"}`}>
+                 <input type="radio" value={mode.id} checked={servingMode === mode.id} onChange={(e) => onServingModeChange(e.target.value)} className="hidden" />
+                 <div className="mr-3 sm:mr-4 opacity-80 text-lg sm:text-xl"><i className={`fas ${mode.icon}`}></i></div>
+                 <span className="font-black uppercase tracking-widest text-xs sm:text-base">{mode.name}</span>
+               </label>
+             ))}
+           </div>
         </div>
 
         <div className="mt-8 border-t border-white/5 pt-8">
