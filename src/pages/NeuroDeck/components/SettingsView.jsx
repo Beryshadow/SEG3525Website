@@ -488,16 +488,16 @@ export const SettingsView = ({
         <p className="text-[var(--text-muted)] font-medium mb-4 sm:mb-8 leading-relaxed text-xs sm:text-base">
           Spaced Repetition algorithm is always enabled, continuously prioritizing unmastered cards with the lowest performance scores. Choose how you want cards delivered when several are due with the same priority:
         </p>
-        <div className="flex flex-col gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
           {[
             { id: "random", name: t.orderRandom || "Randomised (Recommended)", icon: RandomIcon },
             { id: "sequential", name: t.orderSequential || "Sequential", icon: SeqIcon },
             { id: "semantic", name: t.orderSemantic || "Semantic Weakness Target", icon: BrainIcon }
           ].map(mode => (
-            <label key={mode.id} className={`p-4 sm:p-6 rounded-xl sm:rounded-2xl cursor-pointer flex items-center text-left transition-all duration-300 ${cardOrderMode === mode.id ? "neu-pressed text-[var(--accent)]" : "neu-btn text-[var(--text-main)]"}`}>
+            <label key={mode.id} className={`p-4 sm:p-5 rounded-xl sm:rounded-2xl cursor-pointer flex flex-col items-center justify-center text-center transition-all duration-300 ${cardOrderMode === mode.id ? "neu-pressed text-[var(--accent)]" : "neu-btn text-[var(--text-main)]"}`}>
               <input type="radio" value={mode.id} checked={cardOrderMode === mode.id} onChange={(e) => onCardOrderChange(e.target.value)} className="hidden" />
-              <div className="mr-3 sm:mr-4 opacity-80 text-lg sm:text-xl"><mode.icon /></div>
-              <span className="font-black uppercase tracking-widest text-xs sm:text-base">{mode.name}</span>
+              <div className="opacity-80 text-2xl sm:text-3xl mb-3"><mode.icon /></div>
+              <span className="font-black uppercase tracking-widest text-[10px] sm:text-xs leading-tight">{mode.name}</span>
             </label>
           ))}
         </div>
@@ -509,16 +509,16 @@ export const SettingsView = ({
            <p className="text-[var(--text-muted)] font-medium mb-4 sm:mb-8 leading-relaxed text-xs sm:text-base">
              {t.servingModeDesc || "Choose how cards are presented to you."}
            </p>
-           <div className="flex flex-col gap-3 sm:gap-4 mb-6">
+           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6">
              {[
                { id: "full", name: t.servingModeFull || "Full (Type answer then choices)", icon: "fa-keyboard" },
                { id: "mcq", name: t.servingModeMCQ || "Multiple Choice Direct", icon: "fa-list-ul" },
                { id: "pass", name: t.servingModePass || "Passthrough (Answers revealed)", icon: "fa-eye" }
              ].map(mode => (
-               <label key={mode.id} className={`p-4 sm:p-6 rounded-xl sm:rounded-2xl cursor-pointer flex items-center text-left transition-all duration-300 ${servingMode === mode.id ? "neu-pressed text-[var(--accent)]" : "neu-btn text-[var(--text-main)]"}`}>
+               <label key={mode.id} className={`p-4 sm:p-5 rounded-xl sm:rounded-2xl cursor-pointer flex flex-col items-center justify-center text-center transition-all duration-300 ${servingMode === mode.id ? "neu-pressed text-[var(--accent)]" : "neu-btn text-[var(--text-main)]"}`}>
                  <input type="radio" value={mode.id} checked={servingMode === mode.id} onChange={(e) => onServingModeChange(e.target.value)} className="hidden" />
-                 <div className="mr-3 sm:mr-4 opacity-80 text-lg sm:text-xl"><i className={`fas ${mode.icon}`}></i></div>
-                 <span className="font-black uppercase tracking-widest text-xs sm:text-base">{mode.name}</span>
+                 <div className="opacity-80 text-2xl sm:text-3xl mb-3"><i className={`fas ${mode.icon}`}></i></div>
+                 <span className="font-black uppercase tracking-widest text-[10px] sm:text-xs leading-tight">{mode.name}</span>
                </label>
              ))}
            </div>

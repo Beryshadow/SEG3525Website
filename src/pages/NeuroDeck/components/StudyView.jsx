@@ -661,38 +661,39 @@ export const StudyView = ({
 
         {phase === "pass" && (
           <div className="mt-4 sm:mt-8 animate-fade-in">
-            <div className="mb-4 sm:mb-8 neu-pressed p-4 sm:p-6 rounded-xl sm:rounded-2xl flex flex-col sm:flex-row items-center justify-between" style={{ borderLeft: '4px solid var(--color-info)' }}>
-              <div className="mb-3 sm:mb-0 text-center sm:text-left flex-1">
-                <h3 className="font-black text-base sm:text-xl text-[color:var(--color-info)] flex items-center justify-center sm:justify-start uppercase tracking-widest">
-                  <i className="fas fa-eye mr-2 sm:mr-3 text-lg sm:text-2xl"></i> {t.servingModePass || "Passthrough"}
-                </h3>
-                <div className="mt-3 flex flex-col gap-2 max-w-xs mx-auto sm:mx-0">
-                  <label className="text-[10px] sm:text-sm font-bold text-[var(--text-muted)] flex justify-between uppercase tracking-widest">
-                    <span>Mastery Score</span>
-                    <span className="text-[var(--text-main)] font-black">{calculatedScore}/10</span>
-                  </label>
+            <div className="mb-4 sm:mb-8 flex flex-col sm:flex-row items-center gap-4 bg-[var(--bg-main)]/50 backdrop-blur-md p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-white/5 border-l-4 border-l-[color:var(--color-info)]">
+              <div className="flex-1 w-full flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
+                <div className="flex items-center gap-3 w-full sm:w-auto justify-center sm:justify-start">
+                  <div className="text-[color:var(--color-info)] flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 neu-pressed rounded-full flex-shrink-0">
+                    <i className="fas fa-eye text-sm sm:text-lg"></i>
+                  </div>
+                  <span className="font-black text-xs sm:text-sm text-[color:var(--color-info)] uppercase tracking-widest hidden sm:block">
+                    {t.servingModePass || "Passthrough"}
+                  </span>
+                </div>
+                <div className="flex-1 w-full max-w-sm mx-auto sm:mx-0">
+                  <div className="flex justify-between items-center mb-1 sm:mb-2 px-1">
+                    <span className="text-[10px] sm:text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest">Mastery Score</span>
+                    <span className="text-xs sm:text-sm font-black text-[color:var(--color-info)]">{calculatedScore}/10</span>
+                  </div>
                   <input 
-                    type="range" 
-                    min="0" 
-                    max="10" 
+                    type="range" min="0" max="10" 
                     value={calculatedScore}
                     onChange={(e) => setCalculatedScore(parseInt(e.target.value))}
-                    className="w-full h-2 bg-black/30 rounded-lg appearance-none cursor-pointer accent-[var(--color-info)]"
+                    className="w-full h-1.5 sm:h-2 bg-black/30 rounded-full appearance-none cursor-pointer accent-[var(--color-info)]"
                   />
                 </div>
               </div>
-              <div className="flex flex-col items-center sm:items-end w-full sm:w-auto mt-4 sm:mt-0">
-                <button
-                  ref={nextBtnRef}
-                  onClick={() => {
-                    setEvalMethod("pass");
-                    onComplete(question.id, calculatedScore, false, true);
-                  }}
-                  className="neu-btn w-full sm:w-auto px-4 sm:px-8 py-2 sm:py-4 font-black uppercase tracking-widest text-[color:var(--color-info)] mb-2 sm:mb-3 text-[10px] sm:text-sm rounded-lg sm:rounded-2xl"
-                >
-                  {t.nextQuestion} <i className="fas fa-arrow-right ml-2"></i>
-                </button>
-              </div>
+              <button
+                ref={nextBtnRef}
+                onClick={() => {
+                  setEvalMethod("pass");
+                  onComplete(question.id, calculatedScore, false, true);
+                }}
+                className="neu-btn w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-black uppercase tracking-widest text-[color:var(--color-info)] text-xs sm:text-sm flex-shrink-0 transition-transform active:scale-95"
+              >
+                {t.nextQuestion} <i className="fas fa-arrow-right ml-2"></i>
+              </button>
             </div>
 
             <div className="grid grid-cols-1 gap-3 sm:gap-4">
