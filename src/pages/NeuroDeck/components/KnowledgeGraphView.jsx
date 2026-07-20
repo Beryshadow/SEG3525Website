@@ -368,12 +368,17 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
     if (e.touches && e.touches.length > 0) {
       return { clientX: e.touches[0].clientX, clientY: e.touches[0].clientY };
     }
+    if (e.changedTouches && e.changedTouches.length > 0) {
+      return { clientX: e.changedTouches[0].clientX, clientY: e.changedTouches[0].clientY };
+    }
     return { clientX: e.clientX, clientY: e.clientY };
   };
 
   const handleMouseMove = (e) => {
     if (!canvasRef.current) return;
     const { clientX, clientY } = getClientPos(e);
+    if (clientX === undefined) return;
+    
     const rect = canvasRef.current.getBoundingClientRect();
     const mouseX = clientX - rect.left;
     const mouseY = clientY - rect.top;
@@ -411,6 +416,8 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
       return;
     }
     const { clientX, clientY } = getClientPos(e);
+    if (clientX === undefined) return;
+    
     dragStartRef.current = { x: clientX, y: clientY };
     
     if (!hoveredNode) {
@@ -419,9 +426,10 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
   };
 
   const handleMouseUp = (e) => {
-    if (e && e.clientX !== undefined) {
-      const dx = e.clientX - dragStartRef.current.x;
-      const dy = e.clientY - dragStartRef.current.y;
+    const { clientX, clientY } = getClientPos(e);
+    if (clientX !== undefined) {
+      const dx = clientX - dragStartRef.current.x;
+      const dy = clientY - dragStartRef.current.y;
       if (Math.sqrt(dx*dx + dy*dy) < 5) {
         if (hoveredNode) {
           setPreviewFocalNode(hoveredNode);
