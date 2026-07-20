@@ -5,7 +5,7 @@ import { useAIEvaluation } from '../hooks/useAIEvaluation';
 
 export const StudyView = ({
   question, currentIndex, totalCards, model, modelStatus, modelError, progressPercent, onComplete,
-  onNavigate, t, showToast, currentLangKey, getEmbeddings
+  onNavigate, t, showToast, currentLangKey, getEmbeddings, focusMode, setFocusMode
 }) => {
   const [phase, setPhase] = useState("input");
   const [userInput, setUserInput] = useState("");
@@ -285,6 +285,21 @@ export const StudyView = ({
           {t.nextCard || "Next"} <i className="fas fa-chevron-right ml-2"></i>
         </button>
       </div>
+
+      {focusMode?.active && (
+        <div className="w-full flex items-center justify-between neu-panel px-4 py-3 sm:py-2 text-[10px] sm:text-xs font-bold uppercase tracking-widest text-[var(--accent)] border-l-4 border-[var(--accent)]">
+           <div className="flex items-center text-left">
+              <i className="fas fa-bullseye mr-2 sm:mr-3 animate-pulse text-sm sm:text-base"></i> 
+              Focus Mode Active (Threshold: {focusMode.threshold.toFixed(2)})
+           </div>
+           <button 
+              onClick={() => setFocusMode({ ...focusMode, active: false })}
+              className="text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors ml-2 sm:ml-4 whitespace-nowrap"
+           >
+              CLEAR
+           </button>
+        </div>
+      )}
 
       <div className="neu-panel p-4 sm:p-8 md:p-12 relative overflow-hidden transition-all">
         <div className="flex justify-between items-center mb-4 sm:mb-8 text-[10px] sm:text-sm font-bold text-[var(--text-muted)] uppercase tracking-wider">

@@ -80,6 +80,18 @@ export default function NeuroDeck() {
   useEffect(() => {
     localStorage.setItem('neurodeck-embedding-model', selectedEmbeddingModel);
   }, [selectedEmbeddingModel]);
+
+  const [focusMode, setFocusMode] = useState(() => {
+    try {
+      const saved = localStorage.getItem('neurodeck-focus-mode');
+      return saved ? JSON.parse(saved) : { active: false, focalNodeId: null, threshold: 0.85 };
+    } catch (e) {
+      return { active: false, focalNodeId: null, threshold: 0.85 };
+    }
+  });
+  useEffect(() => {
+    localStorage.setItem('neurodeck-focus-mode', JSON.stringify(focusMode));
+  }, [focusMode]);
   const { getEmbeddings, modelStatus: embeddingStatus, backendUsed: embeddingBackend, modelError: embeddingError, progressPercent: embeddingProgress } = useEmbeddingModel(selectedEmbeddingModel);
   const [cardEmbeddings, setCardEmbeddings] = useState({});
   const activeEmbeddingModelRef = useRef(selectedEmbeddingModel);
@@ -192,6 +204,7 @@ export default function NeuroDeck() {
          if (data.data.selectedModel) setSelectedModel(data.data.selectedModel);
          if (data.data.cardOrderMode) setCardOrderMode(data.data.cardOrderMode);
          if (data.data.selectedEmbeddingModel) setSelectedEmbeddingModel(data.data.selectedEmbeddingModel);
+         if (data.data.focusMode) setFocusMode(data.data.focusMode);
          setSyncVersion(data.version);
          if (manual) {
             setSyncCode(code);
@@ -213,7 +226,7 @@ export default function NeuroDeck() {
   const forcePushToCloud = useCallback(async (codeToUse) => {
       const code = codeToUse || syncCode;
       if (!code) return;
-      const payload = { myDecks, currentDeck, loadedDeckId, streak, selectedModel, cardOrderMode, selectedEmbeddingModel };
+      const payload = { myDecks, currentDeck, loadedDeckId, streak, selectedModel, cardOrderMode, selectedEmbeddingModel, focusMode };
       const newVersion = Date.now();
       try {
          const res = await fetch(`${SYNC_API_BASE}/${code}`, {
@@ -287,7 +300,7 @@ export default function NeuroDeck() {
        }
        if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
        syncTimeoutRef.current = setTimeout(async () => {
-          const payload = { myDecks, currentDeck, loadedDeckId, streak, selectedModel, cardOrderMode, selectedEmbeddingModel };
+          const payload = { myDecks, currentDeck, loadedDeckId, streak, selectedModel, cardOrderMode, selectedEmbeddingModel, focusMode };
           const newVersion = Date.now();
           try {
              const res = await fetch(`${SYNC_API_BASE}/${syncCode}`, {
@@ -303,18 +316,30 @@ export default function NeuroDeck() {
           }
        }, 2000);
     }
-  }, [currentDeck, currentIndex, streak, myDecks, loadedDeckId, syncCode, selectedModel, cardOrderMode, selectedEmbeddingModel]);
+  }, [currentDeck, currentIndex, streak, myDecks, loadedDeckId, syncCode, selectedModel, cardOrderMode, selectedEmbeddingModel, focusMode]);
 
   const selectNextCard = useCallback((deck) => {
     if (!deck || deck.length === 0) return 0;
+    
+    let activeDeck = deck;
+    if (focusMode.active && focusMode.focalNodeId && cardEmbeddings[focusMode.focalNodeId]) {
+      const focalEmbedding = cardEmbeddings[focusMode.focalNodeId];
+      activeDeck = deck.filter(q => {
+        if (q.id === focusMode.focalNodeId) return true;
+        if (!cardEmbeddings[q.id]) return false;
+        return cosineSimilarity(cardEmbeddings[q.id], focalEmbedding) >= focusMode.threshold;
+      });
+      if (activeDeck.length === 0) activeDeck = deck; 
+    }
+
     const now = 0; 
-    let dueCards = deck.filter(q => q.dueTurn <= now && !q.isMastered);
+    let dueCards = activeDeck.filter(q => q.dueTurn <= now && !q.isMastered);
 
     if (dueCards.length === 0) {
-      dueCards = deck.filter(q => !q.isMastered);
+      dueCards = activeDeck.filter(q => !q.isMastered);
     }
     if (dueCards.length === 0) {
-      return deck.findIndex(q => deck.indexOf(q) === 0); 
+      return deck.findIndex(q => q.id === (activeDeck[0] ? activeDeck[0].id : deck[0].id)); 
     }
 
     dueCards.sort((a, b) => a.score - b.score);
@@ -354,7 +379,7 @@ export default function NeuroDeck() {
     } else {
       return deck.findIndex(q => q.id === lowestScoreCards[0].id);
     }
-  }, [cardOrderMode, cardEmbeddings]);
+  }, [cardOrderMode, cardEmbeddings, focusMode]);
 
   const updateCardStats = useCallback((id, newScore, firstTry, skipped) => {
     setCurrentDeck(prev => {
@@ -737,6 +762,8 @@ export default function NeuroDeck() {
             showToast={showToast}
             currentLangKey={currentLangKey}
             getEmbeddings={getEmbeddings}
+            focusMode={focusMode}
+            setFocusMode={setFocusMode}
           />
         )}
         
@@ -761,6 +788,12 @@ export default function NeuroDeck() {
             embeddingStatus={embeddingStatus}
             embeddingProgress={embeddingProgress}
             onRecalculate={handleRecalculateGraph}
+            focusMode={focusMode}
+            setFocusMode={setFocusMode}
+            onStartFocusStudy={() => {
+              setCurrentIndex(selectNextCard(currentDeck));
+              setView("study");
+            }}
           />
         )}
 

@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { cosineSimilarity } from '../../../utilities/shared';
 import { ActivityIcon, RefreshIcon, NetworkIcon } from './Icons';
 
-export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embeddingStatus, embeddingProgress, onRecalculate }) => {
+export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embeddingStatus, embeddingProgress, onRecalculate, focusMode, setFocusMode, onStartFocusStudy }) => {
   const canvasRef = useRef(null);
   const wrapperRef = useRef(null);
   const animationRef = useRef(null);
@@ -12,6 +12,8 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
   const [isSimulating, setIsSimulating] = useState(true);
   const [clusterThreshold, setClusterThreshold] = useState(0.85);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [previewFocalNode, setPreviewFocalNode] = useState(null);
+  const [previewThreshold, setPreviewThreshold] = useState(focusMode?.threshold || 0.85);
   
   const cameraRef = useRef({ x: 0, y: 0, scale: 1 });
   const isDraggingRef = useRef(false);
@@ -262,6 +264,19 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
       ctx.translate(cameraRef.current.x, cameraRef.current.y);
       ctx.scale(cameraRef.current.scale, cameraRef.current.scale);
 
+      let inClusterIds = new Set();
+      if (previewFocalNode) {
+        inClusterIds.add(previewFocalNode.id);
+        for (const n of nodes) {
+           if (n.id !== previewFocalNode.id && n.embedding && previewFocalNode.embedding) {
+              const sim = cosineSimilarity(n.embedding, previewFocalNode.embedding);
+              if (sim >= previewThreshold) {
+                 inClusterIds.add(n.id);
+              }
+           }
+        }
+      }
+
       for (const edge of edges) {
         ctx.beginPath();
         ctx.moveTo(edge.source.x, edge.source.y);
@@ -272,13 +287,27 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
         // Cubing the weight naturally suppresses weak links and heavily emphasizes strong ones
         const visualWeight = Math.pow(Math.max(0, edge.weight), 3);
         ctx.lineWidth = 0.5 + (visualWeight * 3);
-        ctx.globalAlpha = 0.1 + (visualWeight * 0.6);
+        
+        let edgeAlpha = 0.1 + (visualWeight * 0.6);
+        if (previewFocalNode) {
+           if (inClusterIds.has(edge.source.id) && inClusterIds.has(edge.target.id)) {
+              edgeAlpha = Math.min(1, edgeAlpha * 2);
+           } else {
+              edgeAlpha *= 0.1;
+           }
+        }
+        ctx.globalAlpha = edgeAlpha;
         
         ctx.stroke();
       }
       ctx.globalAlpha = 1.0;
 
       for (const n of nodes) {
+        let isFocusedNode = previewFocalNode && previewFocalNode.id === n.id;
+        let isDimmed = previewFocalNode && !inClusterIds.has(n.id);
+        
+        ctx.globalAlpha = isDimmed ? 0.2 : 1.0;
+
         ctx.beginPath();
         ctx.arc(n.x, n.y, n.radius, 0, 2 * Math.PI);
         
@@ -301,9 +330,11 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
         ctx.fillStyle = grad;
         ctx.fill();
 
-        ctx.lineWidth = 1;
-        ctx.strokeStyle = hoveredNode && hoveredNode.id === n.id ? '#ffffff' : themeColors.shadowD;
+        ctx.lineWidth = isFocusedNode ? 3 : 1;
+        ctx.strokeStyle = isFocusedNode ? '#ffffff' : (hoveredNode && hoveredNode.id === n.id ? '#ffffff' : themeColors.shadowD);
         ctx.stroke();
+        
+        ctx.globalAlpha = 1.0;
       }
       
       ctx.restore();
@@ -317,7 +348,7 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
       isRunning = false;
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
     };
-  }, [dimensions, isSimulating, hoveredNode, themeColors]);
+  }, [dimensions, isSimulating, hoveredNode, themeColors, previewFocalNode, previewThreshold]);
 
   const getClientPos = (e) => {
     if (e.touches && e.touches.length > 0) {
@@ -372,7 +403,18 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
     }
   };
 
-  const handleMouseUp = () => {
+  const handleMouseUp = (e) => {
+    if (e && e.clientX !== undefined) {
+      const dx = e.clientX - dragStartRef.current.x;
+      const dy = e.clientY - dragStartRef.current.y;
+      if (Math.sqrt(dx*dx + dy*dy) < 5) {
+        if (hoveredNode) {
+          setPreviewFocalNode(hoveredNode);
+        } else {
+          setPreviewFocalNode(null);
+        }
+      }
+    }
     isDraggingRef.current = false;
   };
 
@@ -419,7 +461,19 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
   const handleTouchEnd = (e) => {
     lastPinchDistRef.current = null;
     lastPinchCenterRef.current = null;
-    handleMouseUp();
+    if (e && e.changedTouches && e.changedTouches.length > 0) {
+       const touch = e.changedTouches[0];
+       const dx = touch.clientX - dragStartRef.current.x;
+       const dy = touch.clientY - dragStartRef.current.y;
+       if (Math.sqrt(dx*dx + dy*dy) < 10) {
+         if (hoveredNode) {
+           setPreviewFocalNode(hoveredNode);
+         } else {
+           setPreviewFocalNode(null);
+         }
+       }
+    }
+    isDraggingRef.current = false;
   };
   
   const handleWheel = (e) => {
@@ -539,8 +593,67 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
               </p>
             </div>
           )}
+
+          {previewFocalNode && (() => {
+             let clusterCount = 1; 
+             if (cardEmbeddings && deck && previewFocalNode.embedding) {
+                deck.forEach(q => {
+                   if (q.id !== previewFocalNode.id && cardEmbeddings[q.id]) {
+                      if (cosineSimilarity(cardEmbeddings[q.id], previewFocalNode.embedding) >= previewThreshold) {
+                         clusterCount++;
+                      }
+                   }
+                });
+             }
+             return (
+               <div className="absolute bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-96 neu-panel p-4 z-30 flex flex-col pointer-events-auto animate-fade-in shadow-xl">
+                 <div className="text-[10px] font-black uppercase tracking-widest text-[var(--accent)] mb-2 flex justify-between">
+                    <span>Focus Preview</span>
+                    <span>{clusterCount} Cards</span>
+                 </div>
+                 <div className="text-sm font-medium text-[var(--text-main)] mb-4 line-clamp-2" title={previewFocalNode.question}>
+                    {previewFocalNode.question}
+                 </div>
+                 <div className="flex flex-col mb-4">
+                    <div className="flex justify-between items-center mb-1">
+                       <label className="text-xs font-bold text-[var(--text-muted)]">Similarity Threshold</label>
+                       <span className="text-xs font-bold text-[var(--text-main)]">{previewThreshold.toFixed(2)}</span>
+                    </div>
+                    <input 
+                      type="range" 
+                      min="0.30" 
+                      max="0.99" 
+                      step="0.01" 
+                      value={previewThreshold} 
+                      onChange={(e) => setPreviewThreshold(parseFloat(e.target.value))}
+                      className="w-full accent-[var(--accent)] cursor-pointer"
+                    />
+                 </div>
+                 <div className="flex justify-between items-center mt-auto">
+                    <button 
+                      onClick={() => setPreviewFocalNode(null)} 
+                      className="px-3 py-2 text-xs font-bold text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors"
+                    >
+                      CANCEL
+                    </button>
+                    <button 
+                      onClick={() => {
+                         if (setFocusMode) {
+                            setFocusMode({ active: true, focalNodeId: previewFocalNode.id, threshold: previewThreshold });
+                         }
+                         if (onStartFocusStudy) onStartFocusStudy();
+                      }}
+                      className="neu-btn px-4 py-2 text-xs font-bold uppercase tracking-widest text-[var(--accent)] rounded-lg flex items-center"
+                    >
+                      <ActivityIcon className="mr-2" /> STUDY CLUSTER
+                    </button>
+                 </div>
+               </div>
+             );
+          })()}
         </div>
       </div>
     </div>
   );
 };
+
