@@ -10,6 +10,7 @@ export const KnowledgeGraphView = ({ deck, cardEmbeddings, t, onGoToCard, embedd
   const [hoveredNode, setHoveredNode] = useState(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
   const [isSimulating, setIsSimulating] = useState(true);
+  const [clusterThreshold, setClusterThreshold] = useState(0.85);
   const [previewFocalNode, setPreviewFocalNode] = useState(null);
   const [previewMode, setPreviewMode] = useState(focusMode?.mode || 'threshold');
   const [previewThreshold, setPreviewThreshold] = useState(focusMode?.threshold !== undefined ? focusMode.threshold : 0.85);
