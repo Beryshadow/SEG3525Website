@@ -209,7 +209,7 @@ export function useNeuroSync({
 
   const handleGenerateSyncCode = useCallback(async () => {
      setIsGeneratingCode(true);
-     const newPairingCode = Math.random().toString(36).substring(2, 6).toUpperCase();
+     
      let currentChannel = syncCode;
      if (!currentChannel || currentChannel.length < 64) {
          if (window.crypto && window.crypto.getRandomValues) {
@@ -222,23 +222,46 @@ export function useNeuroSync({
          setSyncCode(currentChannel);
      }
      
-     // Push pointer
-     try {
-         const res = await fetch(`${SYNC_API_BASE}/${newPairingCode}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ data: { pointer: currentChannel }, version: Date.now(), datasetId, type: 'pairing' })
-         });
+     let newPairingCode = "";
+     let attempts = 0;
+     let success = false;
+     
+     while (attempts < 3 && !success) {
+         attempts++;
+         newPairingCode = Math.random().toString(36).substring(2, 7).toUpperCase();
          
-         if (res.status === 429) {
-             const errorData = await res.json();
-             showToast(errorData.error || "Try again later, we are experiencing high demand.");
+         try {
+             const res = await fetch(`${SYNC_API_BASE}/${newPairingCode}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ data: { pointer: currentChannel }, version: Date.now(), datasetId, type: 'pairing' })
+             });
+             
+             if (res.status === 409) {
+                 // Collision, try again
+                 continue;
+             }
+             
+             if (res.status === 429) {
+                 const errorData = await res.json();
+                 showToast(errorData.error || "Try again later, we are experiencing high demand.");
+                 setIsGeneratingCode(false);
+                 return;
+             }
+             
+             if (res.ok) {
+                 success = true;
+             }
+         } catch (e) {
+             console.error("Failed to push pairing pointer", e);
+             showToast("Failed to connect to sync server.");
              setIsGeneratingCode(false);
              return;
          }
-     } catch (e) {
-         console.error("Failed to push pairing pointer", e);
-         showToast("Failed to connect to sync server.");
+     }
+     
+     if (!success) {
+         showToast("Failed to generate a unique pairing code. Try again.");
          setIsGeneratingCode(false);
          return;
      }
@@ -247,6 +270,7 @@ export function useNeuroSync({
      forcePushToCloud(currentChannel);
      setIsGeneratingCode(false);
   }, [syncCode, forcePushToCloud, datasetId, showToast]);
+
 
   const handleClearCloudData = useCallback(async () => {
       if (!window.confirm("Are you sure you want to completely wipe all your cloud sync data? This will permanently delete all codes associated with your dataset.")) return;

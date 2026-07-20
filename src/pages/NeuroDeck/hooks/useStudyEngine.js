@@ -207,12 +207,9 @@ export function useStudyEngine({
   }, [cardOrderMode, cardEmbeddings, questionTypeSettings, computeActiveDeckPool]);
 
   const updateCardStats = useCallback((id, newScore, firstTry, skipped) => {
-    let nextDeck;
-    setCurrentDeck(prev => {
-      nextDeck = [...prev];
-      const idx = nextDeck.findIndex(q => q.id === id);
-      if (idx === -1) return prev;
-
+    let nextDeck = [...currentDeck];
+    const idx = nextDeck.findIndex(q => q.id === id);
+    if (idx !== -1) {
       const card = { ...nextDeck[idx] };
       card.score = newScore;
       card.attempts = (card.attempts || 0) + 1;
@@ -225,6 +222,8 @@ export function useStudyEngine({
 
       nextDeck[idx] = card;
       
+      setCurrentDeck(nextDeck);
+      
       if (loadedDeckId && setMyDecks) {
          setMyDecks(currDecks => currDecks.map(d => {
             if (d.id === loadedDeckId) {
@@ -233,9 +232,10 @@ export function useStudyEngine({
             return d;
          }));
       }
+    } else {
+      nextDeck = currentDeck;
+    }
 
-      return nextDeck;
-    });
 
     if (skipped) {
       setStreak(0);
@@ -250,10 +250,12 @@ export function useStudyEngine({
       setStreak(0);
     }
 
-    if (nextDeck) {
+    if (nextDeck && idx !== -1) {
       setCurrentIndex(selectNextCard(nextDeck));
     }
-  }, [t, showToast, loadedDeckId, selectNextCard, setCurrentDeck, setMyDecks, setStreak, setCurrentIndex]);
+    
+    return nextDeck;
+  }, [currentDeck, t, showToast, loadedDeckId, selectNextCard, setCurrentDeck, setMyDecks, setStreak, setCurrentIndex]);
 
   const handleManualNavigation = useCallback((dir) => {
     if (currentDeck.length === 0) return;

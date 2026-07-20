@@ -12,7 +12,10 @@ app.use(express.json({ limit: '10mb' }));
 // In-memory store for synced data
 // Structure: Map<syncCode, { data: Object, timestamp: Number, version: Number, datasetId: String, type: String }>
 const syncStore = new Map();
-const MAX_STORE_SIZE = 30; // Prevent memory exhaustion DoS
+const MAX_STORE_SIZE = 150; // Prevent memory exhaustion DoS (approx 150 active large sessions)
+
+const pairingStore = new Map();
+const MAX_PAIRING_STORE_SIZE = 1000; // Tiny payloads, so safe to store many
 
 const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
 const TWELVE_HOURS_MS = 12 * 60 * 60 * 1000;
@@ -21,17 +24,22 @@ const migrationStore = new Map(); // Tracks migrations
 const FIVE_MINUTES_MS = 5 * 60 * 1000;
 
 let queueLength = 0;
-const MAX_QUEUE_LENGTH = 4;
+const MAX_QUEUE_LENGTH = 100;
 let nextAvailableTime = 0;
 
 // Cleanup interval to remove data older than 3 days, and migrations older than 12 hours
 setInterval(() => {
     const now = Date.now();
     for (const [code, entry] of syncStore.entries()) {
-        const expiryTime = entry.type === 'pairing' ? FIVE_MINUTES_MS : THREE_DAYS_MS;
-        if (now - entry.timestamp > expiryTime) {
+        if (now - entry.timestamp > THREE_DAYS_MS) {
             syncStore.delete(code);
             console.log(`[CLEANUP] Deleted expired ${entry.type} data for code: ${code}`);
+        }
+    }
+    for (const [code, entry] of pairingStore.entries()) {
+        if (now - entry.timestamp > FIVE_MINUTES_MS) {
+            pairingStore.delete(code);
+            console.log(`[CLEANUP] Deleted expired pairing data for code: ${code}`);
         }
     }
     for (const [code, entry] of migrationStore.entries()) {
@@ -56,8 +64,12 @@ app.post('/api/sync/:code', async (req, res) => {
         return res.status(400).json({ error: 'Invalid sync code format' });
     }
 
+    const isPairing = type === 'pairing';
+    const targetStore = isPairing ? pairingStore : syncStore;
+    const maxStoreSize = isPairing ? MAX_PAIRING_STORE_SIZE : MAX_STORE_SIZE;
+
     // New code creation queue logic
-    if (!syncStore.has(code)) {
+    if (!targetStore.has(code)) {
         if (queueLength >= MAX_QUEUE_LENGTH) {
             return res.status(429).json({ error: 'Try again later, we are experiencing high demand.' });
         }
@@ -83,30 +95,33 @@ app.post('/api/sync/:code', async (req, res) => {
         return res.status(400).json({ error: 'Invalid data payload. Must be a JSON object.' });
     }
 
-    if (syncStore.size >= MAX_STORE_SIZE && !syncStore.has(code)) {
+    if (targetStore.size >= maxStoreSize && !targetStore.has(code)) {
         let oldestCode = null;
         let oldestTime = Infinity;
-        for (const [k, v] of syncStore.entries()) {
+        for (const [k, v] of targetStore.entries()) {
             if (v.timestamp < oldestTime) {
                 oldestTime = v.timestamp;
                 oldestCode = k;
             }
         }
         if (oldestCode) {
-            syncStore.delete(oldestCode);
-            console.log(`[EVICT] Evicted oldest sync code: ${oldestCode}`);
+            targetStore.delete(oldestCode);
+            console.log(`[EVICT] Evicted oldest code: ${oldestCode}`);
         }
     }
 
-    const currentEntry = syncStore.get(code);
+    const currentEntry = targetStore.get(code);
     const newVersion = typeof version === 'number' ? version : Date.now();
 
-    if (currentEntry && currentEntry.version > newVersion) {
+    if (isPairing && currentEntry) {
+        // Strict collision rejection for pairing codes to prevent stealing/overwriting
+        return res.status(409).json({ error: 'Conflict: Pairing code already exists' });
+    } else if (currentEntry && currentEntry.version > newVersion) {
         return res.status(409).json({ error: 'Conflict: Server has a newer version', serverVersion: currentEntry.version });
     }
 
     // Securely store data without executing or merging
-    syncStore.set(code, {
+    targetStore.set(code, {
         data: data,
         timestamp: Date.now(),
         version: newVersion,
@@ -155,6 +170,12 @@ app.delete('/api/sync/clear/:datasetId', (req, res) => {
             deletedCount++;
         }
     }
+    for (const [code, entry] of pairingStore.entries()) {
+        if (entry.datasetId === datasetId) {
+            pairingStore.delete(code);
+            deletedCount++;
+        }
+    }
     for (const [code, entry] of migrationStore.entries()) {
         if (entry.datasetId === datasetId) {
             migrationStore.delete(code);
@@ -166,9 +187,28 @@ app.delete('/api/sync/clear/:datasetId', (req, res) => {
     res.json({ success: true, deletedCount });
 });
 
+// Simple GET rate limiting
+const getRateLimits = new Map();
+
 // GET: Retrieve sync data
 app.get('/api/sync/:code', (req, res) => {
     const { code } = req.params;
+    
+    // IP based rate limiting for GET to prevent brute forcing pairing codes
+    const ip = req.ip || req.connection.remoteAddress;
+    const now = Date.now();
+    const clientLimit = getRateLimits.get(ip) || { count: 0, resetTime: now + 60000 };
+    
+    if (now > clientLimit.resetTime) {
+        clientLimit.count = 1;
+        clientLimit.resetTime = now + 60000;
+    } else {
+        clientLimit.count++;
+        if (clientLimit.count > 60) { // Max 60 requests per minute per IP
+            return res.status(429).json({ error: 'Rate limit exceeded. Too many requests.' });
+        }
+    }
+    getRateLimits.set(ip, clientLimit);
     
     if (!isValidCode(code)) {
         return res.status(400).json({ error: 'Invalid sync code format' });
@@ -183,7 +223,7 @@ app.get('/api/sync/:code', (req, res) => {
         });
     }
 
-    const entry = syncStore.get(code);
+    const entry = syncStore.get(code) || pairingStore.get(code);
 
     if (!entry) {
         return res.status(404).json({ error: 'No data found for this sync code' });
@@ -210,7 +250,7 @@ app.get('/api/sync/:code/version', (req, res) => {
         return res.json({ version: Date.now() }); // Force a pull so the client receives the migration payload
     }
 
-    const entry = syncStore.get(code);
+    const entry = syncStore.get(code) || pairingStore.get(code);
 
     if (!entry) {
         return res.status(404).json({ error: 'No data found for this sync code' });
