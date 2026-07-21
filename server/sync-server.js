@@ -352,8 +352,8 @@ app.get('/api/sync/:code/version', (req, res) => {
 // Serve static files from the Vite build directory
 app.use(express.static(path.join(__dirname, '../build')));
 
-// Fallback to index.html for React Router
-app.get('/*path', (req, res) => {
+// Fallback to index.html for React Router SPA routes (/neurodeck, /serialrecall, etc.)
+app.use((req, res) => {
     res.sendFile(path.join(__dirname, '../build', 'index.html'));
 });
 
