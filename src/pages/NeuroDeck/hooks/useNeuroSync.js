@@ -86,6 +86,13 @@ export function useNeuroSync({
                 return finalized;
              });
              setMyDecks(prev => [...finalizedDecks, ...prev]);
+             
+             const rootDeck = finalizedDecks.find(d => d.parentId === null) || finalizedDecks[0];
+             if (rootDeck) {
+                 setCurrentDeck(rootDeck.deck);
+                 setLoadedDeckId(rootDeck.id);
+             }
+             
              showToast(t.hierarchyImportedSaved || "Hierarchy imported and saved to My Decks!");
           } else if (data.data.sharedDeck) {
              const newDeck = data.data.sharedDeck;
@@ -93,13 +100,16 @@ export function useNeuroSync({
                setCurrentDeck(prev => [...prev, ...newDeck]);
                showToast(t.cardsAppended || "Cards appended to current deck!");
              } else {
-               setMyDecks(prev => [{
+               const newDeckObj = {
                  id: Date.now().toString(),
                  name: data.data.sharedName || `Imported Deck ${code}`,
                  deck: newDeck,
                  completed: false,
                  parentId: null
-               }, ...prev]);
+               };
+               setMyDecks(prev => [newDeckObj, ...prev]);
+               setCurrentDeck(newDeckObj.deck);
+               setLoadedDeckId(newDeckObj.id);
                showToast(t.savedAsNewDeck || "Saved as new deck in My Decks!");
              }
           }
