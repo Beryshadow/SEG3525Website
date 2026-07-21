@@ -46,7 +46,24 @@ export function useEmbeddingModel(selectedModel = "Xenova/all-MiniLM-L6-v2") {
         const func = async (texts) => {
            return new Promise((resolve, reject) => {
               const msgId = messageIdRef.current++;
-              callbacksRef.current[msgId] = { resolve, reject };
+              const timeoutId = setTimeout(() => {
+                 if (callbacksRef.current[msgId]) {
+                    callbacksRef.current[msgId].reject(new Error("Embedding worker timeout"));
+                    delete callbacksRef.current[msgId];
+                 }
+              }, 15000);
+
+              callbacksRef.current[msgId] = {
+                 resolve: (val) => { clearTimeout(timeoutId); resolve(val); },
+                 reject: (err) => { clearTimeout(timeoutId); reject(err); }
+              };
+
+              if (!workerRef.current) {
+                 clearTimeout(timeoutId);
+                 delete callbacksRef.current[msgId];
+                 return reject(new Error("Worker not initialized"));
+              }
+
               workerRef.current.postMessage({
                  type: 'extract',
                  id: msgId,

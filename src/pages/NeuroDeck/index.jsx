@@ -157,46 +157,58 @@ export default function NeuroDeck() {
     }
   };
 
-  const isEmbeddingProcessingRef = useRef(false);
-
   useEffect(() => {
-    if (!currentDeck || !getEmbeddings || embeddingStatus !== 'ready' || isEmbeddingProcessingRef.current) return;
-    const toEmbed = currentDeck.filter(q => cardEmbeddings[q.id] === undefined);
-    if (toEmbed.length === 0) return;
+    if (!currentDeck || !getEmbeddings || embeddingStatus !== 'ready') return;
 
-    isEmbeddingProcessingRef.current = true;
+    const missing = currentDeck.filter(q => cardEmbeddings[q.id] === undefined);
+    if (missing.length === 0) return;
 
-    // Process in chunks of 50 cards for high throughput and smooth progress updates
-    const chunkSize = 50;
-    const chunk = toEmbed.slice(0, chunkSize);
-    const texts = chunk.map(q => (q.question && typeof q.question === 'string' && q.question.trim() ? q.question : `Card ${q.id}`));
+    let isCancelled = false;
 
-    getEmbeddings(texts)
-      .then(res => {
-        setCardEmbeddings(prev => {
-          const next = { ...prev };
-          for (let i = 0; i < chunk.length; i++) {
-            next[chunk[i].id] = (res && res[i]) ? res[i] : [];
+    const processBatch = async () => {
+       const chunkSize = 25;
+       let queue = [...missing];
+
+       while (queue.length > 0 && !isCancelled) {
+          const chunk = queue.slice(0, chunkSize);
+          const texts = chunk.map(q => (q.question && typeof q.question === 'string' && q.question.trim() ? q.question : `Card ${q.id}`));
+
+          try {
+             const res = await getEmbeddings(texts);
+             if (isCancelled) break;
+
+             setCardEmbeddings(prev => {
+                const next = { ...prev };
+                for (let i = 0; i < chunk.length; i++) {
+                   next[chunk[i].id] = (res && res[i]) ? res[i] : [];
+                }
+                return next;
+             });
+             activeEmbeddingModelRef.current = selectedEmbeddingModel;
+          } catch (err) {
+             console.error("Embedding chunk extraction failed:", err);
+             if (isCancelled) break;
+
+             setCardEmbeddings(prev => {
+                const next = { ...prev };
+                for (let i = 0; i < chunk.length; i++) {
+                   if (next[chunk[i].id] === undefined) next[chunk[i].id] = [];
+                }
+                return next;
+             });
           }
-          return next;
-        });
-        activeEmbeddingModelRef.current = selectedEmbeddingModel;
-      })
-      .catch(err => {
-        console.error("Embedding chunk failed:", err);
-        // Fallback: mark failed cards as empty array so extraction pipeline never freezes
-        setCardEmbeddings(prev => {
-          const next = { ...prev };
-          for (let i = 0; i < chunk.length; i++) {
-            if (next[chunk[i].id] === undefined) next[chunk[i].id] = [];
-          }
-          return next;
-        });
-      })
-      .finally(() => {
-        isEmbeddingProcessingRef.current = false;
-      });
-  }, [currentDeck, getEmbeddings, embeddingStatus, cardEmbeddings]); 
+
+          queue = queue.slice(chunkSize);
+       }
+    };
+
+    processBatch();
+
+    return () => {
+       isCancelled = true;
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentDeck, getEmbeddings, embeddingStatus, selectedEmbeddingModel]); 
 
   const [streak, setStreak] = useState(() => {
     try { return parseInt(localStorage.getItem('neurodeck-streak')) || 0; } catch (e) { return 0; }
