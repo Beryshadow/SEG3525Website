@@ -478,8 +478,8 @@ export const KnowledgeGraphView = ({ deck, myDecks, cardEmbeddings, t, onGoToCar
         </div>
 
         <div ref={wrapperRef} className="relative flex-1 rounded-xl overflow-hidden cursor-crosshair">
-          {deck && deck.some(q => !cardEmbeddings[q.id]) && (() => {
-            const embeddedCount = deck.filter(q => cardEmbeddings[q.id]).length;
+          {deck && deck.some(q => cardEmbeddings[q.id] === undefined) && (() => {
+            const embeddedCount = deck.filter(q => cardEmbeddings[q.id] !== undefined).length;
             const remainingCount = deck.length - embeddedCount;
             const displaySec = (secondsRemaining !== null && secondsRemaining !== undefined) ? secondsRemaining : Math.max(1, Math.ceil(remainingCount * 0.12));
             const comeBackMsg = (t.comeBackInSeconds || "Come back in ~{seconds} seconds").replace('{seconds}', displaySec);

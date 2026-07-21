@@ -157,27 +157,45 @@ export default function NeuroDeck() {
     }
   };
 
+  const isEmbeddingProcessingRef = useRef(false);
+
   useEffect(() => {
-    if (!currentDeck || !getEmbeddings || embeddingStatus !== 'ready') return;
-    const toEmbed = currentDeck.filter(q => !cardEmbeddings[q.id]);
+    if (!currentDeck || !getEmbeddings || embeddingStatus !== 'ready' || isEmbeddingProcessingRef.current) return;
+    const toEmbed = currentDeck.filter(q => cardEmbeddings[q.id] === undefined);
     if (toEmbed.length === 0) return;
 
-    // Process in chunks of 5 cards so state updates live for smooth progress bar animation
-    const chunkSize = 5;
-    const chunk = toEmbed.slice(0, chunkSize);
-    const texts = chunk.map(q => q.question);
+    isEmbeddingProcessingRef.current = true;
 
-    getEmbeddings(texts).then(res => {
-       if (res && res.length === chunk.length) {
-          setCardEmbeddings(prev => {
-             const next = { ...prev };
-             for (let i = 0; i < chunk.length; i++) next[chunk[i].id] = res[i];
-             return next;
-          });
-          activeEmbeddingModelRef.current = selectedEmbeddingModel;
-       }
-    }).catch(console.error);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Process in chunks of 50 cards for high throughput and smooth progress updates
+    const chunkSize = 50;
+    const chunk = toEmbed.slice(0, chunkSize);
+    const texts = chunk.map(q => (q.question && typeof q.question === 'string' && q.question.trim() ? q.question : `Card ${q.id}`));
+
+    getEmbeddings(texts)
+      .then(res => {
+        setCardEmbeddings(prev => {
+          const next = { ...prev };
+          for (let i = 0; i < chunk.length; i++) {
+            next[chunk[i].id] = (res && res[i]) ? res[i] : [];
+          }
+          return next;
+        });
+        activeEmbeddingModelRef.current = selectedEmbeddingModel;
+      })
+      .catch(err => {
+        console.error("Embedding chunk failed:", err);
+        // Fallback: mark failed cards as empty array so extraction pipeline never freezes
+        setCardEmbeddings(prev => {
+          const next = { ...prev };
+          for (let i = 0; i < chunk.length; i++) {
+            if (next[chunk[i].id] === undefined) next[chunk[i].id] = [];
+          }
+          return next;
+        });
+      })
+      .finally(() => {
+        isEmbeddingProcessingRef.current = false;
+      });
   }, [currentDeck, getEmbeddings, embeddingStatus, cardEmbeddings]); 
 
   const [streak, setStreak] = useState(() => {
