@@ -56,8 +56,8 @@ function isValidCode(code) {
 };
 
 // POST: Save or update sync data
-app.post('/api/sync/:code', async (req, res) => {
-    const { code } = req.params;
+app.post('/api/sync/:code', (req, res) => {
+    const code = req.params.code.toUpperCase();
     const ip = req.ip || req.connection.remoteAddress;
     console.log(`[SYNC-POST] IP: ${ip} | Code: ${code} | Action: Attempting to save/update data`);
     const { data, version, datasetId, type = 'sync' } = req.body;
@@ -137,8 +137,9 @@ app.post('/api/sync/:code', async (req, res) => {
 
 // POST: Migrate sync code
 app.post('/api/sync/:code/migrate', (req, res) => {
-    const { code } = req.params;
-    const { newCode, datasetId } = req.body;
+    const code = req.params.code.toUpperCase();
+    const newCode = req.body.newCode ? req.body.newCode.toUpperCase() : null;
+    const { datasetId } = req.body;
 
     if (!isValidCode(code) || !isValidCode(newCode)) {
         return res.status(400).json({ error: 'Invalid sync code format' });
@@ -194,7 +195,7 @@ const getRateLimits = new Map();
 
 // GET: Retrieve sync data
 app.get('/api/sync/:code', (req, res) => {
-    const { code } = req.params;
+    const code = req.params.code.toUpperCase();
     const ip = req.ip || req.connection.remoteAddress;
     console.log(`[SYNC-GET] IP: ${ip} | Code: ${code} | Action: Querying sync data`);
     
@@ -243,7 +244,7 @@ app.get('/api/sync/:code', (req, res) => {
 
 // GET: Retrieve only the sync version
 app.get('/api/sync/:code/version', (req, res) => {
-    const { code } = req.params;
+    const code = req.params.code.toUpperCase();
     const ip = req.ip || req.connection.remoteAddress;
     console.log(`[SYNC-GET-VERSION] IP: ${ip} | Code: ${code} | Action: Polling version`);
     
