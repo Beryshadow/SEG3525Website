@@ -2,7 +2,7 @@ import { pipeline, env } from '@huggingface/transformers';
 
 let classifier = null;
 
-const isMobile = typeof navigator !== 'undefined' && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent);
+const isMobile = typeof navigator !== 'undefined' && (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent) || (navigator.maxTouchPoints && navigator.maxTouchPoints > 2));
 const hasSharedArrayBuffer = typeof self !== 'undefined' && typeof self.SharedArrayBuffer !== 'undefined';
 
 env.allowLocalModels = false;
@@ -75,10 +75,12 @@ self.addEventListener('message', async (event) => {
           backendUsed = "WebGPU";
         } catch (webGpuErr) {
           console.warn("WebGPU initialization failed. Falling back to WASM...", webGpuErr);
+          try { env.backends.onnx.wasm.numThreads = 1; } catch (err) {}
           classifier = await loadPipelineWithRetries(modelName, "wasm", 2);
           backendUsed = "WASM";
         }
       } else {
+        try { env.backends.onnx.wasm.numThreads = 1; } catch (err) {}
         classifier = await loadPipelineWithRetries(modelName, "wasm", 2);
         backendUsed = "WASM";
       }

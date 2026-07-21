@@ -14,13 +14,13 @@ app.use((req, res, next) => {
     res.setHeader(
         'Content-Security-Policy',
         "default-src 'self'; " +
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://www.googletagmanager.com https://www.google-analytics.com https://static.cloudflareinsights.com; " +
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://cdn.jsdelivr.net https://www.googletagmanager.com https://www.google-analytics.com https://static.cloudflareinsights.com; " +
         "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; " +
         "font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com data:; " +
         "img-src 'self' data: blob: https:; " +
-        "connect-src 'self' https://ryanbeland.ca https://www.google-analytics.com https://www.google.com https://huggingface.co https://cdn-lfs.huggingface.co https://*.huggingface.co wss: https:; " +
-        "worker-src 'self' blob:; " +
-        "child-src 'self' blob:;"
+        "connect-src 'self' https://ryanbeland.ca https://cdn.jsdelivr.net https://www.google-analytics.com https://www.google.com https://huggingface.co https://cdn-lfs.huggingface.co https://*.huggingface.co wss: https:; " +
+        "worker-src 'self' blob: https://cdn.jsdelivr.net; " +
+        "child-src 'self' blob: https://cdn.jsdelivr.net;"
     );
     next();
 });
