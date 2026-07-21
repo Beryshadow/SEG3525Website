@@ -355,32 +355,40 @@ export function useNeuroSync({
   };
 
   useEffect(() => {
-    let intervalId;
+    let eventSource;
     if (syncCode) {
-       intervalId = setInterval(async () => {
-          try {
-             const res = await fetch(`${SYNC_API_BASE}/${syncCode}/version`);
-             if (res.status === 404) {
-                 if (syncCode && syncCode.length >= 64) {
-                     // Server reset or session expired. Reconcile by pushing local state.
-                     forcePushToCloud(syncCode);
-                 } else {
-                     showToast("Sync code expired. Please generate a new one.");
-                     setSyncCode("");
-                 }
-                 return;
-             }
-             if (res.ok) {
-                const data = await res.json();
-                if (data && data.version > syncVersion) {
+       eventSource = new EventSource(`${SYNC_API_BASE}/${syncCode}/subscribe`);
+       
+       eventSource.onmessage = (event) => {
+           try {
+               const data = JSON.parse(event.data);
+               if (data.error === 'not_found') {
+                   if (syncCode && syncCode.length >= 64) {
+                       // Server reset or session expired. Reconcile by pushing local state.
+                       forcePushToCloud(syncCode);
+                   } else {
+                       showToast("Sync code expired. Please generate a new one.");
+                       setSyncCode("");
+                   }
+               } else if (data.version && data.version > syncVersion) {
                    handleCloudSyncDownload(syncCode);
-                }
-             }
-          } catch (err) {}
-       }, 5000);
+               }
+           } catch (err) {
+               console.error("SSE parse error", err);
+           }
+       };
+
+       eventSource.onerror = (err) => {
+           console.error("SSE connection error", err);
+           // EventSource will automatically try to reconnect.
+       };
     }
-    return () => { if (intervalId) clearInterval(intervalId); }
-  }, [syncCode, syncVersion, handleCloudSyncDownload, showToast]);
+    return () => { 
+        if (eventSource) {
+            eventSource.close();
+        }
+    };
+  }, [syncCode, syncVersion, handleCloudSyncDownload, showToast, forcePushToCloud]);
 
   useEffect(() => {
     const onFocus = () => {

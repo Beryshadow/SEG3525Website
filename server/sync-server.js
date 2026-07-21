@@ -23,6 +23,9 @@ const migrationStore = new Map(); // Tracks migrations
 
 const FIVE_MINUTES_MS = 5 * 60 * 1000;
 
+// Pub/Sub active connections: Map<syncCode, Set<Response>>
+const subscriptions = new Map();
+
 let queueLength = 0;
 const MAX_QUEUE_LENGTH = 100;
 let nextAvailableTime = 0;
@@ -130,6 +133,14 @@ app.post('/api/sync/:code', (req, res) => {
         datasetId: datasetId || null,
         type: type // 'pairing', 'sync', or 'share'
     });
+    
+    // Broadcast to SSE subscribers
+    const subscribers = subscriptions.get(code);
+    if (subscribers) {
+        subscribers.forEach(subscriber => {
+            subscriber.write(`data: ${JSON.stringify({ version: newVersion })}\n\n`);
+        });
+    }
 
     console.log(`[SYNC] Saved ${type} data for code: ${code}, version: ${newVersion}`);
     res.json({ success: true, version: newVersion });
@@ -192,6 +203,42 @@ app.delete('/api/sync/clear/:datasetId', (req, res) => {
 
 // Simple GET rate limiting
 const getRateLimits = new Map();
+
+// GET: Subscribe to SSE updates for a sync code
+app.get('/api/sync/:code/subscribe', (req, res) => {
+    const code = req.params.code.toUpperCase();
+    if (!isValidCode(code)) {
+        return res.status(400).json({ error: 'Invalid sync code format' });
+    }
+
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders(); 
+
+    if (!subscriptions.has(code)) {
+        subscriptions.set(code, new Set());
+    }
+    const subscribers = subscriptions.get(code);
+    subscribers.add(res);
+    
+    const ip = req.ip || req.connection.remoteAddress;
+    console.log(`[SYNC-PUB/SUB] IP: ${ip} | Code: ${code} | Action: Client subscribed via SSE`);
+
+    res.write(`data: ${JSON.stringify({ connected: true })}\n\n`);
+
+    if (!syncStore.has(code) && !pairingStore.has(code) && !migrationStore.has(code)) {
+        res.write(`data: ${JSON.stringify({ error: 'not_found' })}\n\n`);
+    }
+
+    req.on('close', () => {
+        subscribers.delete(res);
+        if (subscribers.size === 0) {
+            subscriptions.delete(code);
+        }
+        console.log(`[SYNC-PUB/SUB] IP: ${ip} | Code: ${code} | Action: Client disconnected`);
+    });
+});
 
 // GET: Retrieve sync data
 app.get('/api/sync/:code', (req, res) => {
