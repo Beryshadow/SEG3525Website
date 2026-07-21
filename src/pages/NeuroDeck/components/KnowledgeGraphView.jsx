@@ -24,9 +24,11 @@ export const KnowledgeGraphView = ({ deck, myDecks, cardEmbeddings, t, onGoToCar
   const startTimeRef = useRef(null);
   const initialEmbeddedRef = useRef(null);
 
+  const getCardId = (q, idx) => (q && (q.id !== undefined && q.id !== null) ? String(q.id) : (q._id || q.question || `card_${idx}`));
+
   const missingCardsCount = React.useMemo(() => {
     if (!deck || !cardEmbeddings) return 0;
-    return deck.filter(q => !cardEmbeddings[q.id]).length;
+    return deck.filter((q, idx) => cardEmbeddings[getCardId(q, idx)] === undefined).length;
   }, [deck, cardEmbeddings]);
 
   useEffect(() => {
@@ -478,8 +480,8 @@ export const KnowledgeGraphView = ({ deck, myDecks, cardEmbeddings, t, onGoToCar
         </div>
 
         <div ref={wrapperRef} className="relative flex-1 rounded-xl overflow-hidden cursor-crosshair">
-          {deck && deck.some(q => cardEmbeddings[q.id] === undefined) && (() => {
-            const embeddedCount = deck.filter(q => cardEmbeddings[q.id] !== undefined).length;
+          {deck && deck.some((q, idx) => cardEmbeddings[getCardId(q, idx)] === undefined) && (() => {
+            const embeddedCount = deck.filter((q, idx) => cardEmbeddings[getCardId(q, idx)] !== undefined).length;
             const remainingCount = deck.length - embeddedCount;
             const displaySec = (secondsRemaining !== null && secondsRemaining !== undefined) ? secondsRemaining : Math.max(1, Math.ceil(remainingCount * 0.12));
             const comeBackMsg = (t.comeBackInSeconds || "Come back in ~{seconds} seconds").replace('{seconds}', displaySec);

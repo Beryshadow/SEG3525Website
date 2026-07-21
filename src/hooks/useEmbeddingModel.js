@@ -1,7 +1,6 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 
 export function useEmbeddingModel(selectedModel = "Xenova/all-MiniLM-L6-v2") {
-  const [extractFunc, setExtractFunc] = useState(null);
   const [modelStatus, setModelStatus] = useState("unloaded");
   const [backendUsed, setBackendUsed] = useState("");
   const [modelError, setModelError] = useState("");
@@ -10,6 +9,7 @@ export function useEmbeddingModel(selectedModel = "Xenova/all-MiniLM-L6-v2") {
   const workerRef = useRef(null);
   const callbacksRef = useRef({});
   const messageIdRef = useRef(0);
+  const modelStatusRef = useRef("unloaded");
 
   const progressPercent = useMemo(() => {
     const items = Object.values(progressItems);
@@ -19,10 +19,42 @@ export function useEmbeddingModel(selectedModel = "Xenova/all-MiniLM-L6-v2") {
     );
   }, [progressItems]);
 
+  const updateStatus = (status) => {
+    modelStatusRef.current = status;
+    setModelStatus(status);
+  };
+
+  const getEmbeddings = useCallback(async (texts) => {
+    return new Promise((resolve, reject) => {
+      if (!workerRef.current || modelStatusRef.current !== 'ready') {
+        return reject(new Error("Model not ready yet"));
+      }
+
+      const msgId = messageIdRef.current++;
+      const timeoutId = setTimeout(() => {
+        if (callbacksRef.current[msgId]) {
+          callbacksRef.current[msgId].reject(new Error("Embedding worker timeout"));
+          delete callbacksRef.current[msgId];
+        }
+      }, 15000);
+
+      callbacksRef.current[msgId] = {
+        resolve: (val) => { clearTimeout(timeoutId); resolve(val); },
+        reject: (err) => { clearTimeout(timeoutId); reject(err); }
+      };
+
+      workerRef.current.postMessage({
+        type: 'extract',
+        id: msgId,
+        payload: { texts }
+      });
+    });
+  }, []);
+
   useEffect(() => {
     let isMounted = true;
 
-    setModelStatus("loading");
+    updateStatus("loading");
     setProgressItems({});
 
     const worker = new Worker(new URL('../workers/embeddingWorker.js', import.meta.url), {
@@ -40,45 +72,14 @@ export function useEmbeddingModel(selectedModel = "Xenova/all-MiniLM-L6-v2") {
         }
       } else if (type === 'ready') {
         setBackendUsed(backendUsed);
-        setModelStatus("ready");
+        updateStatus("ready");
         setModelError("");
-        
-        const func = async (texts) => {
-           return new Promise((resolve, reject) => {
-              const msgId = messageIdRef.current++;
-              const timeoutId = setTimeout(() => {
-                 if (callbacksRef.current[msgId]) {
-                    callbacksRef.current[msgId].reject(new Error("Embedding worker timeout"));
-                    delete callbacksRef.current[msgId];
-                 }
-              }, 15000);
-
-              callbacksRef.current[msgId] = {
-                 resolve: (val) => { clearTimeout(timeoutId); resolve(val); },
-                 reject: (err) => { clearTimeout(timeoutId); reject(err); }
-              };
-
-              if (!workerRef.current) {
-                 clearTimeout(timeoutId);
-                 delete callbacksRef.current[msgId];
-                 return reject(new Error("Worker not initialized"));
-              }
-
-              workerRef.current.postMessage({
-                 type: 'extract',
-                 id: msgId,
-                 payload: { texts }
-              });
-           });
-        };
-        
-        setExtractFunc(() => func);
       } else if (type === 'error') {
         if (id !== undefined && callbacksRef.current[id]) {
            callbacksRef.current[id].reject(new Error(error));
            delete callbacksRef.current[id];
         } else {
-           setModelStatus("error");
+           updateStatus("error");
            setModelError(error);
         }
       } else if (type === 'extract_result') {
@@ -93,9 +94,10 @@ export function useEmbeddingModel(selectedModel = "Xenova/all-MiniLM-L6-v2") {
 
     return () => {
       isMounted = false;
+      updateStatus("unloaded");
       worker.terminate();
     };
   }, [selectedModel]);
 
-  return { getEmbeddings: extractFunc, modelStatus, backendUsed, modelError, progressPercent };
+  return { getEmbeddings, modelStatus, backendUsed, modelError, progressPercent };
 }

@@ -157,10 +157,17 @@ export default function NeuroDeck() {
     }
   };
 
-  useEffect(() => {
-    if (!currentDeck || !getEmbeddings || embeddingStatus !== 'ready') return;
+  const getCardId = useCallback((q, idx) => {
+    if (q && (q.id !== undefined && q.id !== null)) return String(q.id);
+    if (q && q._id) return String(q._id);
+    if (q && q.question) return String(q.question);
+    return `card_${idx}`;
+  }, []);
 
-    const missing = currentDeck.filter(q => cardEmbeddings[q.id] === undefined);
+  useEffect(() => {
+    if (!currentDeck || currentDeck.length === 0 || !getEmbeddings || embeddingStatus !== 'ready') return;
+
+    const missing = currentDeck.filter((q, idx) => cardEmbeddings[getCardId(q, idx)] === undefined);
     if (missing.length === 0) return;
 
     let isCancelled = false;
@@ -171,7 +178,7 @@ export default function NeuroDeck() {
 
        while (queue.length > 0 && !isCancelled) {
           const chunk = queue.slice(0, chunkSize);
-          const texts = chunk.map(q => (q.question && typeof q.question === 'string' && q.question.trim() ? q.question : `Card ${q.id}`));
+          const texts = chunk.map((q, idx) => (q.question && typeof q.question === 'string' && q.question.trim() ? q.question : `Card ${getCardId(q, idx)}`));
 
           try {
              const res = await getEmbeddings(texts);
@@ -180,7 +187,8 @@ export default function NeuroDeck() {
              setCardEmbeddings(prev => {
                 const next = { ...prev };
                 for (let i = 0; i < chunk.length; i++) {
-                   next[chunk[i].id] = (res && res[i]) ? res[i] : [];
+                   const cardKey = getCardId(chunk[i], currentDeck.indexOf(chunk[i]));
+                   next[cardKey] = (res && res[i]) ? res[i] : [];
                 }
                 return next;
              });
@@ -192,7 +200,8 @@ export default function NeuroDeck() {
              setCardEmbeddings(prev => {
                 const next = { ...prev };
                 for (let i = 0; i < chunk.length; i++) {
-                   if (next[chunk[i].id] === undefined) next[chunk[i].id] = [];
+                   const cardKey = getCardId(chunk[i], currentDeck.indexOf(chunk[i]));
+                   if (next[cardKey] === undefined) next[cardKey] = [];
                 }
                 return next;
              });
@@ -207,8 +216,7 @@ export default function NeuroDeck() {
     return () => {
        isCancelled = true;
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentDeck, getEmbeddings, embeddingStatus, selectedEmbeddingModel]); 
+  }, [currentDeck, getEmbeddings, embeddingStatus, selectedEmbeddingModel, getCardId]); 
 
   const [streak, setStreak] = useState(() => {
     try { return parseInt(localStorage.getItem('neurodeck-streak')) || 0; } catch (e) { return 0; }

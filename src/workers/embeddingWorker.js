@@ -85,7 +85,18 @@ self.addEventListener('message', async (event) => {
     try {
       const { texts } = payload;
       const outputs = await extractor(texts, { pooling: 'mean', normalize: true });
-      const data = outputs.tolist();
+      let data;
+      if (outputs && typeof outputs.tolist === 'function') {
+        data = outputs.tolist();
+      } else if (outputs && outputs.data && outputs.dims) {
+        const [batchSize, dim] = outputs.dims;
+        data = [];
+        for (let i = 0; i < batchSize; i++) {
+          data.push(Array.from(outputs.data.slice(i * dim, (i + 1) * dim)));
+        }
+      } else {
+        data = Array.isArray(outputs) ? outputs : [];
+      }
       self.postMessage({ type: 'extract_result', id, embeddings: data });
     } catch (error) {
       self.postMessage({ type: 'error', id, error: error.message || String(error) });
