@@ -57,9 +57,9 @@ export function useNeuroSync({
     try {
       const res = await fetch(`${SYNC_API_BASE}/${code}/version`);
       if (!res.ok) {
-        if (res.status === 404) showToast("Share code expired or invalid.");
-        else if (res.status === 429) showToast("Rate limited, try again later.");
-        else showToast("Failed to connect to sync server.");
+        if (res.status === 404) showToast(t.shareCodeExpiredInvalid || "Share code expired or invalid.");
+        else if (res.status === 429) showToast(t.rateLimitedTryAgain || "Rate limited, try again later.");
+        else showToast(t.failedConnectSyncServer || "Failed to connect to sync server.");
         return;
       }
       if (res.ok) {
@@ -68,7 +68,7 @@ export function useNeuroSync({
         
         if (data && data.data) {
           if (data.data.myDecks !== undefined || data.data.currentDeck !== undefined) {
-             showToast("Detected sync code in import input. Connecting...");
+             showToast(t.detectedSyncCodeImporting || "Detected sync code in import input. Connecting...");
              handleConnectSyncCode(code);
              return;
           }
@@ -86,12 +86,12 @@ export function useNeuroSync({
                 return finalized;
              });
              setMyDecks(prev => [...finalizedDecks, ...prev]);
-             showToast("Hierarchy imported and saved to My Decks!");
+             showToast(t.hierarchyImportedSaved || "Hierarchy imported and saved to My Decks!");
           } else if (data.data.sharedDeck) {
              const newDeck = data.data.sharedDeck;
              if (window.confirm("Would you like to append these shared cards to your current deck, or save as a new deck in 'My Decks'?\n\nOK = Append\nCancel = New Deck")) {
                setCurrentDeck(prev => [...prev, ...newDeck]);
-               showToast("Cards appended to current deck!");
+               showToast(t.cardsAppended || "Cards appended to current deck!");
              } else {
                setMyDecks(prev => [{
                  id: Date.now().toString(),
@@ -100,16 +100,16 @@ export function useNeuroSync({
                  completed: false,
                  parentId: null
                }, ...prev]);
-               showToast("Saved as new deck in My Decks!");
+               showToast(t.savedAsNewDeck || "Saved as new deck in My Decks!");
              }
           }
         } else {
-          showToast("Code does not contain a shared deck.");
+          showToast(t.codeNotSharedDeck || "Code does not contain a shared deck.");
         }
       }
     } catch (err) {
       console.error(err);
-      showToast(err.message === "Failed to fetch" ? "Network connection failed during import." : "An unexpected error occurred during import.");
+      showToast(err.message === "Failed to fetch" ? (t.networkFailedImport || "Network connection failed during import.") : (t.errorDuringImport || "An unexpected error occurred during import."));
     }
   };
 
@@ -122,7 +122,7 @@ export function useNeuroSync({
              // Server reset or session expired. Reconcile by pushing local state.
              forcePushToCloud(code);
          } else {
-             showToast("Sync code expired or not found.");
+             showToast(t.syncCodeExpiredNotFound || "Sync code expired or not found.");
              setSyncCode("");
          }
          return;
@@ -134,25 +134,25 @@ export function useNeuroSync({
          else if (res.status === 429) reason = "Rate limited";
          else if (res.status === 400) reason = "Invalid request";
          console.warn(`Failed to pull sync data: ${reason}`);
-         if (manual) showToast(`Failed to pull sync data: ${reason}`);
+         if (manual) showToast(`${t.failedToPullSync || "Failed to pull sync data:"} ${reason}`);
          return;
       }
       const data = await res.json();
       if (data && data.data && data.data.pointer) {
-         showToast("Connecting to secure channel...");
+         showToast(t.connectingSecureChannel || "Connecting to secure channel...");
          setSyncCode(data.data.pointer);
          setPairingCode(code); // Remember the pairing code we just used
          setTimeout(() => handleCloudSyncDownload(data.data.pointer, true), 100);
          return;
       }
       if (data && data.data && data.data.newSyncCode) {
-         showToast("Sync session moved! Reconnecting...");
+         showToast(t.syncSessionMoved || "Sync session moved! Reconnecting...");
          setSyncCode(data.data.newSyncCode);
          setTimeout(() => handleCloudSyncDownload(data.data.newSyncCode, true), 100);
          return;
       }
       if (data && data.data && (data.data.sharedDeck || data.data.sharedDecks)) {
-         showToast("Detected share code in sync input. Importing...");
+         showToast(t.detectedShareCodeImporting || "Detected share code in sync input. Importing...");
          handleImportFromCode(code);
          return;
       }
@@ -172,7 +172,7 @@ export function useNeuroSync({
          if (manual) {
             setSyncCode(code);
          }
-         showToast("Cloud sync: Data pulled successfully.");
+         showToast(t.cloudSyncPulled || "Cloud sync: Data pulled successfully.");
       } else if (manual) {
          showToast(t?.syncUpToDate || "Connected! You are already up to date.");
       }
@@ -199,16 +199,16 @@ export function useNeuroSync({
          });
          if (res.ok) {
             setSyncVersion(newVersion);
-            showToast("Cloud sync: Data pushed initially.");
+            showToast(t.cloudSyncPushed || "Cloud sync: Data pushed initially.");
          } else {
             let reason = "Server error";
             if (res.status === 413) reason = "Data too large to sync";
             else if (res.status === 429) reason = "Rate limited";
-            showToast(`Cloud sync failed: ${reason}`);
+            showToast(`${t.cloudSyncFailed || "Cloud sync failed:"} ${reason}`);
          }
       } catch (err) {
          console.error("Auto-push error", err);
-         showToast(err.message === "Failed to fetch" ? "Cloud sync failed: Network error" : "Cloud sync failed: Unexpected error");
+         showToast(err.message === "Failed to fetch" ? (t.cloudSyncFailedNetwork || "Cloud sync failed: Network error") : (t.cloudSyncFailedUnexpected || "Cloud sync failed: Unexpected error"));
       }
   }, [syncCode, myDecks, currentDeck, loadedDeckId, streak, selectedModel, cardOrderMode, servingMode, selectedEmbeddingModel, focusMode, questionTypeSettings, showToast]);
 
@@ -249,7 +249,7 @@ export function useNeuroSync({
              
              if (res.status === 429) {
                  const errorData = await res.json();
-                 showToast(errorData.error || "Try again later, we are experiencing high demand.");
+                 showToast(errorData.error || t.highDemand || "Try again later, we are experiencing high demand.");
                  setIsGeneratingCode(false);
                  return;
              }
@@ -259,14 +259,14 @@ export function useNeuroSync({
              }
          } catch (e) {
              console.error("Failed to push pairing pointer", e);
-             showToast("Failed to connect to sync server.");
+             showToast(t.failedConnectSyncServer || "Failed to connect to sync server.");
              setIsGeneratingCode(false);
              return;
          }
      }
      
      if (!success) {
-         showToast("Failed to generate a unique pairing code. Try again.");
+         showToast(t.failedGeneratePairingCode || "Failed to generate a unique pairing code. Try again.");
          setIsGeneratingCode(false);
          return;
      }
@@ -285,13 +285,13 @@ export function useNeuroSync({
          });
          if (res.ok) {
             const data = await res.json();
-            showToast(`Cloud data wiped successfully (${data.deletedCount} items).`);
+            showToast(`${t.cloudDataWiped || "Cloud data wiped successfully"} (${data.deletedCount} ${t.items || "items"}).`);
             setSyncCode("");
          } else {
-            showToast("Failed to clear cloud data.");
+            showToast(t.failedClearCloudData || "Failed to clear cloud data.");
          }
       } catch (err) {
-         showToast("Network error while clearing cloud data.");
+         showToast(t.networkErrorClearingCloudData || "Network error while clearing cloud data.");
       }
   }, [datasetId, showToast]);
 
@@ -310,7 +310,7 @@ export function useNeuroSync({
        };
        const rootDeck = myDecks.find(d => d.id === loadedDeckId);
        if (!rootDeck) {
-          showToast("No loaded deck found to share hierarchy.");
+          showToast(t.noLoadedDeckToShare || "No loaded deck found to share hierarchy.");
           return null;
        }
        const hierarchy = [rootDeck, ...getDescendants(loadedDeckId)];
@@ -349,7 +349,7 @@ export function useNeuroSync({
       }
     } catch (err) {
       console.error("Share error", err);
-      showToast(err.message === "Failed to fetch" ? "Network connection failed while sharing." : "An unexpected error occurred while sharing.");
+      showToast(err.message === "Failed to fetch" ? (t.networkFailedSharing || "Network connection failed while sharing.") : (t.errorWhileSharing || "An unexpected error occurred while sharing."));
     }
     return null;
   };
@@ -367,7 +367,7 @@ export function useNeuroSync({
                        // Server reset or session expired. Reconcile by pushing local state.
                        forcePushToCloud(syncCode);
                    } else {
-                       showToast("Sync code expired. Please generate a new one.");
+                       showToast(t.syncCodeExpiredNew || "Sync code expired. Please generate a new one.");
                        setSyncCode("");
                    }
                } else if (data.version && data.version > syncVersion) {
@@ -425,7 +425,7 @@ export function useNeuroSync({
              if (res.ok) {
                 setSyncVersion(newVersion);
              } else if (res.status === 413) {
-                showToast("Auto-sync failed: Data too large");
+                showToast(t.autoSyncFailedSize || "Auto-sync failed: Data too large");
              }
           } catch (err) {
              console.error("Auto-push error", err);

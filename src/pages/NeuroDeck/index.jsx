@@ -277,7 +277,7 @@ export default function NeuroDeck() {
               <div className="relative flex items-center space-x-2 z-10 font-bold">
                 <CpuIcon />
                 <span className="truncate max-w-[150px]" title={modelError}>
-                  {modelStatus === "loading" ? `NLI Engine ${progressPercent}%` : modelStatus === "ready" ? `Semantic AI (${backendUsed})` : modelStatus === "error" ? "Engine Error" : "Waiting..."}
+                  {modelStatus === "loading" ? `${t.nliEngine || "NLI Engine"} ${progressPercent}%` : modelStatus === "ready" ? `${t.semanticAi || "Semantic AI"} (${backendUsed})` : modelStatus === "error" ? (t.engineError || "Engine Error") : (t.waiting || "Waiting...")}
                 </span>
               </div>
               {modelStatus === "loading" && (
@@ -289,7 +289,7 @@ export default function NeuroDeck() {
               <div className="relative flex items-center space-x-2 z-10 font-bold">
                 <NetworkIcon />
                 <span className="truncate max-w-[150px]" title={embeddingError}>
-                  {embeddingStatus === "loading" ? `Embeddings ${embeddingProgress}%` : embeddingStatus === "ready" ? `Embeddings (${embeddingBackend})` : embeddingStatus === "error" ? "Model Error" : "Waiting..."}
+                  {embeddingStatus === "loading" ? `${t.embeddingsStatus || "Embeddings"} ${embeddingProgress}%` : embeddingStatus === "ready" ? `${t.embeddingsStatus || "Embeddings"} (${embeddingBackend})` : embeddingStatus === "error" ? (t.modelErrorStatus || "Model Error") : (t.waiting || "Waiting...")}
                 </span>
               </div>
               {embeddingStatus === "loading" && (

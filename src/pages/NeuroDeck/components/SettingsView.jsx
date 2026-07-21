@@ -216,7 +216,7 @@ export const SettingsView = ({
     navigator.clipboard.writeText(textToCopy).then(() => {
       showToast(t.promptCopiedBtn || "Copied!");
     }).catch(() => {
-      showToast("Failed to copy. Clipboard access denied.");
+      showToast(t.clipboardFailed || "Failed to copy. Clipboard access denied.");
     });
   };
 
@@ -225,7 +225,7 @@ export const SettingsView = ({
     navigator.clipboard.writeText(textToCopy).then(() => {
       showToast(t.promptCopiedBtn || "Copied!");
     }).catch(() => {
-      showToast("Failed to copy. Clipboard access denied.");
+      showToast(t.clipboardFailed || "Failed to copy. Clipboard access denied.");
     });
   };
 
@@ -743,16 +743,16 @@ export const SettingsView = ({
               {t.shareClean || "Share Deck (Clean)"}
             </button>
             <button onClick={() => handleShare(true, true)} className="neu-btn flex-1 min-w-[120px] py-2 sm:py-4 font-black uppercase tracking-wider text-[color:var(--color-success)] flex items-center justify-center text-[10px] sm:text-sm rounded-lg sm:rounded-2xl">
-              Share Hierarchy (With Progress)
+              {t.shareHierarchyProgress || "Share Hierarchy (With Progress)"}
             </button>
             <button onClick={() => handleShare(false, true)} className="neu-btn flex-1 min-w-[120px] py-2 sm:py-4 font-black uppercase tracking-wider text-[color:var(--color-success)] flex items-center justify-center text-[10px] sm:text-sm rounded-lg sm:rounded-2xl">
-              Share Hierarchy (Clean)
+              {t.shareHierarchyClean || "Share Hierarchy (Clean)"}
             </button>
           </div>
           {shareQrCodeData && (
              <div className="mt-6 p-4 neu-pressed rounded-2xl max-w-sm mx-auto lg:mx-0 flex flex-col items-center">
                 <div className="flex justify-between w-full items-center mb-4">
-                  <span className="text-sm font-black uppercase tracking-widest text-[var(--accent)]">Share Code: {shareQrCodeData.code}</span>
+                  <span className="text-sm font-black uppercase tracking-widest text-[var(--accent)]">{t.shareCodeIs || "Share Code:"} {shareQrCodeData.code}</span>
                   <button onClick={() => setShareQrCodeData(null)} className="text-[var(--text-muted)] hover:text-white"><i className="fas fa-times"></i></button>
                 </div>
                 <div 
@@ -760,13 +760,13 @@ export const SettingsView = ({
                    title="Click to copy link"
                    onClick={() => {
                        navigator.clipboard.writeText(shareQrCodeData.url).then(() => {
-                           showToast("Link copied to clipboard!");
+                           showToast(t.linkCopied || "Link copied to clipboard!");
                        });
                    }}
                 >
                    <QRCodeSVG value={shareQrCodeData.url} size={200} />
                 </div>
-                <span className="text-xs font-bold text-center text-[var(--text-muted)]">Scan this code or open the link to import the shared cards.</span>
+                <span className="text-xs font-bold text-center text-[var(--text-muted)]">{t.scanCodeOrOpenLink || "Scan this code or open the link to import the shared cards."}</span>
              </div>
           )}
         </div>
@@ -786,7 +786,7 @@ export const SettingsView = ({
               value={importCode} 
               onChange={e => setImportCode(e.target.value)} 
               className="neu-pressed flex-1 px-4 py-3 rounded-xl bg-transparent text-[var(--text-main)] font-black outline-none uppercase min-w-[150px]"
-              placeholder="ENTER SYNC OR SHARE CODE"
+              placeholder={t.enterSyncOrShareCode || "ENTER SYNC OR SHARE CODE"}
             />
             <button 
               onClick={() => { onImportFromCode(importCode); setImportCode(""); }}
@@ -834,17 +834,17 @@ export const SettingsView = ({
                                completed: false,
                                parentId: null
                              });
-                             showToast(`Imported ${filename}`);
+                             showToast(`${t.importedFile || "Imported"} ${filename}`);
                           } else if (parsed.myDecks) {
                              onImportProgress(text);
                           }
                        } catch (err) {
-                          showToast(`Failed to parse ${filename}`);
+                          showToast(`${t.failedToParse || "Failed to parse"} ${filename}`);
                        }
                     } else if (file.name.toLowerCase().endsWith('.csv') || file.name.toLowerCase().endsWith('.txt')) {
                        handleAnkiImport(text, file.name);
                     } else {
-                       showToast("Unsupported file format");
+                       showToast(t.unsupportedFormat || "Unsupported file format");
                     }
                  };
                  reader.readAsText(file);
@@ -922,7 +922,7 @@ export const SettingsView = ({
                 value={inputSyncCode} 
                 onChange={e => setInputSyncCode(e.target.value)} 
                 className="neu-pressed flex-1 px-4 py-3 rounded-xl bg-transparent text-[var(--text-main)] font-black outline-none uppercase min-w-[150px]"
-                placeholder="ENTER SYNC OR SHARE CODE"
+                placeholder={t.enterSyncOrShareCode || "ENTER SYNC OR SHARE CODE"}
               />
               <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
                 {syncCode && (
@@ -930,7 +930,7 @@ export const SettingsView = ({
                     onClick={onDisconnectSyncCode} 
                     className="neu-btn flex-1 sm:flex-none px-4 py-3 rounded-xl font-bold text-xs uppercase whitespace-nowrap text-[color:var(--color-danger)]"
                   >
-                    Stop Sync
+                    {t.stopSyncBtn || "Stop Sync"}
                   </button>
                 )}
                 <button 
@@ -945,7 +945,7 @@ export const SettingsView = ({
                   disabled={isGeneratingCode}
                   className="neu-btn flex-1 sm:flex-none px-4 py-3 rounded-xl font-bold text-xs uppercase whitespace-nowrap text-[color:var(--color-success)] disabled:opacity-50"
                 >
-                  {isGeneratingCode ? "Generating your new code..." : (t.generateCode || "Generate")}
+                  {isGeneratingCode ? (t.generatingCode || "Generating your new code...") : (t.generateCode || "Generate")}
                 </button>
               </div>
             </div>
@@ -967,7 +967,7 @@ export const SettingsView = ({
                    onClick={() => {
                        const url = `${window.location.origin}${window.location.pathname}?sync=${syncCode}`;
                        navigator.clipboard.writeText(url).then(() => {
-                           showToast("Link copied to clipboard!");
+                           showToast(t.linkCopied || "Link copied to clipboard!");
                        });
                    }}
                 >

@@ -10,7 +10,7 @@ export function useDeckManager({
 
   const saveDeckToCache = useCallback((name, forceEmpty = false) => {
     if (!forceEmpty && currentDeck.length === 0) {
-      showToast("Cannot save an empty deck.");
+      showToast(t.cannotSaveEmptyDeck || "Cannot save an empty deck.");
       return;
     }
     const cleanDeck = currentDeck.map(q => {
@@ -25,12 +25,12 @@ export function useDeckManager({
       parentId: null
     };
     setMyDecks(prev => [newDeck, ...prev]);
-    showToast("Deck saved successfully!");
+    showToast(t.deckSavedSuccessfully || "Deck saved successfully!");
   }, [currentDeck, setMyDecks, showToast]);
 
   const overwriteDeckCache = useCallback(() => {
     if (!loadedDeckId) {
-      showToast("No deck loaded to overwrite.");
+      showToast(t.noDeckLoadedToOverwrite || "No deck loaded to overwrite.");
       return;
     }
     
@@ -62,7 +62,7 @@ export function useDeckManager({
        });
     });
     
-    showToast("Deck updated successfully!");
+    showToast(t.deckUpdatedSuccessfully || "Deck updated successfully!");
   }, [loadedDeckId, currentDeck, setMyDecks, showToast]);
 
   const loadDeckFromCache = useCallback((id) => {
@@ -88,7 +88,7 @@ export function useDeckManager({
       
       setCurrentDeck(combinedDeck);
       setLoadedDeckId(id);
-      showToast(`Loaded deck: ${selected.name}`);
+      showToast(`${t.loadedDeckName || "Loaded deck:"} ${selected.name}`);
     }
   }, [myDecks, setCurrentDeck, setLoadedDeckId, showToast]);
 
@@ -108,7 +108,7 @@ export function useDeckManager({
           setCurrentDeck([]);
           setLoadedDeckId(null);
        }
-       showToast("Deck(s) deleted.");
+       showToast(t.decksDeleted || "Deck(s) deleted.");
     }
   }, [myDecks, loadedDeckId, setMyDecks, setCurrentDeck, setLoadedDeckId, showToast]);
 
@@ -128,7 +128,7 @@ export function useDeckManager({
        let curr = targetParentId;
        while (curr) {
           if (curr === draggedId) {
-             showToast("Cannot move a folder into its own subfolder.");
+             showToast(t.cannotMoveFolderInsideSelf || "Cannot move a folder into its own subfolder.");
              return prev;
           }
           const parentDeck = prev.find(d => d.id === curr);
@@ -145,14 +145,14 @@ export function useDeckManager({
        }
        return card;
     }));
-    showToast("Cards updated!");
+    showToast(t.cardsUpdated || "Cards updated!");
   }, [setCurrentDeck, showToast]);
 
   const handleDeleteCards = useCallback((idsToDelete) => {
     if (idsToDelete.length === 0) return;
     if (window.confirm(`Are you sure you want to delete ${idsToDelete.length} card(s)?`)) {
        setCurrentDeck(prev => prev.filter(card => !idsToDelete.includes(card.id)));
-       showToast("Cards deleted!");
+       showToast(t.cardsDeleted || "Cards deleted!");
     }
   }, [setCurrentDeck, showToast]);
   
@@ -241,7 +241,7 @@ export function useDeckManager({
      });
      
      setMyDecks(prev => [...newDecks, ...prev]);
-     showToast(`Successfully imported ${newDecks.length} deck(s)`);
+     showToast(`${t.successfullyImported || "Successfully imported"} ${newDecks.length} ${t.items || "deck(s)"}`);
   }, [setMyDecks, showToast]);
 
   const handleImport = useCallback((jsonStr) => {
@@ -304,7 +304,7 @@ export function useDeckManager({
           setCurrentDeck([]);
           setLoadedDeckId(null);
        }
-       showToast("Decks deleted.");
+       showToast(t.decksDeletedMsg || "Decks deleted.");
     }
   }, [myDecks, loadedDeckId, setMyDecks, setCurrentDeck, setLoadedDeckId, showToast]);
 
@@ -332,7 +332,7 @@ export function useDeckManager({
        }
        return updatedDecks;
     });
-    showToast("Decks moved.");
+    showToast(t.decksMovedMsg || "Decks moved.");
   }, [setMyDecks, showToast]);
 
   return {
