@@ -464,9 +464,9 @@ export default function NeuroDeck() {
         )}
       </main>
 
-      <footer className="w-full max-w-7xl mx-auto px-4 pt-12 pb-8 mt-12 text-center lg:text-left">
-        <div className="neu-pressed p-6 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex flex-col items-center md:items-start text-center md:text-left">
+      <footer className={`w-full max-w-7xl mx-auto px-4 ${syncCode ? 'pt-4 pb-4 md:pt-12 md:pb-8 mt-4 md:mt-12' : 'hidden md:block pt-12 pb-8 mt-12'} text-center lg:text-left`}>
+        <div className={`neu-pressed ${syncCode ? 'p-3 md:p-6' : 'p-6'} rounded-2xl flex flex-col md:flex-row justify-between items-center gap-4 md:gap-6`}>
+          <div className="hidden md:flex flex-col items-center md:items-start text-center md:text-left">
             <h3 className="font-bold text-lg text-[var(--accent)] mb-1 flex items-center gap-2">
               <span>NeuroDeck</span>
               <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--accent)]/10 text-[var(--accent)] border border-[var(--accent)]/20 font-mono">
@@ -486,17 +486,17 @@ export default function NeuroDeck() {
                 {syncHash && <span className="opacity-90">[{syncHash}]</span>}
               </span>
             ) : (
-              <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 text-amber-500 text-xs font-bold border border-amber-500/20">
+              <span className="hidden md:inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 text-amber-500 text-xs font-bold border border-amber-500/20">
                 <span className="w-2.5 h-2.5 rounded-full bg-amber-500 opacity-60"></span>
                 <span>{t.syncOffline || "SYNC LOCAL (OFFLINE)"}</span>
               </span>
             )}
-            <span className="text-[11px] text-[var(--text-muted)] font-medium">
+            <span className="hidden md:inline text-[11px] text-[var(--text-muted)] font-medium">
               {myDecks.length} {t.items || "decks"} • {currentDeck?.length || 0} {t.cards || "cards"}
             </span>
           </div>
 
-          <div className="flex flex-col items-center md:items-end text-center md:text-right gap-1">
+          <div className="hidden md:flex flex-col items-center md:items-end text-center md:text-right gap-1">
             <p className="text-xs text-[var(--text-muted)] mb-0">
               &copy; 2026 Université d'Ottawa / University of Ottawa.
             </p>
