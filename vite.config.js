@@ -68,6 +68,6 @@ export default defineConfig({
     })
   ],
   define: {
-    'import.meta.env.VITE_BUILD_TIME': JSON.stringify(new Date().toLocaleString()),
+    'import.meta.env.VITE_BUILD_TIME': JSON.stringify(new Date().toISOString()),
   },
 });

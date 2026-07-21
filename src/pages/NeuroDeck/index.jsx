@@ -520,7 +520,12 @@ export default function NeuroDeck() {
               &copy; 2026 Université d'Ottawa / University of Ottawa.
             </p>
             <span className="text-[11px] text-[var(--text-muted)] opacity-80 font-mono">
-              Mis à jour / Updated: {import.meta.env.VITE_BUILD_TIME}
+              Mis à jour / Updated: {(() => {
+                try {
+                  const d = new Date(import.meta.env.VITE_BUILD_TIME);
+                  return isNaN(d.getTime()) ? import.meta.env.VITE_BUILD_TIME : d.toLocaleString();
+                } catch (e) { return import.meta.env.VITE_BUILD_TIME; }
+              })()}
             </span>
           </div>
         </div>

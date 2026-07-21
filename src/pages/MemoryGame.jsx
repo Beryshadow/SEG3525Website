@@ -153,7 +153,12 @@ export default function App() {
                         &copy; 2026 Université d'Ottawa / University of Ottawa.
                       </p>
                       <span className="text-xs text-color-textMuted opacity-80">
-                        {t.footerUpdateLabel} {import.meta.env.VITE_BUILD_TIME}
+                        {t.footerUpdateLabel} {(() => {
+                          try {
+                            const d = new Date(import.meta.env.VITE_BUILD_TIME);
+                            return isNaN(d.getTime()) ? import.meta.env.VITE_BUILD_TIME : d.toLocaleString();
+                          } catch (e) { return import.meta.env.VITE_BUILD_TIME; }
+                        })()}
                       </span>
                     </div>
                   </div>

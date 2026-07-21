@@ -383,7 +383,12 @@ export default function Portfolio() {
                 </p>
       
                 <span className="text-xs text-textMuted opacity-80">
-                  Mis à jour / Updated: {import.meta.env.VITE_BUILD_TIME}
+                  Mis à jour / Updated: {(() => {
+                    try {
+                      const d = new Date(import.meta.env.VITE_BUILD_TIME);
+                      return isNaN(d.getTime()) ? import.meta.env.VITE_BUILD_TIME : d.toLocaleString();
+                    } catch (e) { return import.meta.env.VITE_BUILD_TIME; }
+                  })()}
                 </span>
               </div>
 
