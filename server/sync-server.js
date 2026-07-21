@@ -349,12 +349,19 @@ app.get('/api/sync/:code/version', (req, res) => {
     res.json({ version: entry.version });
 });
 
+const fs = require('fs');
+const buildIndexPath = path.join(__dirname, '../build', 'index.html');
+
 // Serve static files from the Vite build directory
 app.use(express.static(path.join(__dirname, '../build')));
 
 // Fallback to index.html for React Router SPA routes (/neurodeck, /serialrecall, etc.)
 app.use((req, res) => {
-    res.sendFile(path.join(__dirname, '../build', 'index.html'));
+    if (fs.existsSync(buildIndexPath)) {
+        res.sendFile(buildIndexPath);
+    } else {
+        res.status(503).send("Application static assets are building or initializing. Please refresh in a moment.");
+    }
 });
 
 app.listen(PORT, () => {
