@@ -118,8 +118,13 @@ export function useNeuroSync({
     try {
       const res = await fetch(`${SYNC_API_BASE}/${code}`);
       if (res.status === 404) {
-         showToast("Sync code expired or not found.");
-         setSyncCode("");
+         if (code.length >= 64) {
+             // Server reset or session expired. Reconcile by pushing local state.
+             forcePushToCloud(code);
+         } else {
+             showToast("Sync code expired or not found.");
+             setSyncCode("");
+         }
          return;
       }
       if (!res.ok) {
@@ -356,8 +361,13 @@ export function useNeuroSync({
           try {
              const res = await fetch(`${SYNC_API_BASE}/${syncCode}/version`);
              if (res.status === 404) {
-                 showToast("Sync code expired. Please generate a new one.");
-                 setSyncCode("");
+                 if (syncCode && syncCode.length >= 64) {
+                     // Server reset or session expired. Reconcile by pushing local state.
+                     forcePushToCloud(syncCode);
+                 } else {
+                     showToast("Sync code expired. Please generate a new one.");
+                     setSyncCode("");
+                 }
                  return;
              }
              if (res.ok) {
