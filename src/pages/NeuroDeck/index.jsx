@@ -269,9 +269,10 @@ export default function NeuroDeck() {
 
   useEffect(() => {
     if (activePool.length > 0 && activeIndex === -1 && currentDeck.length > 0) {
-      selectNextCard(currentDeck);
+      const nextIdx = selectNextCard(currentDeck);
+      setCurrentIndex(nextIdx);
     }
-  }, [activePool.length, activeIndex, currentDeck, selectNextCard]);
+  }, [activePool.length, activeIndex, currentDeck, selectNextCard, setCurrentIndex]);
 
   return (
     <div className={`min-h-screen relative font-sans transition-colors duration-300 ${themeClass} neurodeck-route`} style={{ backgroundColor: 'var(--bg-main)', color: 'var(--text-main)' }}>
