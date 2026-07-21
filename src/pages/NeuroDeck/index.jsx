@@ -291,10 +291,29 @@ export default function NeuroDeck() {
     }
   }, [activePool.length, activeIndex, currentDeck, selectNextCard, setCurrentIndex]);
 
+  const [showMobileNav, setShowMobileNav] = useState(true);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY < 15) {
+        setShowMobileNav(true);
+      } else if (currentScrollY < lastScrollY.current - 5) {
+        setShowMobileNav(true);
+      } else if (currentScrollY > lastScrollY.current + 5) {
+        setShowMobileNav(false);
+      }
+      lastScrollY.current = currentScrollY;
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
     <div className={`min-h-screen relative font-sans transition-colors duration-300 ${themeClass} neurodeck-route`} style={{ backgroundColor: 'var(--bg-main)', color: 'var(--text-main)' }}>
       
-      <nav className="sticky top-0 z-50 w-full px-2 sm:px-4 pt-2 sm:pt-4 mb-4 sm:mb-8 flex flex-col items-center">
+      <nav className={`sticky top-0 z-50 w-full px-2 sm:px-4 pt-1 sm:pt-4 mb-2 sm:mb-8 flex flex-col items-center transition-all duration-300 ${view === "study" && !showMobileNav ? "-translate-y-full opacity-0 pointer-events-none sm:translate-y-0 sm:opacity-100 sm:pointer-events-auto" : "translate-y-0 opacity-100"}`}>
         <div className="neu-panel w-full max-w-6xl px-4 py-3 sm:px-6 sm:py-4 flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-0">
           
           <div className="flex items-center space-x-3 text-[var(--accent)] font-bold text-xl cursor-pointer" onClick={() => setView("study")}>
@@ -357,7 +376,7 @@ export default function NeuroDeck() {
 
       </nav>
 
-      <main className="flex flex-col items-center p-4 w-full max-w-5xl mx-auto mb-12">
+      <main className={`flex flex-col items-center ${view === "study" ? "px-2 py-1 sm:p-4 mb-4 sm:mb-12" : "p-4 mb-12"} w-full max-w-5xl mx-auto`}>
         {view === "study" && (
           <StudyView
             question={!isDeckMastered && currentDeck.length > 0 ? currentCard : null}
@@ -464,7 +483,7 @@ export default function NeuroDeck() {
         )}
       </main>
 
-      <footer className={`w-full max-w-7xl mx-auto px-4 ${syncCode ? 'pt-4 pb-4 md:pt-12 md:pb-8 mt-4 md:mt-12' : 'hidden md:block pt-12 pb-8 mt-12'} text-center lg:text-left`}>
+      <footer className={`w-full max-w-7xl mx-auto px-4 ${view === "study" ? 'hidden sm:block pt-12 pb-8 mt-12' : (syncCode ? 'pt-4 pb-4 md:pt-12 md:pb-8 mt-4 md:mt-12' : 'hidden md:block pt-12 pb-8 mt-12')} text-center lg:text-left`}>
         <div className={`neu-pressed ${syncCode ? 'p-3 md:p-6' : 'p-6'} rounded-2xl flex flex-col md:flex-row justify-between items-center gap-4 md:gap-6`}>
           <div className="hidden md:flex flex-col items-center md:items-start text-center md:text-left">
             <h3 className="font-bold text-lg text-[var(--accent)] mb-1 flex items-center gap-2">

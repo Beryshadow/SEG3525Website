@@ -1,7 +1,18 @@
-let pipeline = null;
-let env = null;
+import { pipeline, env } from '@huggingface/transformers';
 
 let classifier = null;
+
+env.allowLocalModels = false;
+env.useBrowserCache = true;
+
+try {
+  const threads = typeof navigator !== 'undefined' && navigator.hardwareConcurrency
+    ? Math.min(4, navigator.hardwareConcurrency)
+    : 2;
+  env.backends.onnx.wasm.numThreads = threads;
+} catch (e) {
+  console.warn("Could not set numThreads", e);
+}
 
 async function hasWebGpu() {
   if (typeof navigator !== 'undefined' && navigator.gpu) {
@@ -29,7 +40,7 @@ const loadPipelineWithRetries = async (modelName, device, dtype, maxRetries = 2)
     } catch (e) {
       lastErr = e;
       if (attempt < maxRetries) {
-        await new Promise(resolve => setTimeout(resolve, attempt * 2000));
+        await new Promise(resolve => setTimeout(resolve, 150));
       }
     }
   }
@@ -42,21 +53,6 @@ self.addEventListener('message', async (event) => {
   if (type === 'load') {
     const { modelName } = payload;
     try {
-      if (!pipeline) {
-        const transformers = await new Function(
-          "return import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.1.2')"
-        )();
-        pipeline = transformers.pipeline;
-        env = transformers.env;
-
-        env.allowLocalModels = false;
-        try {
-          env.backends.onnx.wasm.numThreads = 1;
-        } catch (e) {
-          console.warn("Could not set numThreads", e);
-        }
-      }
-
       const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
       const gpuAvailable = !isMobile && await hasWebGpu();
 
@@ -72,7 +68,7 @@ self.addEventListener('message', async (event) => {
           backendUsed = "WASM";
         }
       } else {
-        classifier = await loadPipelineWithRetries(modelName, "wasm", "q8", 3);
+        classifier = await loadPipelineWithRetries(modelName, "wasm", "q8", 2);
         backendUsed = "WASM";
       }
 

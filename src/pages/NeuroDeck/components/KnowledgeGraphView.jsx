@@ -45,53 +45,56 @@ export const KnowledgeGraphView = ({ deck, myDecks, cardEmbeddings, t, onGoToCar
       embedding: cardEmbeddings[q.id]
     }));
 
+    const numNodes = nodes.length;
     let globalMax = -Infinity;
     let globalMin = Infinity;
-    
-    // First Pass: Find the absolute bounds of the semantic space for this specific model + deck
-    nodes.forEach(n1 => {
-      nodes.forEach(n2 => {
-        if (n1.id !== n2.id && n1.embedding && n2.embedding) {
-          const sim = cosineSimilarity(n1.embedding, n2.embedding);
-          if (sim > globalMax) globalMax = sim;
-          if (sim < globalMin) globalMin = sim;
-        }
-      });
-    });
-    
-    const range = globalMax - globalMin || 1;
+    const pairSims = new Map();
+
+    // Single-Pass Symmetric Matrix Computation O(N^2 / 2) instead of redundant 2x O(N^2)
+    for (let i = 0; i < numNodes; i++) {
+      const n1 = nodes[i];
+      if (!n1.embedding) continue;
+      for (let j = i + 1; j < numNodes; j++) {
+        const n2 = nodes[j];
+        if (!n2.embedding) continue;
+        const sim = cosineSimilarity(n1.embedding, n2.embedding);
+        pairSims.set(`${i}_${j}`, sim);
+        if (sim > globalMax) globalMax = sim;
+        if (sim < globalMin) globalMin = sim;
+      }
+    }
+
+    const range = (globalMax - globalMin) || 1;
     const edgesMap = new Map();
-    
-    // Second Pass: Build edges using universally normalized weights (0.0 to 1.0)
-    nodes.forEach(n1 => {
+
+    // Build edges reusing precomputed symmetric similarity matrix
+    for (let i = 0; i < numNodes; i++) {
+      const n1 = nodes[i];
+      if (!n1.embedding) continue;
       const nodeEdges = [];
-      nodes.forEach(n2 => {
-        if (n1.id !== n2.id && n1.embedding && n2.embedding) {
-          const sim = cosineSimilarity(n1.embedding, n2.embedding);
-          // Mathematical normalization completely neutralizes the differences between embedding models
+
+      for (let j = 0; j < numNodes; j++) {
+        if (i === j) continue;
+        const n2 = nodes[j];
+        if (!n2.embedding) continue;
+
+        const sim = i < j ? pairSims.get(`${i}_${j}`) : pairSims.get(`${j}_${i}`);
+        if (sim !== undefined) {
           const normalizedWeight = (sim - globalMin) / range;
           nodeEdges.push({ source: n1, target: n2, weight: normalizedWeight, rawSim: sim });
         }
-      });
-      
-      // Sort this specific node's edges by the normalized weight
+      }
+
       nodeEdges.sort((a, b) => b.weight - a.weight);
-      
-      // Filter edges using the globally normalized ranking:
-      // 1. Guaranteed Connectivity: Always keep the top 2 semantic neighbors
-      // 2. Cluster Preservation: Keep any edge that falls into the user-defined top % of the graph's global variance
-      const topEdges = nodeEdges.filter((e, idx) => {
-         if (idx < 2) return true;
-         return e.weight >= clusterThreshold;
-      });
-      
+
+      const topEdges = nodeEdges.filter((e, idx) => idx < 2 || e.weight >= clusterThreshold);
       topEdges.forEach(e => {
-        const key = [e.source.id, e.target.id].sort().join('-');
+        const key = e.source.id < e.target.id ? `${e.source.id}-${e.target.id}` : `${e.target.id}-${e.source.id}`;
         if (!edgesMap.has(key)) {
           edgesMap.set(key, e);
         }
       });
-    });
+    }
 
     const edges = Array.from(edgesMap.values());
 
@@ -219,14 +222,17 @@ export const KnowledgeGraphView = ({ deck, myDecks, cardEmbeddings, t, onGoToCar
         let totalVelocity = 0;
 
         for (let i = 0; i < nodes.length; i++) {
+          const n1 = nodes[i];
           for (let j = i + 1; j < nodes.length; j++) {
-            const n1 = nodes[i];
             const n2 = nodes[j];
             const dx = n1.x - n2.x;
             const dy = n1.y - n2.y;
-            const dist = Math.max(0.1, Math.sqrt(dx * dx + dy * dy));
-            
-            const force = REPULSION / (dist * dist);
+            const distSq = dx * dx + dy * dy;
+
+            if (distSq > 90000 || distSq < 0.01) continue; // Cutoff repulsion beyond 300px
+
+            const dist = Math.sqrt(distSq);
+            const force = REPULSION / distSq;
             const fx = (dx / dist) * force;
             const fy = (dy / dist) * force;
 

@@ -397,7 +397,7 @@ export const SettingsView = ({
                }
              }}
              disabled={!newDeckName.trim()}
-             className="neu-btn px-4 sm:px-8 py-3 sm:py-4 font-black uppercase tracking-widest text-[var(--accent)] rounded-lg sm:rounded-2xl disabled:opacity-50 text-[10px] sm:text-sm active:scale-95 transition-all whitespace-nowrap"
+             className="neu-btn px-3 sm:px-8 py-2.5 sm:py-4 font-black uppercase tracking-widest text-[var(--accent)] rounded-lg sm:rounded-2xl disabled:opacity-50 text-[10px] sm:text-sm active:scale-95 transition-all text-center sm:whitespace-nowrap"
           >
             {t.createEmptyFolderBtn || "Create Folder"}
           </button>
@@ -410,7 +410,7 @@ export const SettingsView = ({
                }
              }}
              disabled={!newDeckName.trim()}
-             className="neu-btn px-4 sm:px-8 py-3 sm:py-4 font-black uppercase tracking-widest text-[var(--accent)] rounded-lg sm:rounded-2xl disabled:opacity-50 text-[10px] sm:text-sm active:scale-95 transition-all whitespace-nowrap"
+             className="neu-btn px-3 sm:px-8 py-2.5 sm:py-4 font-black uppercase tracking-widest text-[var(--accent)] rounded-lg sm:rounded-2xl disabled:opacity-50 text-[10px] sm:text-sm active:scale-95 transition-all text-center sm:whitespace-nowrap"
           >
             {t.saveDeckBtn || "Save as New"}
           </button>
@@ -418,7 +418,7 @@ export const SettingsView = ({
           {loadedDeckId && (
             <button
                onClick={onOverwriteDeck}
-               className="neu-btn px-4 sm:px-8 py-3 sm:py-4 font-black uppercase tracking-widest text-[color:var(--color-success)] rounded-lg sm:rounded-2xl text-[10px] sm:text-sm active:scale-95 transition-all whitespace-nowrap"
+               className="neu-btn px-3 sm:px-8 py-2.5 sm:py-4 font-black uppercase tracking-widest text-[color:var(--color-success)] rounded-lg sm:rounded-2xl text-[10px] sm:text-sm active:scale-95 transition-all text-center sm:whitespace-nowrap"
             >
               <i className="fas fa-sync-alt mr-2"></i> {t.overwriteDeckBtn || "Overwrite Progress"}
             </button>
@@ -653,7 +653,7 @@ export const SettingsView = ({
           ))}
         </div>
 
-        <div className="mt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 neu-pressed rounded-xl">
+        <div className="mt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 p-3.5 sm:p-4 neu-pressed rounded-xl">
           <div className="flex-1">
             <span className="font-bold text-xs sm:text-sm text-[var(--text-main)] block uppercase tracking-wider">
               {t.jumpToPriorityCard || "Jump to Priority Question"}
@@ -664,9 +664,9 @@ export const SettingsView = ({
           </div>
           <button 
             onClick={onJumpToPriorityCard} 
-            className="neu-btn px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-widest text-[var(--accent)] hover:text-[var(--text-main)] transition-colors flex items-center gap-2 whitespace-nowrap self-stretch sm:self-auto justify-center"
+            className="neu-btn px-3.5 sm:px-5 py-2.5 rounded-xl font-black text-[10px] sm:text-xs uppercase tracking-widest text-[var(--accent)] hover:text-[var(--text-main)] transition-colors flex items-center gap-2 self-stretch sm:self-auto justify-center text-center leading-snug sm:whitespace-nowrap"
           >
-            <i className="fas fa-crosshairs text-sm"></i>
+            <i className="fas fa-crosshairs text-xs sm:text-sm"></i>
             <span>{t.jumpToPriorityCard || "Jump to Priority Question"}</span>
           </button>
         </div>
@@ -809,7 +809,7 @@ export const SettingsView = ({
             <button 
               onClick={() => { onImportFromCode(importCode); setImportCode(""); }}
               disabled={!importCode}
-              className="neu-btn flex-1 sm:flex-none px-8 py-3 rounded-xl font-bold text-xs sm:text-sm uppercase whitespace-nowrap disabled:opacity-50 text-[var(--text-main)]"
+              className="neu-btn flex-1 sm:flex-none px-5 sm:px-8 py-2.5 sm:py-3 rounded-xl font-bold text-xs sm:text-sm uppercase disabled:opacity-50 text-[var(--text-main)] text-center sm:whitespace-nowrap"
             >
               {t.importCodeBtn || "Import Code"}
             </button>
@@ -918,10 +918,10 @@ export const SettingsView = ({
           </p>
         </div>
         <div className="flex flex-col gap-3 w-full sm:w-auto">
-          <button onClick={handleCopyPrompt} className="neu-btn px-6 py-3 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-widest flex items-center justify-center whitespace-nowrap text-[var(--text-main)]">
+          <button onClick={handleCopyPrompt} className="neu-btn px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-widest flex items-center justify-center text-[var(--text-main)] text-center sm:whitespace-nowrap">
             <CopyIcon className="mr-2" /> {t.copyPromptBtn || "Copy Prompt Template"}
           </button>
-          <button onClick={handleCopyLongPrompt} className="neu-btn px-6 py-3 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-widest flex items-center justify-center whitespace-nowrap text-[color:var(--color-success)]">
+          <button onClick={handleCopyLongPrompt} className="neu-btn px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-widest flex items-center justify-center text-[color:var(--color-success)] text-center sm:whitespace-nowrap">
             <CopyIcon className="mr-2" /> {t.copyLongPromptBtn || "Copy Long Prompt"}
           </button>
         </div>
@@ -953,7 +953,7 @@ export const SettingsView = ({
                 {syncCode && (
                   <button 
                     onClick={onDisconnectSyncCode} 
-                    className="neu-btn flex-1 sm:flex-none px-4 py-3 rounded-xl font-bold text-xs uppercase whitespace-nowrap text-[color:var(--color-danger)]"
+                    className="neu-btn flex-1 sm:flex-none px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl font-bold text-[10px] sm:text-xs uppercase text-[color:var(--color-danger)] text-center sm:whitespace-nowrap"
                   >
                     {t.stopSyncBtn || "Stop Sync"}
                   </button>
@@ -961,16 +961,16 @@ export const SettingsView = ({
                 <button 
                   onClick={() => onConnectSyncCode(inputSyncCode)}
                   disabled={!inputSyncCode}
-                  className="neu-btn flex-1 sm:flex-none px-4 py-3 rounded-xl font-bold text-xs uppercase whitespace-nowrap disabled:opacity-50"
+                  className="neu-btn flex-1 sm:flex-none px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl font-bold text-[10px] sm:text-xs uppercase disabled:opacity-50 text-center sm:whitespace-nowrap"
                 >
                   {t.connectBtn || "Connect"}
                 </button>
-                                <button 
+                <button 
                   onClick={onGenerateSyncCode} 
                   disabled={isGeneratingCode}
-                  className="neu-btn flex-1 sm:flex-none px-4 py-3 rounded-xl font-bold text-xs uppercase whitespace-nowrap text-[color:var(--color-success)] disabled:opacity-50"
+                  className="neu-btn flex-1 sm:flex-none px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl font-bold text-[10px] sm:text-xs uppercase text-[color:var(--color-success)] disabled:opacity-50 text-center sm:whitespace-nowrap"
                 >
-                  {isGeneratingCode ? (t.generatingCode || "Generating your new code...") : (t.generateCode || "Generate")}
+                  {isGeneratingCode ? (t.generatingCode || "Generating...") : (t.generateCode || "Generate")}
                 </button>
               </div>
             </div>

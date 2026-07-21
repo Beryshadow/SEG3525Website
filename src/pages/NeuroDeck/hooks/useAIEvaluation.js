@@ -1,5 +1,7 @@
 import { cosineSimilarity } from '../../../utilities/shared';
 
+const embeddingCache = new Map();
+
 export const useAIEvaluation = ({ model, getEmbeddings, t, currentLangKey }) => {
 
   const getEntailmentScores = (output, debugContext = "") => {
@@ -141,18 +143,41 @@ export const useAIEvaluation = ({ model, getEmbeddings, t, currentLangKey }) => 
         }
       }
 
-      // --- EMBEDDING RESCUE LOGIC ---
+      // --- EMBEDDING RESCUE LOGIC (WITH SPEED OPTIMIZED LRU CACHING) ---
       let maxEmbeddingSim = 0;
       if (getEmbeddings && validTruths.length > 0) {
         try {
-           const textsToEmbed = [userInput.trim(), ...validTruths];
-           const embs = await getEmbeddings(textsToEmbed);
-           if (embs && embs.length === textsToEmbed.length) {
-              const inputEmb = embs[0];
-              for(let i=1; i<embs.length; i++){
-                 const sim = cosineSimilarity(inputEmb, embs[i]);
-                 if(sim > maxEmbeddingSim) maxEmbeddingSim = sim;
-              }
+           const userText = userInput.trim();
+           const uncached = [];
+
+           if (!embeddingCache.has(userText)) uncached.push(userText);
+           for (const truth of validTruths) {
+             const key = truth.trim();
+             if (!embeddingCache.has(key)) uncached.push(key);
+           }
+
+           if (uncached.length > 0) {
+             const computed = await getEmbeddings(uncached);
+             if (computed && computed.length === uncached.length) {
+               uncached.forEach((txt, idx) => {
+                 if (embeddingCache.size > 500) {
+                   const firstKey = embeddingCache.keys().next().value;
+                   embeddingCache.delete(firstKey);
+                 }
+                 embeddingCache.set(txt, computed[idx]);
+               });
+             }
+           }
+
+           const inputEmb = embeddingCache.get(userText);
+           if (inputEmb) {
+             for (const truth of validTruths) {
+               const truthEmb = embeddingCache.get(truth.trim());
+               if (truthEmb) {
+                 const sim = cosineSimilarity(inputEmb, truthEmb);
+                 if (sim > maxEmbeddingSim) maxEmbeddingSim = sim;
+               }
+             }
            }
         } catch (e) {
            console.error("Embedding gamification failed", e);
