@@ -1,0 +1,14 @@
+.git
+.gitignore
+node_modules
+build
+dev-dist
+.direnv
+.helix
+.aider*
+*.pdf
+*.log
+testBank.json
+testBankMulti.json
+testAIEvaluation.mjs
+testRealModel.mjs

@@ -1,4 +1,12 @@
 providers = ["node"]
 
+[phases.install]
+cmds = ["npm ci --prefer-offline --no-audit --no-fund"]
+cacheDirectories = ["/root/.npm"]
+
+[phases.build]
+cmds = ["npm run build"]
+cacheDirectories = ["node_modules/.cache", "build"]
+
 [start]
 cmd = "npm start"
