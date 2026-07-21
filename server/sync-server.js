@@ -346,21 +346,32 @@ app.get('/api/sync/:code/version', (req, res) => {
         return res.status(404).json({ error: 'No data found for this sync code' });
     }
 
-    res.json({ version: entry.version });
-});
-
 const fs = require('fs');
-const buildIndexPath = path.join(__dirname, '../build', 'index.html');
+const { execSync } = require('child_process');
+
+const rootDir = path.resolve(__dirname, '..');
+const buildDir = path.join(rootDir, 'build');
+const buildIndexPath = path.join(buildDir, 'index.html');
+
+// Ensure build directory exists on startup
+if (!fs.existsSync(buildIndexPath)) {
+    console.log('[SERVER] Static assets missing at', buildIndexPath, '- Running Vite build...');
+    try {
+        execSync('npx vite build', { stdio: 'inherit', cwd: rootDir });
+    } catch (e) {
+        console.error('[SERVER] Auto-build failed:', e);
+    }
+}
 
 // Serve static files from the Vite build directory
-app.use(express.static(path.join(__dirname, '../build')));
+app.use(express.static(buildDir));
 
 // Fallback to index.html for React Router SPA routes (/neurodeck, /serialrecall, etc.)
 app.use((req, res) => {
     if (fs.existsSync(buildIndexPath)) {
         res.sendFile(buildIndexPath);
     } else {
-        res.status(503).send("Application static assets are building or initializing. Please refresh in a moment.");
+        res.status(503).send("Application static assets are building. Please refresh in a moment.");
     }
 });
 
