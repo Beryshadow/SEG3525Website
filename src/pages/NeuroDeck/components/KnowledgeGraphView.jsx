@@ -443,8 +443,10 @@ export const KnowledgeGraphView = ({ deck, myDecks, cardEmbeddings, t, onGoToCar
     }
   };
 
+  const isMobile = typeof navigator !== 'undefined' && (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent) || (navigator.maxTouchPoints && navigator.maxTouchPoints > 2));
+
   return (
-    <div className="w-full h-[calc(100dvh-200px)] animate-fade-in flex flex-col">
+    <div className="w-full h-[calc(100dvh-160px)] min-h-[400px] max-h-[850px] animate-fade-in flex flex-col">
       <div className="neu-panel p-4 sm:p-8 flex-1 flex flex-col relative">
         <div className="flex justify-between items-center mb-4 z-10 relative pointer-events-none">
           <h2 className="text-lg sm:text-2xl font-black text-[var(--text-main)] flex items-center uppercase tracking-widest">
@@ -546,7 +548,7 @@ export const KnowledgeGraphView = ({ deck, myDecks, cardEmbeddings, t, onGoToCar
             className="w-full h-full touch-none"
           />
           
-          {hoveredNode && !isDraggingRef.current && (
+          {hoveredNode && !isMobile && !isDraggingRef.current && (
             <div 
               className="absolute pointer-events-none neu-panel p-4 z-20 max-w-sm sm:max-w-md"
               style={{

@@ -1,4 +1,6 @@
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState, useCallback, useEffect } from 'react';
+
+const isMobile = typeof navigator !== 'undefined' && (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent) || (navigator.maxTouchPoints && navigator.maxTouchPoints > 2));
 
 export const useGraphInteraction = (canvasRef, nodesRef, setPreviewFocalNode) => {
   const cameraRef = useRef({ x: 0, y: 0, scale: 1 });
@@ -6,6 +8,7 @@ export const useGraphInteraction = (canvasRef, nodesRef, setPreviewFocalNode) =>
   const [hoveredNode, setHoveredNode] = useState(null);
   
   const isDraggingRef = useRef(false);
+  const isMultiTouchRef = useRef(false);
   const dragStartRef = useRef({ x: 0, y: 0 });
   const clickStartRef = useRef({ x: 0, y: 0 });
 
@@ -22,22 +25,50 @@ export const useGraphInteraction = (canvasRef, nodesRef, setPreviewFocalNode) =>
     return { clientX: e.clientX, clientY: e.clientY };
   }, []);
 
+  const getNodeAtClientPos = useCallback((clientX, clientY) => {
+    if (!canvasRef.current || !nodesRef.current) return null;
+    const rect = canvasRef.current.getBoundingClientRect();
+    const mouseX = clientX - rect.left;
+    const mouseY = clientY - rect.top;
+    const worldX = (mouseX - cameraRef.current.x) / cameraRef.current.scale;
+    const worldY = (mouseY - cameraRef.current.y) / cameraRef.current.scale;
+
+    for (const n of nodesRef.current) {
+      const dx = n.x - worldX;
+      const dy = n.y - worldY;
+      // Allow a generous hit area on mobile touch so tapping nodes is effortless
+      const hitMultiplier = isMobile ? 2.5 : 2.0;
+      if (dx * dx + dy * dy < (n.radius * hitMultiplier) * (n.radius * hitMultiplier)) {
+        return n;
+      }
+    }
+    return null;
+  }, [canvasRef, nodesRef]);
+
   const handlePointerDown = useCallback((e) => {
     if (e.touches && e.touches.length > 1) {
       setHoveredNode(null);
+      isMultiTouchRef.current = true;
+      clickStartRef.current = null;
+      isDraggingRef.current = false;
       return;
     }
+    
+    if (!e.touches || e.touches.length === 1) {
+      isMultiTouchRef.current = false;
+    }
+
     const { clientX, clientY } = getClientPos(e);
     if (clientX === undefined) return;
     
     clickStartRef.current = { x: clientX, y: clientY };
     dragStartRef.current = { x: clientX, y: clientY };
     
-    // Check if we clicked on empty space (hoveredNode is determined in pointerMove)
-    if (!hoveredNode) {
+    const targetNode = getNodeAtClientPos(clientX, clientY);
+    if (!targetNode) {
       isDraggingRef.current = true;
     }
-  }, [hoveredNode, getClientPos]);
+  }, [getClientPos, getNodeAtClientPos]);
 
   const handlePointerMove = useCallback((e) => {
     if (!canvasRef.current) return;
@@ -56,45 +87,45 @@ export const useGraphInteraction = (canvasRef, nodesRef, setPreviewFocalNode) =>
       dragStartRef.current = { x: clientX, y: clientY };
     }
 
-    const worldX = (mouseX - cameraRef.current.x) / cameraRef.current.scale;
-    const worldY = (mouseY - cameraRef.current.y) / cameraRef.current.scale;
+    // Only update hover node state on desktop (mobile has no hover)
+    if (!isMobile) {
+      const worldX = (mouseX - cameraRef.current.x) / cameraRef.current.scale;
+      const worldY = (mouseY - cameraRef.current.y) / cameraRef.current.scale;
 
-    let found = null;
-    if (nodesRef.current) {
-       for (const n of nodesRef.current) {
-         const dx = n.x - worldX;
-         const dy = n.y - worldY;
-         if (dx * dx + dy * dy < (n.radius * 2) * (n.radius * 2)) {
-           found = n;
-           break;
+      let found = null;
+      if (nodesRef.current) {
+         for (const n of nodesRef.current) {
+           const dx = n.x - worldX;
+           const dy = n.y - worldY;
+           if (dx * dx + dy * dy < (n.radius * 2) * (n.radius * 2)) {
+             found = n;
+             break;
+           }
          }
-       }
-    }
-    
-    setHoveredNode(found);
-    if (canvasRef.current) {
-       canvasRef.current.style.cursor = isDraggingRef.current ? 'grabbing' : (found ? 'pointer' : 'grab');
+      }
+      
+      setHoveredNode(found);
+      if (canvasRef.current) {
+         canvasRef.current.style.cursor = isDraggingRef.current ? 'grabbing' : (found ? 'pointer' : 'grab');
+      }
     }
   }, [canvasRef, nodesRef, getClientPos]);
 
   const handlePointerUp = useCallback((e) => {
     const { clientX, clientY } = getClientPos(e);
-    if (clientX !== undefined && clickStartRef.current) {
+    if (clientX !== undefined && clickStartRef.current && !isMultiTouchRef.current) {
       const dx = clientX - clickStartRef.current.x;
       const dy = clientY - clickStartRef.current.y;
       
-      // If we haven't moved far from the ORIGINAL click point, it's a true click
-      if (Math.sqrt(dx*dx + dy*dy) < 5) {
-        if (hoveredNode) {
-          setPreviewFocalNode(hoveredNode);
-        } else {
-          setPreviewFocalNode(null);
-        }
+      // If movement was small, treat as a true click/tap
+      if (Math.sqrt(dx*dx + dy*dy) < 8) {
+        const clickedNode = getNodeAtClientPos(clientX, clientY);
+        setPreviewFocalNode(clickedNode);
       }
     }
     isDraggingRef.current = false;
     clickStartRef.current = null;
-  }, [hoveredNode, setPreviewFocalNode, getClientPos]);
+  }, [getNodeAtClientPos, setPreviewFocalNode, getClientPos]);
 
   const handlePointerLeave = useCallback(() => {
     isDraggingRef.current = false;
@@ -103,8 +134,12 @@ export const useGraphInteraction = (canvasRef, nodesRef, setPreviewFocalNode) =>
   
   const handleTouchMove = useCallback((e) => {
     if (!canvasRef.current) return;
-    if (e.touches && e.touches.length === 2) {
+    if (e.touches && e.touches.length >= 2) {
       setHoveredNode(null);
+      isMultiTouchRef.current = true;
+      clickStartRef.current = null;
+      isDraggingRef.current = false;
+
       const dx = e.touches[0].clientX - e.touches[1].clientX;
       const dy = e.touches[0].clientY - e.touches[1].clientY;
       const dist = Math.sqrt(dx * dx + dy * dy);
@@ -130,8 +165,6 @@ export const useGraphInteraction = (canvasRef, nodesRef, setPreviewFocalNode) =>
       return;
     }
     
-    // For single touch, we just delegate to pointerMove
-    // We don't reset isDraggingRef falsely anymore
     handlePointerMove(e);
   }, [canvasRef, handlePointerMove]);
   
@@ -139,25 +172,40 @@ export const useGraphInteraction = (canvasRef, nodesRef, setPreviewFocalNode) =>
     lastPinchDistRef.current = null;
     lastPinchCenterRef.current = null;
     
-    // Only process as a click if it was a single touch ending
-    if (e && e.changedTouches && e.changedTouches.length === 1 && e.touches.length === 0) {
+    if (!isMultiTouchRef.current && e && e.changedTouches && e.changedTouches.length === 1 && (!e.touches || e.touches.length === 0)) {
        handlePointerUp(e);
     } else {
        isDraggingRef.current = false;
+       clickStartRef.current = null;
+    }
+
+    if (!e.touches || e.touches.length === 0) {
+       isMultiTouchRef.current = false;
     }
   }, [handlePointerUp]);
 
-  const handleWheel = useCallback((e) => {
-    if (!canvasRef.current) return;
-    const rect = canvasRef.current.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
+  // Non-passive wheel handler directly bound to canvas to prevent browser window scrolling
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
-    const zoom = Math.exp(-e.deltaY * 0.002);
-    
-    cameraRef.current.x = mouseX - (mouseX - cameraRef.current.x) * zoom;
-    cameraRef.current.y = mouseY - (mouseY - cameraRef.current.y) * zoom;
-    cameraRef.current.scale *= zoom;
+    const onWheel = (e) => {
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
+      const zoom = Math.exp(-e.deltaY * 0.002);
+      
+      cameraRef.current.x = mouseX - (mouseX - cameraRef.current.x) * zoom;
+      cameraRef.current.y = mouseY - (mouseY - cameraRef.current.y) * zoom;
+      cameraRef.current.scale = Math.min(Math.max(0.2, cameraRef.current.scale * zoom), 5);
+    };
+
+    canvas.addEventListener('wheel', onWheel, { passive: false });
+    return () => {
+      canvas.removeEventListener('wheel', onWheel);
+    };
   }, [canvasRef]);
 
   // Center camera helper
@@ -180,7 +228,6 @@ export const useGraphInteraction = (canvasRef, nodesRef, setPreviewFocalNode) =>
       onTouchStart: handlePointerDown,
       onTouchEnd: handleTouchEnd,
       onTouchCancel: handleTouchEnd,
-      onWheel: handleWheel,
     }
   };
 };

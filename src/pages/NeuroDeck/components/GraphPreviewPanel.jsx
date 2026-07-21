@@ -35,35 +35,54 @@ export const GraphPreviewPanel = ({
   }
 
   return (
-    <div className="absolute bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-96 neu-panel p-4 z-30 flex flex-col pointer-events-auto animate-fade-in shadow-xl">
-      <div className="text-[10px] font-black uppercase tracking-widest text-[var(--accent)] mb-2 flex justify-between">
-         <span>{t.focusPreview || "Focus Preview"}</span>
-         <span>{clusterCount} {t.cardsPreview || "Cards"}</span>
+    <div className="absolute bottom-2 left-2 right-2 sm:bottom-4 sm:left-auto sm:right-4 sm:w-96 neu-panel p-3 sm:p-4 z-30 flex flex-col pointer-events-auto animate-fade-in shadow-xl rounded-xl sm:rounded-2xl max-h-[75vh] overflow-y-auto">
+      <div className="flex items-center justify-between gap-2 mb-1.5 sm:mb-2">
+         <div className="flex items-center gap-1.5 min-w-0">
+           <span className="text-[10px] font-black uppercase tracking-widest text-[var(--accent)] shrink-0">{t.focusPreview || "Focus Preview"}</span>
+           {previewFocalNode.subgroup && (
+             <span className="px-1.5 py-0.5 text-[9px] font-bold rounded-md truncate max-w-[120px] bg-[var(--accent)]/15 text-[var(--accent)] border border-[var(--accent)]/20">
+               {previewFocalNode.subgroup}
+             </span>
+           )}
+         </div>
+         <div className="flex items-center gap-2 shrink-0">
+           <span className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">
+             {clusterCount} {t.cardsPreview || "Cards"}
+           </span>
+           <button 
+             onClick={() => setPreviewFocalNode(null)}
+             className="w-5 h-5 sm:w-6 sm:h-6 rounded-full neu-btn flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-main)] text-[10px] sm:text-xs font-bold leading-none"
+             title="Close preview"
+           >
+             ✕
+           </button>
+         </div>
       </div>
-      <div className="text-sm font-medium text-[var(--text-main)] mb-4 line-clamp-2" title={previewFocalNode.question}>
+
+      <div className="text-xs sm:text-sm font-medium text-[var(--text-main)] mb-2 sm:mb-4 line-clamp-2" title={previewFocalNode.question}>
          {previewFocalNode.question}
       </div>
       
-      <div className="flex gap-2 mb-4 bg-[var(--bg-main)] p-1 rounded-lg border border-white/5">
+      <div className="flex gap-1.5 sm:gap-2 mb-2 sm:mb-4 bg-[var(--bg-main)] p-1 rounded-lg border border-white/5">
          <button 
             onClick={() => setPreviewMode('threshold')}
-            className={`flex-1 py-1.5 text-[10px] font-bold rounded uppercase tracking-widest transition-colors ${previewMode === 'threshold' ? 'bg-[var(--accent)] text-white shadow-md' : 'text-[var(--text-muted)] hover:bg-white/5'}`}
+            className={`flex-1 py-1 sm:py-1.5 text-[9px] sm:text-[10px] font-bold rounded uppercase tracking-widest transition-colors ${previewMode === 'threshold' ? 'bg-[var(--accent)] text-white shadow-md' : 'text-[var(--text-muted)] hover:bg-white/5'}`}
          >
             {t.thresholdMode || "Threshold"}
          </button>
          <button 
             onClick={() => setPreviewMode('topN')}
-            className={`flex-1 py-1.5 text-[10px] font-bold rounded uppercase tracking-widest transition-colors ${previewMode === 'topN' ? 'bg-[var(--accent)] text-white shadow-md' : 'text-[var(--text-muted)] hover:bg-white/5'}`}
+            className={`flex-1 py-1 sm:py-1.5 text-[9px] sm:text-[10px] font-bold rounded uppercase tracking-widest transition-colors ${previewMode === 'topN' ? 'bg-[var(--accent)] text-white shadow-md' : 'text-[var(--text-muted)] hover:bg-white/5'}`}
          >
             {t.topNMode || "Top N"}
          </button>
       </div>
 
       {previewMode === 'threshold' ? (
-        <div className="flex flex-col mb-4">
+        <div className="flex flex-col mb-2 sm:mb-4">
            <div className="flex justify-between items-center mb-1">
-              <label className="text-xs font-bold text-[var(--text-muted)]">{t.thresholdLabel || "Similarity Threshold"}</label>
-              <span className="text-xs font-bold text-[var(--text-main)]">
+              <label className="text-[10px] sm:text-xs font-bold text-[var(--text-muted)]">{t.thresholdLabel || "Similarity Threshold"}</label>
+              <span className="text-[10px] sm:text-xs font-bold text-[var(--text-main)]">
                  {previewThreshold > 1.0 ? (t.onlyThisCard || "Only This Card") : (previewThreshold <= -1.0 ? (t.allCards || "All Cards") : previewThreshold.toFixed(2))}
               </span>
            </div>
@@ -76,16 +95,16 @@ export const GraphPreviewPanel = ({
              onChange={(e) => setPreviewThreshold(parseFloat(e.target.value))}
              className="w-full accent-[var(--accent)] cursor-pointer"
            />
-           <div className="flex justify-between text-[8px] text-[var(--text-muted)] mt-1 uppercase font-bold">
+           <div className="flex justify-between text-[8px] text-[var(--text-muted)] mt-0.5 uppercase font-bold">
               <span>{t.broadAll || "Broad (All)"}</span>
               <span>{t.strictSelf || "Strict (Self)"}</span>
            </div>
         </div>
       ) : (
-        <div className="flex flex-col mb-4">
+        <div className="flex flex-col mb-2 sm:mb-4">
            <div className="flex justify-between items-center mb-1">
-              <label className="text-xs font-bold text-[var(--text-muted)]">{t.topNLabel || "Number of Cards"}</label>
-              <span className="text-xs font-bold text-[var(--text-main)]">{previewTopN}</span>
+              <label className="text-[10px] sm:text-xs font-bold text-[var(--text-muted)]">{t.topNLabel || "Number of Cards"}</label>
+              <span className="text-[10px] sm:text-xs font-bold text-[var(--text-main)]">{previewTopN}</span>
            </div>
            <input 
              type="range" 
@@ -96,14 +115,14 @@ export const GraphPreviewPanel = ({
              onChange={(e) => setPreviewTopN(parseInt(e.target.value))}
              className="w-full accent-[var(--accent)] cursor-pointer"
            />
-           <div className="flex justify-between text-[8px] text-[var(--text-muted)] mt-1 uppercase font-bold">
+           <div className="flex justify-between text-[8px] text-[var(--text-muted)] mt-0.5 uppercase font-bold">
               <span>{t.justThis || "Just This"}</span>
               <span>{t.everything || "Everything"}</span>
            </div>
         </div>
       )}
 
-      <div className="flex justify-between items-center mt-auto">
+      <div className="flex justify-between items-center mt-auto pt-1">
          <button 
            onClick={() => {
               setPreviewFocalNode(null);
@@ -111,7 +130,7 @@ export const GraphPreviewPanel = ({
                  setFocusMode({ active: false, focalNodeId: null, threshold: 0.85 });
               }
            }} 
-           className="px-3 py-2 text-xs font-bold text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors"
+           className="px-2 py-1 sm:px-3 sm:py-2 text-[10px] sm:text-xs font-bold text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors"
          >
            {t.clearSelection || "CLEAR SELECTION"}
          </button>
@@ -122,9 +141,9 @@ export const GraphPreviewPanel = ({
               }
               if (onStartFocusStudy) onStartFocusStudy();
            }}
-           className="neu-btn px-4 py-2 text-xs font-bold uppercase tracking-widest text-[var(--accent)] rounded-lg flex items-center"
+           className="neu-btn px-3 py-1.5 sm:px-4 sm:py-2 text-[10px] sm:text-xs font-bold uppercase tracking-widest text-[var(--accent)] rounded-lg flex items-center"
          >
-           <ActivityIcon className="mr-2" /> {t.studyCluster || "STUDY CLUSTER"}
+           <ActivityIcon className="mr-1.5 sm:mr-2" /> {t.studyCluster || "STUDY CLUSTER"}
          </button>
       </div>
     </div>
