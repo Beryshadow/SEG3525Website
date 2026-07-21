@@ -1,7 +1,7 @@
 providers = ["node"]
 
 [phases.install]
-cmds = ["npm ci --prefer-offline --no-audit --no-fund"]
+cmds = ["npm install --prefer-offline --no-audit --no-fund"]
 cacheDirectories = ["/root/.npm"]
 
 [phases.build]
