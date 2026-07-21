@@ -48,7 +48,7 @@ export const StudyHeader = ({
 
           {question.isMastered && (
             <span className="px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-500 text-[9px] font-black tracking-widest border border-purple-500/30">
-              MASTERED
+              {t.mastered || "MASTERED"}
             </span>
           )}
         </div>

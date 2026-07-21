@@ -108,9 +108,9 @@ export const TextInputPhase = ({
           {feedback.hotColdScore !== undefined && (
             <div className="mb-4 bg-[var(--bg-main)] rounded-xl p-3 sm:p-4 border border-white/5 flex flex-col gap-2 relative overflow-hidden">
               <div className="flex justify-between items-center text-[10px] sm:text-xs font-black uppercase tracking-widest text-[var(--text-muted)]">
-                 <span>Semantic Gamification (Beta)</span>
+                 <span>{t.semanticGamification || "Semantic Gamification (Beta)"}</span>
                  <span style={{ color: feedback.hotColdScore > 0.7 ? 'var(--color-danger)' : feedback.hotColdScore > 0.4 ? 'var(--color-warning)' : 'var(--color-info)' }}>
-                    {feedback.hotColdScore > 0.7 ? "Boiling Hot! 🔥" : feedback.hotColdScore > 0.4 ? "Getting Warmer ☀️" : "Freezing Cold 🧊"}
+                    {feedback.hotColdScore > 0.7 ? (t.boilingHot || "Boiling Hot! 🔥") : feedback.hotColdScore > 0.4 ? (t.gettingWarmer || "Getting Warmer ☀️") : (t.freezingCold || "Freezing Cold 🧊")}
                  </span>
               </div>
               <div className="w-full bg-white/5 rounded-full h-3 shadow-inner relative overflow-hidden">
