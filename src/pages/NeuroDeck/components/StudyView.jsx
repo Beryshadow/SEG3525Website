@@ -32,9 +32,10 @@ export const StudyView = ({
   const nextBtnRef = useRef(null);
 
   const shuffledChoices = useMemo(() => {
-    if (!question) return [];
+    if (!question || !question.choices) return [];
     return shuffleArray(question.choices);
-  }, [question]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [question?.id || question?.question]);
 
   const correctAnswersArray = useMemo(() => getCorrectAnswers(question), [question]);
   const isSingleAnswer = correctAnswersArray.length === 1;

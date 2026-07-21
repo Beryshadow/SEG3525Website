@@ -276,12 +276,8 @@ export function useStudyEngine({
     if (skipped) {
       setStreak(0);
       if (showToast) showToast(t?.skippedCard || "Card Skipped. Review Later.");
-    } else if (firstTry && newScore >= 8) {
-      setStreak(s => s + 1);
-      if (showToast) showToast(t?.perfectRecall || "Perfect Recall! Mastering rapidly.");
     } else if (firstTry) {
       setStreak(s => s + 1);
-      if (showToast) showToast(t?.correctAnswer || "Correct!");
     } else {
       setStreak(0);
     }
