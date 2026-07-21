@@ -146,7 +146,7 @@ export default function NeuroDeck() {
     localStorage.setItem('neurodeck-question-type-settings', JSON.stringify(questionTypeSettings));
   }, [questionTypeSettings]);
 
-  const { getEmbeddings, modelStatus: embeddingStatus, backendUsed: embeddingBackend, modelError: embeddingError, progressPercent: embeddingProgress } = useEmbeddingModel(selectedEmbeddingModel);
+  const { getEmbeddings, modelStatus: embeddingStatus, backendUsed: embeddingBackend, modelError: embeddingError, lastLogMessage: embeddingLogMessage, progressPercent: embeddingProgress } = useEmbeddingModel(selectedEmbeddingModel);
   const [cardEmbeddings, setCardEmbeddings] = useState({});
   const activeEmbeddingModelRef = useRef(selectedEmbeddingModel);
 
@@ -466,6 +466,8 @@ export default function NeuroDeck() {
             onGoToCard={(idx) => { setCurrentIndex(idx); setView("study"); }}
             embeddingStatus={embeddingStatus}
             embeddingProgress={embeddingProgress}
+            lastLogMessage={embeddingLogMessage}
+            modelError={embeddingError}
             onRecalculate={handleRecalculateGraph}
             focusMode={focusMode}
             setFocusMode={setFocusMode}

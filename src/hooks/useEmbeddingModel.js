@@ -4,6 +4,7 @@ export function useEmbeddingModel(selectedModel = "Xenova/all-MiniLM-L6-v2") {
   const [modelStatus, setModelStatus] = useState("unloaded");
   const [backendUsed, setBackendUsed] = useState("");
   const [modelError, setModelError] = useState("");
+  const [lastLogMessage, setLastLogMessage] = useState("");
   const [progressItems, setProgressItems] = useState({});
 
   const workerRef = useRef(null);
@@ -56,6 +57,7 @@ export function useEmbeddingModel(selectedModel = "Xenova/all-MiniLM-L6-v2") {
 
     updateStatus("loading");
     setProgressItems({});
+    setLastLogMessage("Initializing worker...");
 
     const worker = new Worker(new URL('../workers/embeddingWorker.js', import.meta.url), {
       type: 'module'
@@ -64,16 +66,22 @@ export function useEmbeddingModel(selectedModel = "Xenova/all-MiniLM-L6-v2") {
 
     worker.onmessage = (e) => {
       if (!isMounted) return;
-      const { type, data, backendUsed, error, id, embeddings } = e.data;
+      const { type, data, backendUsed, error, id, embeddings, message } = e.data;
 
-      if (type === 'progress') {
+      if (type === 'log') {
+        setLastLogMessage(message);
+      } else if (type === 'progress') {
         if (["progress", "download", "done"].includes(data.status)) {
           setProgressItems((prev) => ({ ...prev, [data.file]: data }));
+          if (data.status === 'download' && data.file) {
+            setLastLogMessage(`Downloading ${data.file.split('/').pop()}...`);
+          }
         }
       } else if (type === 'ready') {
         setBackendUsed(backendUsed);
         updateStatus("ready");
         setModelError("");
+        setLastLogMessage(`Model ready (${backendUsed}).`);
       } else if (type === 'error') {
         if (id !== undefined && callbacksRef.current[id]) {
            callbacksRef.current[id].reject(new Error(error));
@@ -81,6 +89,7 @@ export function useEmbeddingModel(selectedModel = "Xenova/all-MiniLM-L6-v2") {
         } else {
            updateStatus("error");
            setModelError(error);
+           setLastLogMessage(`Error: ${error}`);
         }
       } else if (type === 'extract_result') {
         if (id !== undefined && callbacksRef.current[id]) {
@@ -99,5 +108,5 @@ export function useEmbeddingModel(selectedModel = "Xenova/all-MiniLM-L6-v2") {
     };
   }, [selectedModel]);
 
-  return { getEmbeddings, modelStatus, backendUsed, modelError, progressPercent };
+  return { getEmbeddings, modelStatus, backendUsed, modelError, lastLogMessage, progressPercent };
 }

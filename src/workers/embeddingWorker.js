@@ -11,8 +11,6 @@ env.useBrowserCache = true;
 
 try {
   env.backends.onnx.wasm.proxy = false;
-  // On mobile devices or browsers without SharedArrayBuffer (DuckDuckGo Mobile, Chrome Mobile, iOS WebViews),
-  // force single-threaded WASM execution (numThreads = 1) to avoid SharedArrayBuffer memory allocation crashes.
   if (isMobile || !hasSharedArrayBuffer) {
     env.backends.onnx.wasm.numThreads = 1;
   } else {
@@ -24,6 +22,10 @@ try {
 } catch (e) {
   console.warn("Could not set WASM env options", e);
 }
+
+const sendLog = (msg) => {
+  self.postMessage({ type: 'log', message: msg });
+};
 
 async function hasWebGpu() {
   if (typeof navigator !== 'undefined' && navigator.gpu) {
@@ -41,6 +43,7 @@ const loadPipelineWithRetries = async (modelName, device, maxRetries = 2) => {
   let lastErr;
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
+      sendLog(`Loading ${modelName} on ${device} (Attempt ${attempt})...`);
       return await pipeline("feature-extraction", modelName, {
         device,
         progress_callback: (data) => {
@@ -49,6 +52,7 @@ const loadPipelineWithRetries = async (modelName, device, maxRetries = 2) => {
       });
     } catch (e) {
       lastErr = e;
+      sendLog(`Attempt ${attempt} on ${device} failed: ${e.message || String(e)}`);
       console.warn(`Embedding pipeline load attempt ${attempt} failed for ${modelName}:`, e);
       try { env.backends.onnx.wasm.numThreads = 1; } catch (err) {}
       if (attempt < maxRetries) {
@@ -65,6 +69,7 @@ self.addEventListener('message', async (event) => {
   if (type === 'load') {
     const { modelName } = payload;
     try {
+      sendLog(`Initializing AI environment (Mobile: ${isMobile}, Threads: ${env.backends.onnx.wasm.numThreads})...`);
       const gpuAvailable = !isMobile && await hasWebGpu();
 
       let backendUsed = "WASM";
@@ -74,7 +79,7 @@ self.addEventListener('message', async (event) => {
           extractor = await loadPipelineWithRetries(modelName, "webgpu", 2);
           backendUsed = "WebGPU";
         } catch (webGpuErr) {
-          console.warn("WebGPU initialization failed. Falling back to WASM...", webGpuErr);
+          sendLog("WebGPU unavailable. Falling back to WebAssembly (WASM)...");
           extractor = await loadPipelineWithRetries(modelName, "wasm", 2);
           backendUsed = "WASM";
         }
@@ -83,8 +88,10 @@ self.addEventListener('message', async (event) => {
         backendUsed = "WASM";
       }
 
+      sendLog(`Model ready using ${backendUsed}.`);
       self.postMessage({ type: 'ready', backendUsed });
     } catch (error) {
+      sendLog(`Error: ${error.message || String(error)}`);
       self.postMessage({ type: 'error', error: error.message || String(error) });
     }
   } else if (type === 'extract') {

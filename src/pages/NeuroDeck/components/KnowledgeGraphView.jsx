@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { cosineSimilarity } from '../../../utilities/shared';
 import { ActivityIcon, RefreshIcon, NetworkIcon } from './Icons';
 
-export const KnowledgeGraphView = ({ deck, myDecks, cardEmbeddings, t, onGoToCard, embeddingStatus, embeddingProgress, onRecalculate, focusMode, setFocusMode, onStartFocusStudy }) => {
+export const KnowledgeGraphView = ({ deck, myDecks, cardEmbeddings, t, onGoToCard, embeddingStatus, embeddingProgress, lastLogMessage, modelError, onRecalculate, focusMode, setFocusMode, onStartFocusStudy }) => {
   const canvasRef = useRef(null);
   const wrapperRef = useRef(null);
   const animationRef = useRef(null);
@@ -510,12 +510,26 @@ export const KnowledgeGraphView = ({ deck, myDecks, cardEmbeddings, t, onGoToCar
 
                 <div className="mt-3 text-xs font-bold text-[var(--accent)] tracking-widest uppercase flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-[var(--accent)] animate-ping"></span>
-                  {embeddingStatus === "loading"
+                  {embeddingStatus === "error"
+                    ? `⚠️ Model Error`
+                    : embeddingStatus === "loading"
                     ? `${t.downloadingAiModel || "Downloading AI Model..."} ${embeddingProgress || 0}%`
                     : `${t.extractingData || "Extracting Knowledge Vector Features..."} (${embeddedCount} / ${deck.length})`}
                 </div>
 
-                {embeddingStatus !== "loading" && (
+                {lastLogMessage && (
+                  <div className="mt-2 text-[11px] font-mono text-[var(--text-muted)] opacity-90 px-3 py-1 bg-black/20 rounded-md max-w-sm text-center truncate" title={lastLogMessage}>
+                    💬 {lastLogMessage}
+                  </div>
+                )}
+
+                {embeddingStatus === "error" && modelError && (
+                  <div className="mt-2 text-[11px] font-mono text-red-400 bg-red-950/40 p-2 rounded-md max-w-sm text-center border border-red-500/30">
+                    ❌ {modelError}
+                  </div>
+                )}
+
+                {embeddingStatus !== "loading" && embeddingStatus !== "error" && (
                   <p className="mt-2 text-xs font-bold text-[var(--text-muted)] opacity-90 tracking-wider">
                     ⏱️ {comeBackMsg}
                   </p>
