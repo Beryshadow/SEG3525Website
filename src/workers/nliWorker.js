@@ -3,15 +3,17 @@ import { pipeline, env } from '@huggingface/transformers';
 let classifier = null;
 
 env.allowLocalModels = false;
+env.allowRemoteModels = true;
 env.useBrowserCache = true;
 
 try {
+  env.backends.onnx.wasm.proxy = false;
   const threads = typeof navigator !== 'undefined' && navigator.hardwareConcurrency
     ? Math.min(4, navigator.hardwareConcurrency)
     : 2;
   env.backends.onnx.wasm.numThreads = threads;
 } catch (e) {
-  console.warn("Could not set numThreads", e);
+  console.warn("Could not set WASM env options", e);
 }
 
 async function hasWebGpu() {
