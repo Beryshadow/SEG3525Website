@@ -17,7 +17,7 @@ try {
     env.backends.onnx.wasm.numThreads = 1;
   } else {
     const threads = typeof navigator !== 'undefined' && navigator.hardwareConcurrency
-      ? Math.min(4, navigator.hardwareConcurrency)
+      ? Math.max(1, navigator.hardwareConcurrency)
       : 1;
     env.backends.onnx.wasm.numThreads = threads;
   }
