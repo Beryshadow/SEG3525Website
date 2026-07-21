@@ -26,29 +26,50 @@ export const GraphPreviewPanel = ({
     }
   };
 
+  const anchorNodeRef = React.useRef(previewFocalNode);
+  if (!anchorNodeRef.current || (previewFocalNode && !deck?.some(d => d.id === previewFocalNode.id))) {
+     anchorNodeRef.current = previewFocalNode;
+  }
+
+  // Reset anchor if previewFocalNode changes to a node outside current cluster
+  const isCurrentFocalInAnchorCluster = React.useMemo(() => {
+    if (!anchorNodeRef.current || !previewFocalNode) return false;
+    if (anchorNodeRef.current.id === previewFocalNode.id) return true;
+    if (!cardEmbeddings || !cardEmbeddings[anchorNodeRef.current.id] || !cardEmbeddings[previewFocalNode.id]) return false;
+    const sim = cosineSimilarity(cardEmbeddings[previewFocalNode.id], cardEmbeddings[anchorNodeRef.current.id]);
+    return sim >= (previewMode === 'threshold' ? previewThreshold : -1.0);
+  }, [previewFocalNode, cardEmbeddings, previewMode, previewThreshold]);
+
+  if (!isCurrentFocalInAnchorCluster && previewFocalNode) {
+     anchorNodeRef.current = previewFocalNode;
+  }
+
+  const anchorNode = anchorNodeRef.current || previewFocalNode;
+
   const clusterCards = React.useMemo(() => {
-    if (!cardEmbeddings || !deck || !previewFocalNode || !previewFocalNode.embedding) {
-      return [previewFocalNode];
+    if (!cardEmbeddings || !deck || !anchorNode || !cardEmbeddings[anchorNode.id]) {
+      return [anchorNode];
     }
     if (previewMode === 'threshold') {
-      return deck.filter(q => q.id === previewFocalNode.id || (cardEmbeddings[q.id] && cosineSimilarity(cardEmbeddings[q.id], previewFocalNode.embedding) >= previewThreshold));
+      return deck.filter(q => q.id === anchorNode.id || (cardEmbeddings[q.id] && cosineSimilarity(cardEmbeddings[q.id], cardEmbeddings[anchorNode.id]) >= previewThreshold));
     } else {
       const sorted = [...deck].sort((a, b) => {
-        const simA = (cardEmbeddings[a.id] && a.id !== previewFocalNode.id) ? cosineSimilarity(cardEmbeddings[a.id], previewFocalNode.embedding) : (a.id === previewFocalNode.id ? 2.0 : -2.0);
-        const simB = (cardEmbeddings[b.id] && b.id !== previewFocalNode.id) ? cosineSimilarity(cardEmbeddings[b.id], previewFocalNode.embedding) : (b.id === previewFocalNode.id ? 2.0 : -2.0);
+        const simA = (cardEmbeddings[a.id] && a.id !== anchorNode.id) ? cosineSimilarity(cardEmbeddings[a.id], cardEmbeddings[anchorNode.id]) : (a.id === anchorNode.id ? 2.0 : -2.0);
+        const simB = (cardEmbeddings[b.id] && b.id !== anchorNode.id) ? cosineSimilarity(cardEmbeddings[b.id], cardEmbeddings[anchorNode.id]) : (b.id === anchorNode.id ? 2.0 : -2.0);
         if (simB !== simA) return simB - simA;
         return String(a.id).localeCompare(String(b.id));
       });
       return sorted.slice(0, Math.min(previewTopN, deck.length));
     }
-  }, [cardEmbeddings, deck, previewFocalNode, previewMode, previewThreshold, previewTopN]);
+  }, [cardEmbeddings, deck, anchorNode, previewMode, previewThreshold, previewTopN]);
 
   const clusterCount = clusterCards.length;
   const currentCardIdx = clusterCards.findIndex(q => q.id === previewFocalNode.id);
 
   const cycleCard = (dir) => {
     triggerHaptic();
-    const targetIdx = (currentCardIdx + dir + clusterCards.length) % clusterCards.length;
+    const baseIdx = currentCardIdx >= 0 ? currentCardIdx : 0;
+    const targetIdx = (baseIdx + dir + clusterCards.length) % clusterCards.length;
     const targetNode = clusterCards[targetIdx];
     if (targetNode) {
       setPreviewFocalNode({

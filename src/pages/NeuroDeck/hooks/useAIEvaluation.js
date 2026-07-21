@@ -4,10 +4,10 @@ const embeddingCache = new Map();
 
 export const useAIEvaluation = ({ model, getEmbeddings, t, currentLangKey }) => {
 
-  const getEntailmentScores = (output, debugContext = "") => {
+  const getEntailmentScores = (output) => {
     const classes = Array.isArray(output) && Array.isArray(output[0]) ? output[0] : (Array.isArray(output) ? output : [output]);
     if (!classes || classes.length === 0 || !classes[0].label) {
-      return { entailment: 0, isEntailment: false };
+      return { entailment: 0, isEntailment: false, isContradiction: false };
     }
     
     let entailmentScore = 0;
@@ -49,17 +49,90 @@ export const useAIEvaluation = ({ model, getEmbeddings, t, currentLangKey }) => 
       return { status: "loading" };
     }
 
+    const truthTexts = correctAnswersArray;
+    const choicesArray = Array.isArray(question?.choices) ? question.choices : [];
+    const incorrectTexts = choicesArray.filter(c => !correctAnswersArray.includes(c));
+    const validTruths = truthTexts.filter(t => t.trim());
+    const compositeDistractor = incorrectTexts.join(". ");
+    const distractorField = [...incorrectTexts, compositeDistractor].filter(d => d.trim());
+
+    // --- 1. FAST EMBEDDING PRE-CHECK (~30ms) ---
+    let maxEmbeddingSim = 0;
+    let maxDistractorEmbSim = 0;
+
+    if (getEmbeddings && validTruths.length > 0) {
+      try {
+         const userText = userInput.trim();
+         const uncached = [];
+
+         if (!embeddingCache.has(userText)) uncached.push(userText);
+         for (const truth of validTruths) {
+           const key = truth.trim();
+           if (!embeddingCache.has(key)) uncached.push(key);
+         }
+         for (const dist of distractorField) {
+           const key = dist.trim();
+           if (!embeddingCache.has(key)) uncached.push(key);
+         }
+
+         if (uncached.length > 0) {
+           const computed = await getEmbeddings(uncached);
+           if (computed && computed.length === uncached.length) {
+             uncached.forEach((txt, idx) => {
+               if (embeddingCache.size > 500) {
+                 const firstKey = embeddingCache.keys().next().value;
+                 embeddingCache.delete(firstKey);
+               }
+               embeddingCache.set(txt, computed[idx]);
+             });
+           }
+         }
+
+         const inputEmb = embeddingCache.get(userText);
+         if (inputEmb) {
+           for (const truth of validTruths) {
+             const truthEmb = embeddingCache.get(truth.trim());
+             if (truthEmb) {
+               const sim = cosineSimilarity(inputEmb, truthEmb);
+               if (sim > maxEmbeddingSim) maxEmbeddingSim = sim;
+             }
+           }
+           for (const dist of distractorField) {
+             const distEmb = embeddingCache.get(dist.trim());
+             if (distEmb) {
+               const sim = cosineSimilarity(inputEmb, distEmb);
+               if (sim > maxDistractorEmbSim) maxDistractorEmbSim = sim;
+             }
+           }
+         }
+      } catch (e) {
+         console.error("Embedding fast-path failed", e);
+      }
+    }
+
+    // Fast-path success: if high similarity to truth (> 0.85) and beats distractors
+    if (maxEmbeddingSim >= 0.85 && maxEmbeddingSim > maxDistractorEmbSim + 0.05) {
+      return { status: "success", score: Math.min(10.0, Math.max(8.0, maxEmbeddingSim * 10)), hotColdScore: maxEmbeddingSim };
+    }
+
+    // Fast-path wrong: if extremely low similarity (< 0.20) to everything
+    if (maxEmbeddingSim <= 0.20 && maxDistractorEmbSim <= 0.20) {
+      return { status: "wrong", score: 0.0, hotColdScore: maxEmbeddingSim };
+    }
+
+    if (!model) {
+      // Fallback if NLI model is still loading
+      if (maxEmbeddingSim >= 0.70) {
+        return { status: "success", score: Math.min(10.0, maxEmbeddingSim * 10), hotColdScore: maxEmbeddingSim };
+      }
+      return { status: "wrong", score: 0.0, hotColdScore: maxEmbeddingSim };
+    }
+
+    // --- 2. STREAMLINED FORWARD NLI EVALUATION FOR BORDERLINE CASES ---
     try {
-      const truthTexts = correctAnswersArray;
-      const choicesArray = Array.isArray(question?.choices) ? question.choices : [];
-      const incorrectTexts = choicesArray.filter(c => !correctAnswersArray.includes(c));
       const sepToken = model?.tokenizer?.sep_token || "[SEP]";
       const questionContext = currentLangKey === 'FR' ? `Question: ${question.question} Réponse:` : `Question: ${question.question} Answer:`;
       const statementUser = `${questionContext} ${userInput.trim()}`;
-      
-      const compositeDistractor = incorrectTexts.join(". ");
-      const distractorField = [...incorrectTexts, compositeDistractor].filter(d => d.trim());
-      const validTruths = truthTexts.filter(t => t.trim());
 
       const pairsToEvaluate = [];
       const mapping = []; 
@@ -70,9 +143,7 @@ export const useAIEvaluation = ({ model, getEmbeddings, t, currentLangKey }) => 
       for (const dist of distractorField) {
         const statementChoice = `${questionContext} ${dist.trim()}`;
         pairsToEvaluate.push(`${statementUser} ${sepToken} ${statementChoice}`);
-        mapping.push({ type: 'distractor', dir: 'forward', text: dist });
-        pairsToEvaluate.push(`${statementChoice} ${sepToken} ${statementUser}`);
-        mapping.push({ type: 'distractor', dir: 'backward', text: dist });
+        mapping.push({ type: 'distractor', text: dist });
       }
 
       for (const truth of validTruths) {
@@ -84,12 +155,10 @@ export const useAIEvaluation = ({ model, getEmbeddings, t, currentLangKey }) => 
         }
         const statementChoice = `${questionContext} ${truth.trim()}`;
         pairsToEvaluate.push(`${statementUser} ${sepToken} ${statementChoice}`);
-        mapping.push({ type: 'truth', dir: 'forward', text: truth });
-        pairsToEvaluate.push(`${statementChoice} ${sepToken} ${statementUser}`);
-        mapping.push({ type: 'truth', dir: 'backward', text: truth });
+        mapping.push({ type: 'truth', text: truth });
       }
 
-      let maxDistractorScore = 0;
+      let maxDistractorScore = maxDistractorEmbSim;
       let closestIncorrectText = null;
       let isStrongContradiction = false;
 
@@ -99,106 +168,42 @@ export const useAIEvaluation = ({ model, getEmbeddings, t, currentLangKey }) => 
             ? [batchedOutputs]
             : batchedOutputs;
 
-        const resultsByOriginal = { distractor: {}, truth: {} };
-        
         for (let i = 0; i < normalizedOutputs.length; i++) {
           const map = mapping[i];
           const out = normalizedOutputs[i];
-          const scores = getEntailmentScores(out, `${map.type} (${map.dir})`);
+          const scores = getEntailmentScores(out);
           
-          if (!resultsByOriginal[map.type][map.text]) {
-             resultsByOriginal[map.type][map.text] = { forward: null, backward: null };
+          if (map.type === 'distractor') {
+             if (scores.entailment > maxDistractorScore) {
+                maxDistractorScore = scores.entailment;
+                closestIncorrectText = map.text === compositeDistractor ? "Composite Distractor" : map.text;
+             }
+          } else if (map.type === 'truth') {
+             if (scores.isContradiction) {
+                isStrongContradiction = true;
+             }
+             totalEntailment += scores.entailment;
+             if (scores.entailment > maxDistractorScore && scores.isEntailment) {
+                hits++;
+             }
           }
-          resultsByOriginal[map.type][map.text][map.dir] = scores;
-        }
-
-        for (const dist of distractorField) {
-           const resInfo = resultsByOriginal.distractor[dist];
-           if (resInfo && resInfo.forward && resInfo.backward) {
-              const avgEnt = (resInfo.forward.entailment + resInfo.backward.entailment) / 2;
-              if (avgEnt > maxDistractorScore) {
-                  maxDistractorScore = avgEnt;
-                  closestIncorrectText = dist === compositeDistractor ? "Composite Distractor" : dist;
-              }
-           }
-        }
-
-        for (const truth of validTruths) {
-           const cleanTruth = truth.trim().toLowerCase();
-           if (cleanInput === cleanTruth) continue; 
-           const resInfo = resultsByOriginal.truth[truth];
-           if (resInfo && resInfo.forward && resInfo.backward) {
-              const avgEnt = (resInfo.forward.entailment + resInfo.backward.entailment) / 2;
-              const isEnt = resInfo.forward.isEntailment || resInfo.backward.isEntailment;
-              
-              if (resInfo.forward.isContradiction && resInfo.backward.isContradiction) {
-                 isStrongContradiction = true;
-              }
-              
-              totalEntailment += avgEnt;
-              if (avgEnt > maxDistractorScore && isEnt) {
-                 hits++;
-              }
-           }
-        }
-      }
-
-      // --- EMBEDDING RESCUE LOGIC (WITH SPEED OPTIMIZED LRU CACHING) ---
-      let maxEmbeddingSim = 0;
-      if (getEmbeddings && validTruths.length > 0) {
-        try {
-           const userText = userInput.trim();
-           const uncached = [];
-
-           if (!embeddingCache.has(userText)) uncached.push(userText);
-           for (const truth of validTruths) {
-             const key = truth.trim();
-             if (!embeddingCache.has(key)) uncached.push(key);
-           }
-
-           if (uncached.length > 0) {
-             const computed = await getEmbeddings(uncached);
-             if (computed && computed.length === uncached.length) {
-               uncached.forEach((txt, idx) => {
-                 if (embeddingCache.size > 500) {
-                   const firstKey = embeddingCache.keys().next().value;
-                   embeddingCache.delete(firstKey);
-                 }
-                 embeddingCache.set(txt, computed[idx]);
-               });
-             }
-           }
-
-           const inputEmb = embeddingCache.get(userText);
-           if (inputEmb) {
-             for (const truth of validTruths) {
-               const truthEmb = embeddingCache.get(truth.trim());
-               if (truthEmb) {
-                 const sim = cosineSimilarity(inputEmb, truthEmb);
-                 if (sim > maxEmbeddingSim) maxEmbeddingSim = sim;
-               }
-             }
-           }
-        } catch (e) {
-           console.error("Embedding gamification failed", e);
         }
       }
 
       const avgEntailment = validTruths.length > 0 ? totalEntailment / validTruths.length : 0;
-      
       let effectiveTruthScore = avgEntailment;
       
-      if (maxEmbeddingSim >= 0.85 && !isStrongContradiction) {
+      if (maxEmbeddingSim >= 0.80 && !isStrongContradiction) {
          effectiveTruthScore = Math.max(avgEntailment, maxEmbeddingSim);
          if (hits === 0 && effectiveTruthScore > maxDistractorScore) {
              hits = 1;
          }
       }
-      
+
       let mappedScore10 = 0;
       if (hits === validTruths.length && validTruths.length > 0) {
           mappedScore10 = 5 + ((effectiveTruthScore - maxDistractorScore) / Math.max(0.01, 1 - maxDistractorScore)) * 5;
-          if (effectiveTruthScore >= 0.90) mappedScore10 = 10.0;
+          if (effectiveTruthScore >= 0.85) mappedScore10 = 10.0;
       } else if (hits > 0) {
           const hitRatio = hits / validTruths.length;
           mappedScore10 = hitRatio * 4.9;

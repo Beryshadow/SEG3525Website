@@ -343,6 +343,8 @@ export const StudyView = ({
             handleNext={handleNext}
             nextBtnRef={nextBtnRef}
             evalMethod={evalMethod}
+            question={question}
+            userInput={userInput}
             t={t}
           />
         ) : isLongQuestion ? (

@@ -89,21 +89,27 @@ self.addEventListener('message', async (event) => {
     } catch (error) {
       self.postMessage({ type: 'error', error: error.message || String(error) });
     }
-  } else if (type === 'classify') {
+  } else if (type === 'evaluate' || type === 'classify') {
     if (!classifier) {
       self.postMessage({ type: 'error', id, error: 'Model not loaded yet' });
       return;
     }
     
     try {
-      const { text, textPair, options } = payload;
+      const { batchedInputs, text, textPair, options } = payload;
       let output;
-      if (textPair) {
-        output = await classifier({ text, text_pair: textPair }, options || { top_k: 5 });
+      const opt = options || { top_k: 5 };
+
+      if (batchedInputs) {
+        output = await classifier(batchedInputs, opt);
+      } else if (textPair) {
+        output = await classifier({ text, text_pair: textPair }, opt);
       } else {
-        output = await classifier(text, options || { top_k: 5 });
+        output = await classifier(text, opt);
       }
-      self.postMessage({ type: 'classify_result', id, output });
+
+      const responseType = type === 'evaluate' ? 'evaluate_result' : 'classify_result';
+      self.postMessage({ type: responseType, id, output });
     } catch (error) {
       self.postMessage({ type: 'error', id, error: error.message || String(error) });
     }

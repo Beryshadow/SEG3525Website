@@ -431,14 +431,13 @@ export const KnowledgeGraphView = ({ deck, myDecks, cardEmbeddings, t, onGoToCar
         }
         ctx.stroke();
 
-        // Pulsing weakness halo for cards with failed attempts (score 0 with attempts > 0)
+        // Static weakness indicator ring for cards with failed attempts (score 0 with attempts > 0)
         const isWeakNode = n.score === 0 && (n.attempts || 0) > 0;
         if (isWeakNode && !isDimmed) {
-          const pulse = Math.sin(Date.now() * 0.004 + n.originalIndex * 1.5) * 0.5 + 0.5;
           ctx.beginPath();
-          ctx.arc(n.x, n.y, n.radius + 3 + pulse * 2.5, 0, 2 * Math.PI);
+          ctx.arc(n.x, n.y, n.radius + 3.5, 0, 2 * Math.PI);
           ctx.lineWidth = 1.5;
-          ctx.strokeStyle = `rgba(239, 68, 68, ${0.45 + pulse * 0.4})`;
+          ctx.strokeStyle = 'rgba(239, 68, 68, 0.7)';
           ctx.stroke();
         }
         
