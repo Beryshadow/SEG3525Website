@@ -5,7 +5,7 @@ export function useDeckManager({
   currentDeck, setCurrentDeck,
   loadedDeckId, setLoadedDeckId,
   streak, setStreak,
-  showToast, t
+  showToast, confirm, t
 }) {
 
   const saveDeckToCache = useCallback((name, forceEmpty = false) => {
@@ -92,8 +92,17 @@ export function useDeckManager({
     }
   }, [myDecks, setCurrentDeck, setLoadedDeckId, showToast]);
 
-  const deleteDeckFromCache = useCallback((id) => {
-    if (window.confirm("Are you sure you want to delete this deck?")) {
+  const deleteDeckFromCache = useCallback(async (id) => {
+    const isConfirmed = await confirm({
+      title: t.confirmDeleteDeckTitle || "Delete Deck",
+      message: t.confirmDeleteDeckMessage || "Are you sure you want to delete this deck?",
+      buttons: [
+        { label: t.delete || "Delete", value: true, danger: true },
+        { label: t.cancel || "Cancel", value: false, secondary: true }
+      ]
+    });
+    
+    if (isConfirmed) {
        const deleteIds = new Set();
        const collectDeletes = (deckId) => {
           deleteIds.add(deckId);
@@ -148,9 +157,19 @@ export function useDeckManager({
     showToast(t.cardsUpdated || "Cards updated!");
   }, [setCurrentDeck, showToast]);
 
-  const handleDeleteCards = useCallback((idsToDelete) => {
-    if (idsToDelete.length === 0) return;
-    if (window.confirm(`Are you sure you want to delete ${idsToDelete.length} card(s)?`)) {
+  const handleDeleteCards = useCallback(async (idsToDelete) => {
+    if (!idsToDelete || idsToDelete.length === 0) return;
+    
+    const isConfirmed = await confirm({
+      title: t.confirmDeleteCardsTitle || "Delete Cards",
+      message: t.confirmDeleteCardsMessage || `Are you sure you want to delete ${idsToDelete.length} card(s)?`,
+      buttons: [
+        { label: t.delete || "Delete", value: true, danger: true },
+        { label: t.cancel || "Cancel", value: false, secondary: true }
+      ]
+    });
+    
+    if (isConfirmed) {
        setCurrentDeck(prev => prev.filter(card => !idsToDelete.includes(card.id)));
        showToast(t.cardsDeleted || "Cards deleted!");
     }
@@ -288,8 +307,19 @@ export function useDeckManager({
     }
   }, [setMyDecks, setCurrentDeck, setLoadedDeckId, setStreak, showToast, t]);
 
-  const handleBatchDeleteDecks = useCallback((ids) => {
-    if (window.confirm(`Are you sure you want to delete ${ids.length} deck(s)?`)) {
+  const handleBatchDeleteDecks = useCallback(async (ids) => {
+    if (!ids || ids.length === 0) return;
+    
+    const isConfirmed = await confirm({
+      title: t.confirmDeleteDecksTitle || "Delete Decks",
+      message: t.confirmDeleteDecksMessage || `Are you sure you want to delete ${ids.length} deck(s)?`,
+      buttons: [
+        { label: t.delete || "Delete", value: true, danger: true },
+        { label: t.cancel || "Cancel", value: false, secondary: true }
+      ]
+    });
+    
+    if (isConfirmed) {
        const deleteIds = new Set();
        const collectDeletes = (deckId) => {
           deleteIds.add(deckId);

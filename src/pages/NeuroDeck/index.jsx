@@ -14,6 +14,7 @@ import { SettingsView } from './components/SettingsView';
 import { DashboardView } from './components/DashboardView';
 import { StudyView } from './components/StudyView';
 import { KnowledgeGraphView } from './components/KnowledgeGraphView';
+import ConfirmModal from './components/ConfirmModal';
 import { BrainIcon, SettingsIcon, ActivityIcon, CpuIcon, FireIcon, NetworkIcon } from './components/Icons';
 
 const SYNC_API_BASE = import.meta.env.DEV ? 'http://localhost:3001/api/sync' : '/api/sync';
@@ -23,6 +24,14 @@ export default function NeuroDeck() {
   const navigate = useNavigate();
   const location = useLocation();
   const { appTheme, theme, toggleTheme, lang, toggleLang } = useSharedLogic([]);
+
+  const [dialogState, setDialogState] = useState(null);
+
+  const confirm = useCallback((options) => {
+    return new Promise((resolve) => {
+      setDialogState({ ...options, resolve });
+    });
+  }, []);
 
   const currentLangKey = (lang || 'EN').toUpperCase();
   const t = TRANSLATIONS[currentLangKey] || TRANSLATIONS.EN;
@@ -210,7 +219,7 @@ export default function NeuroDeck() {
     handleBatchMoveDecks, handleUpdateCards,
     handleDeleteCards, handleToggleDeckCompleted, handleExportProgress,
     handleExportWithoutProgress, handleImport, handleImportProgress
-  } = useDeckManager({ myDecks, setMyDecks, currentDeck, setCurrentDeck, loadedDeckId, setLoadedDeckId, streak, setStreak, showToast, t });
+  } = useDeckManager({ myDecks, setMyDecks, currentDeck, setCurrentDeck, loadedDeckId, setLoadedDeckId, streak, setStreak, showToast, confirm, t });
 
   const {
     computeActiveDeckPool, selectNextCard, updateCardStats, handleManualNavigation
@@ -228,7 +237,7 @@ export default function NeuroDeck() {
     myDecks, setMyDecks, currentDeck, setCurrentDeck, loadedDeckId, setLoadedDeckId,
     streak, setStreak, selectedModel, setSelectedModel, cardOrderMode, setCardOrderMode,
     servingMode, setServingMode, selectedEmbeddingModel, setSelectedEmbeddingModel,
-    focusMode, setFocusMode, questionTypeSettings, setQuestionTypeSettings, showToast, currentIndex, t
+    focusMode, setFocusMode, questionTypeSettings, setQuestionTypeSettings, showToast, confirm, currentIndex, t
   });
 
   // Automatically connect if ?sync= or ?share= is provided in the URL
@@ -441,6 +450,16 @@ export default function NeuroDeck() {
            <span className="text-sm font-bold text-[var(--text-main)]">{toastMessage}</span>
          </div>
       )}
+
+      <ConfirmModal 
+        dialogState={dialogState} 
+        onClose={(value) => {
+          if (dialogState && dialogState.resolve) {
+            dialogState.resolve(value);
+          }
+          setDialogState(null);
+        }} 
+      />
     </div>
   );
 }

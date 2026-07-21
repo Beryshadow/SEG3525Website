@@ -13,7 +13,7 @@ export function useNeuroSync({
   selectedEmbeddingModel, setSelectedEmbeddingModel,
   focusMode, setFocusMode,
   questionTypeSettings, setQuestionTypeSettings,
-  showToast, currentIndex, t
+  showToast, confirm, currentIndex, t
 }) {
   const [syncCode, setSyncCode] = useState(() => {
     return localStorage.getItem('neurodeck-sync-code') || "";
@@ -108,10 +108,20 @@ export function useNeuroSync({
              showToast(t.hierarchyImportedSaved || "Hierarchy imported and saved to My Decks!");
           } else if (data.data.sharedDeck) {
              const newDeck = data.data.sharedDeck;
-             if (window.confirm("Would you like to append these shared cards to your current deck, or save as a new deck in 'My Decks'?\n\nOK = Append\nCancel = New Deck")) {
+             const choice = await confirm({
+               title: t.importDeckTitle || "Import Shared Deck",
+               message: t.importDeckMessage || "Would you like to append these shared cards to your current deck, or save as a new deck in 'My Decks'?",
+               buttons: [
+                 { label: t.append || "Append", value: "append", primary: true },
+                 { label: t.newDeck || "New Deck", value: "new" },
+                 { label: t.cancel || "Cancel", value: null, secondary: true }
+               ]
+             });
+             
+             if (choice === "append") {
                setCurrentDeck(prev => [...prev, ...newDeck]);
                showToast(t.cardsAppended || "Cards appended to current deck!");
-             } else {
+             } else if (choice === "new") {
                const newDeckObj = {
                  id: Date.now().toString(),
                  name: data.data.sharedName || `Imported Deck ${code}`,
@@ -309,7 +319,17 @@ export function useNeuroSync({
 
 
   const handleClearCloudData = useCallback(async () => {
-      if (!window.confirm("Are you sure you want to completely wipe all your cloud sync data? This will permanently delete all codes associated with your dataset.")) return;
+      const isConfirmed = await confirm({
+        title: t.confirmClearCloudDataTitle || "Clear Cloud Data",
+        message: t.confirmClearCloudDataMessage || "Are you sure you want to completely wipe all your cloud sync data? This will permanently delete all codes associated with your dataset.",
+        buttons: [
+          { label: t.wipeData || "Wipe Data", value: true, danger: true },
+          { label: t.cancel || "Cancel", value: false, secondary: true }
+        ]
+      });
+      
+      if (!isConfirmed) return;
+      
       try {
          const res = await fetch(`${SYNC_API_BASE}/clear/${datasetId}`, {
             method: 'DELETE'

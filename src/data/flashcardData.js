@@ -246,7 +246,20 @@ export const TRANSLATIONS = {
     decksDeletedMsg: "Paquets supprimés.",
     decksMovedMsg: "Paquets déplacés.",
     cloudDataWipedRemotely: "Les données cloud ont été effacées à distance. Synchronisation désactivée.",
-    deckAlreadyImported: "Paquet déjà importé. Chargé depuis la bibliothèque !"
+    deckAlreadyImported: "Paquet déjà importé. Chargé depuis la bibliothèque !",
+    confirmDeleteDeckTitle: "Supprimer le Paquet",
+    confirmDeleteDeckMessage: "Êtes-vous sûr de vouloir supprimer ce paquet ?",
+    delete: "Supprimer",
+    cancel: "Annuler",
+    confirmDeleteCardsTitle: "Supprimer les Cartes",
+    confirmDeleteDecksTitle: "Supprimer les Paquets",
+    importDeckTitle: "Importer un Paquet Partagé",
+    importDeckMessage: "Voulez-vous ajouter ces cartes partagées à votre paquet actuel ou les sauvegarder comme un nouveau paquet dans 'Mes Paquets' ?",
+    append: "Ajouter",
+    newDeck: "Nouveau Paquet",
+    confirmClearCloudDataTitle: "Effacer les Données Cloud",
+    confirmClearCloudDataMessage: "Êtes-vous sûr de vouloir effacer complètement toutes vos données de synchronisation cloud ? Cela supprimera définitivement tous les codes associés à votre appareil.",
+    wipeData: "Effacer les Données"
   },
   EN: {
     appTitle: "NeuroDeck",
@@ -495,7 +508,20 @@ export const TRANSLATIONS = {
     decksDeletedMsg: "Decks deleted.",
     decksMovedMsg: "Decks moved.",
     cloudDataWipedRemotely: "Cloud data was remotely wiped. Sync disabled.",
-    deckAlreadyImported: "Deck already imported. Loaded from library!"
+    deckAlreadyImported: "Deck already imported. Loaded from library!",
+    confirmDeleteDeckTitle: "Delete Deck",
+    confirmDeleteDeckMessage: "Are you sure you want to delete this deck?",
+    delete: "Delete",
+    cancel: "Cancel",
+    confirmDeleteCardsTitle: "Delete Cards",
+    confirmDeleteDecksTitle: "Delete Decks",
+    importDeckTitle: "Import Shared Deck",
+    importDeckMessage: "Would you like to append these shared cards to your current deck, or save as a new deck in 'My Decks'?",
+    append: "Append",
+    newDeck: "New Deck",
+    confirmClearCloudDataTitle: "Clear Cloud Data",
+    confirmClearCloudDataMessage: "Are you sure you want to completely wipe all your cloud sync data? This will permanently delete all codes associated with your dataset.",
+    wipeData: "Wipe Data"
   }
 };
 
