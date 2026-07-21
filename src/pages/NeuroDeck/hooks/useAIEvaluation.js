@@ -35,11 +35,12 @@ export const useAIEvaluation = ({ model, getEmbeddings, t, currentLangKey }) => 
     return { entailment: entailmentScore, isEntailment, isContradiction };
   };
 
-  const evaluateInput = async (userInput, question, correctAnswersArray) => {
-    if (!userInput.trim()) return null;
+  const evaluateInput = async (userInput, question, correctAnswersArray = []) => {
+    if (!userInput || typeof userInput !== 'string' || !userInput.trim()) return null;
     
+    const safeCorrectAnswers = Array.isArray(correctAnswersArray) ? correctAnswersArray : [];
     const cleanInput = userInput.trim().toLowerCase();
-    const isPerfectSingleAnswer = correctAnswersArray.length === 1 && cleanInput === correctAnswersArray[0].trim().toLowerCase();
+    const isPerfectSingleAnswer = safeCorrectAnswers.length === 1 && cleanInput === safeCorrectAnswers[0].trim().toLowerCase();
     
     if (isPerfectSingleAnswer) {
         return { status: "success", score: 10.0 };
@@ -49,12 +50,12 @@ export const useAIEvaluation = ({ model, getEmbeddings, t, currentLangKey }) => 
       return { status: "loading" };
     }
 
-    const truthTexts = correctAnswersArray;
+    const truthTexts = safeCorrectAnswers;
     const choicesArray = Array.isArray(question?.choices) ? question.choices : [];
-    const incorrectTexts = choicesArray.filter(c => !correctAnswersArray.includes(c));
-    const validTruths = truthTexts.filter(t => t.trim());
+    const incorrectTexts = choicesArray.filter(c => !safeCorrectAnswers.includes(c));
+    const validTruths = truthTexts.filter(t => t && typeof t === 'string' && t.trim());
     const compositeDistractor = incorrectTexts.join(". ");
-    const distractorField = [...incorrectTexts, compositeDistractor].filter(d => d.trim());
+    const distractorField = [...incorrectTexts, compositeDistractor].filter(d => d && typeof d === 'string' && d.trim());
 
     // --- 1. FAST EMBEDDING PRE-CHECK (~30ms) ---
     let maxEmbeddingSim = 0;
@@ -77,7 +78,7 @@ export const useAIEvaluation = ({ model, getEmbeddings, t, currentLangKey }) => 
 
          if (uncached.length > 0) {
            const computed = await getEmbeddings(uncached);
-           if (computed && computed.length === uncached.length) {
+           if (computed && Array.isArray(computed) && computed.length === uncached.length) {
              uncached.forEach((txt, idx) => {
                if (embeddingCache.size > 500) {
                  const firstKey = embeddingCache.keys().next().value;
@@ -131,7 +132,7 @@ export const useAIEvaluation = ({ model, getEmbeddings, t, currentLangKey }) => 
     // --- 2. STREAMLINED FORWARD NLI EVALUATION FOR BORDERLINE CASES ---
     try {
       const sepToken = model?.tokenizer?.sep_token || "[SEP]";
-      const questionContext = currentLangKey === 'FR' ? `Question: ${question.question} Réponse:` : `Question: ${question.question} Answer:`;
+      const questionContext = currentLangKey === 'FR' ? `Question: ${question?.question || ''} Réponse:` : `Question: ${question?.question || ''} Answer:`;
       const statementUser = `${questionContext} ${userInput.trim()}`;
 
       const pairsToEvaluate = [];
@@ -164,12 +165,17 @@ export const useAIEvaluation = ({ model, getEmbeddings, t, currentLangKey }) => 
 
       if (pairsToEvaluate.length > 0) {
         const batchedOutputs = await model(pairsToEvaluate, { top_k: 5, topk: 5 });
-        const normalizedOutputs = Array.isArray(batchedOutputs) && batchedOutputs.length > 0 && !Array.isArray(batchedOutputs[0])
-            ? [batchedOutputs]
-            : batchedOutputs;
+        if (!batchedOutputs) {
+           return { status: "wrong", score: 0.0, hotColdScore: maxEmbeddingSim };
+        }
+
+        const normalizedOutputs = Array.isArray(batchedOutputs) 
+            ? (batchedOutputs.length > 0 && !Array.isArray(batchedOutputs[0]) ? [batchedOutputs] : batchedOutputs)
+            : [];
 
         for (let i = 0; i < normalizedOutputs.length; i++) {
           const map = mapping[i];
+          if (!map) continue;
           const out = normalizedOutputs[i];
           const scores = getEntailmentScores(out);
           
