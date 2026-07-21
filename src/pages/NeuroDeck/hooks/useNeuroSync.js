@@ -437,8 +437,10 @@ export function useNeuroSync({
        };
 
        eventSource.onerror = (err) => {
-           console.error("SSE connection error", err);
-           // EventSource will automatically try to reconnect.
+           if (eventSource.readyState === EventSource.CLOSED) {
+               console.warn("[SYNC] SSE connection closed.");
+           }
+           // When readyState is CONNECTING (0), browser automatically retries in background.
        };
     }
     return () => { 
