@@ -6,6 +6,25 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 app.use(cors());
+
+// Enable Cross-Origin Isolation for WebAssembly multi-threading (SharedArrayBuffer) & configure CSP
+app.use((req, res, next) => {
+    res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+    res.setHeader('Cross-Origin-Embedder-Policy', 'credentialless');
+    res.setHeader(
+        'Content-Security-Policy',
+        "default-src 'self'; " +
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://static.cloudflareinsights.com; " +
+        "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; " +
+        "font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com data:; " +
+        "img-src 'self' data: blob: https:; " +
+        "connect-src 'self' https://ryanbeland.ca https://www.google-analytics.com https://www.google.com https://huggingface.co https://cdn-lfs.huggingface.co https://*.huggingface.co wss: https:; " +
+        "worker-src 'self' blob:; " +
+        "child-src 'self' blob:;"
+    );
+    next();
+});
+
 // 10mb limit to prevent huge payloads DoS
 app.use(express.json({ limit: '10mb' }));
 
