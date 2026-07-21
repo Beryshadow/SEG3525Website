@@ -39,6 +39,7 @@ const loadPipelineWithRetries = async (modelName, device, dtype, maxRetries = 2)
       });
     } catch (e) {
       lastErr = e;
+      try { env.backends.onnx.wasm.numThreads = 1; } catch (err) {}
       if (attempt < maxRetries) {
         await new Promise(resolve => setTimeout(resolve, 150));
       }
