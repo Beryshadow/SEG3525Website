@@ -231,10 +231,11 @@ export default function NeuroDeck() {
     focusMode, setFocusMode, questionTypeSettings, setQuestionTypeSettings, showToast, currentIndex, t
   });
 
-  // Automatically connect if ?sync= is provided in the URL
+  // Automatically connect if ?sync= or ?share= is provided in the URL
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const syncParam = params.get('sync');
+    const shareParam = params.get('share');
     if (syncParam) {
        // Only trigger download if we aren't already connected to this code
        if (syncParam !== syncCode) {
@@ -242,8 +243,11 @@ export default function NeuroDeck() {
        }
        // Clean up URL so it doesn't stay there if user disconnects later
        navigate(location.pathname, { replace: true });
+    } else if (shareParam) {
+       handleImportFromCode(shareParam);
+       navigate(location.pathname, { replace: true });
     }
-  }, [location.search, location.pathname, navigate, syncCode, handleCloudSyncDownload]);
+  }, [location.search, location.pathname, navigate, syncCode, handleCloudSyncDownload, handleImportFromCode]);
 
   const themeClass = appTheme === 'light' ? 'light-mode' : (appTheme === 'dark' ? '' : `theme-${appTheme}`);
   const isDeckMastered = currentDeck.length > 0 && currentDeck.every(q => q.isMastered);
