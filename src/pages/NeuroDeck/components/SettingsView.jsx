@@ -755,7 +755,15 @@ export const SettingsView = ({
                   <span className="text-sm font-black uppercase tracking-widest text-[var(--accent)]">Share Code: {shareQrCodeData.code}</span>
                   <button onClick={() => setShareQrCodeData(null)} className="text-[var(--text-muted)] hover:text-white"><i className="fas fa-times"></i></button>
                 </div>
-                <div className="bg-white p-3 rounded-xl mb-3">
+                <div 
+                   className="bg-white p-3 rounded-xl mb-3 cursor-pointer hover:opacity-80 transition-opacity"
+                   title="Click to copy link"
+                   onClick={() => {
+                       navigator.clipboard.writeText(shareQrCodeData.url).then(() => {
+                           showToast("Link copied to clipboard!");
+                       });
+                   }}
+                >
                    <QRCodeSVG value={shareQrCodeData.url} size={200} />
                 </div>
                 <span className="text-xs font-bold text-center text-[var(--text-muted)]">Scan this code or open the link to import the shared cards.</span>
@@ -953,7 +961,16 @@ export const SettingsView = ({
                    </div>
                 )}
                 <span className="text-xs font-bold uppercase tracking-widest mb-3 text-[var(--text-main)]">{t?.scanToSync || "Scan to Sync"}</span>
-                <div className="bg-white p-2 rounded-xl">
+                <div 
+                   className="bg-white p-2 rounded-xl cursor-pointer hover:opacity-80 transition-opacity"
+                   title="Click to copy link"
+                   onClick={() => {
+                       const url = `${window.location.origin}${window.location.pathname}?sync=${syncCode}`;
+                       navigator.clipboard.writeText(url).then(() => {
+                           showToast("Link copied to clipboard!");
+                       });
+                   }}
+                >
                   <QRCodeSVG value={`${window.location.origin}${window.location.pathname}?sync=${syncCode}`} size={150} />
                 </div>
               </div>
