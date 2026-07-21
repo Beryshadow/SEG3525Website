@@ -105,23 +105,95 @@ export const applyProportionalDeficit = (activeDeck, fullDeck, questionTypeSetti
   return activeDeck;
 };
 
+export const getCardWeaknessWeight = (q, currentTurn = 0) => {
+  if (!q || q.isMastered || (q.score || 0) >= 8) {
+    return 0; // Fully mastered cards have zero weakness weight
+  }
+  
+  const score = q.score || 0;
+  const attempts = q.attempts || 0;
+  const dueTurn = q.dueTurn || 0;
+  const turnsOverdue = Math.max(0, currentTurn - dueTurn);
+  
+  let baseWeight = 0;
+  if (score === 0) {
+    if (attempts > 0) {
+      // Score 0 with more attempts represents persistent weakness:
+      // Score 0 with 2 attempts (weight 120) > Score 0 with 1 attempt (weight 110)
+      baseWeight = 100 + (attempts * 10);
+    } else {
+      // Unattempted card (score 0, 0 attempts): weight 50
+      baseWeight = 50;
+    }
+  } else {
+    // Partial mastery (score between 1 and 7):
+    // E.g. score 5/10 -> weight 20, which is significantly lower (more mastered) than 0/10 with 0 attempts (weight 50)
+    baseWeight = Math.max(5, 50 - (score * 6));
+  }
+
+  // Time-based memory decay: overdue cards get a deterministic weight boost (+2 per turn overdue)
+  return baseWeight + (turnsOverdue * 2);
+};
+
+export const getContrastPairIndex = (fullDeck, currentCard, cardEmbeddings) => {
+  if (!fullDeck || !currentCard || !cardEmbeddings || !cardEmbeddings[currentCard.id]) {
+    return -1;
+  }
+  
+  const currentEmb = cardEmbeddings[currentCard.id];
+  const candidates = [];
+  
+  for (const q of fullDeck) {
+    if (q.id === currentCard.id || q.isMastered || !cardEmbeddings[q.id]) continue;
+    const sim = cosineSimilarity(cardEmbeddings[q.id], currentEmb);
+    if (sim >= 0.65) {
+      candidates.push({ card: q, sim });
+    }
+  }
+  
+  if (candidates.length === 0) return -1;
+  
+  candidates.sort((a, b) => {
+    if (b.sim !== a.sim) return b.sim - a.sim;
+    return String(a.card.id).localeCompare(String(b.card.id));
+  });
+  
+  return fullDeck.findIndex(q => q.id === candidates[0].card.id);
+};
+
 export const getSemanticallyPrioritizedCardIndex = (fullDeck, lowestScoreCards, cardEmbeddings) => {
-  let attempted = fullDeck.filter(q => (q.attempts || 0) > 0 && !q.isMastered);
+  let attempted = fullDeck.filter(q => (q.attempts || 0) > 0 && !q.isMastered && getCardWeaknessWeight(q) > 0);
   let targetEmbeddings = [];
+  let weights = [];
   
   if (attempted.length > 0) {
-     attempted.sort((a,b) => (a.score || 0) - (b.score || 0));
-     const lowestAttemptedScore = attempted[0].score || 0;
-     const weakestCards = attempted.filter(q => (q.score || 0) === lowestAttemptedScore);
-     targetEmbeddings = weakestCards.map(q => cardEmbeddings && cardEmbeddings[q.id]).filter(Boolean);
+     for (const q of attempted) {
+        if (cardEmbeddings && cardEmbeddings[q.id]) {
+           targetEmbeddings.push(cardEmbeddings[q.id]);
+           weights.push(getCardWeaknessWeight(q));
+        }
+     }
   }
   
   if (targetEmbeddings.length > 0) {
-      const weaknessVector = new Array(targetEmbeddings[0].length).fill(0);
-      for(const emb of targetEmbeddings) {
-         for(let i = 0; i < emb.length; i++) weaknessVector[i] += emb[i];
+      const dim = targetEmbeddings[0].length;
+      const weaknessVector = new Array(dim).fill(0);
+      let totalWeight = 0;
+
+      for (let i = 0; i < targetEmbeddings.length; i++) {
+         const emb = targetEmbeddings[i];
+         const w = weights[i];
+         totalWeight += w;
+         for (let d = 0; d < dim; d++) {
+            weaknessVector[d] += emb[d] * w;
+         }
       }
-      for(let i = 0; i < weaknessVector.length; i++) weaknessVector[i] /= targetEmbeddings.length;
+
+      if (totalWeight > 0) {
+         for (let d = 0; d < dim; d++) {
+            weaknessVector[d] /= totalWeight;
+         }
+      }
 
       const sortedBySimilarity = [...lowestScoreCards].sort((a, b) => {
          const simA = (cardEmbeddings && cardEmbeddings[a.id]) ? cosineSimilarity(cardEmbeddings[a.id], weaknessVector) : 0;
@@ -192,10 +264,10 @@ export function useStudyEngine({
       return deck.findIndex(q => q.id === (activeDeck[0] ? activeDeck[0].id : deck[0].id)); 
     }
 
-    // 4. Sort by Lowest Score
-    dueCards.sort((a, b) => (a.score || 0) - (b.score || 0));
-    const lowestScore = dueCards[0].score || 0;
-    const lowestScoreCards = dueCards.filter(q => (q.score || 0) === lowestScore);
+    // 4. Sort by Weakness Weight (Attempt-weighted & Mastery-avoidance)
+    dueCards.sort((a, b) => getCardWeaknessWeight(b) - getCardWeaknessWeight(a));
+    const maxWeaknessWeight = getCardWeaknessWeight(dueCards[0]);
+    const lowestScoreCards = dueCards.filter(q => getCardWeaknessWeight(q) === maxWeaknessWeight);
 
     // 5. Apply Final Card Ordering Resolution
     if (cardOrderMode === 'random') {
@@ -220,9 +292,9 @@ export function useStudyEngine({
       return deck.findIndex(q => q.id === (activeDeck[0] ? activeDeck[0].id : deck[0].id)); 
     }
 
-    dueCards.sort((a, b) => (a.score || 0) - (b.score || 0));
-    const lowestScore = dueCards[0].score || 0;
-    const lowestScoreCards = dueCards.filter(q => (q.score || 0) === lowestScore);
+    dueCards.sort((a, b) => getCardWeaknessWeight(b) - getCardWeaknessWeight(a));
+    const maxWeaknessWeight = getCardWeaknessWeight(dueCards[0]);
+    const lowestScoreCards = dueCards.filter(q => getCardWeaknessWeight(q) === maxWeaknessWeight);
 
     if (cardOrderMode === 'semantic') {
       return getSemanticallyPrioritizedCardIndex(deck, lowestScoreCards, cardEmbeddings);

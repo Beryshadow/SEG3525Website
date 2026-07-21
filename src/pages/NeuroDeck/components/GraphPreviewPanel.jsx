@@ -13,26 +13,53 @@ export const GraphPreviewPanel = ({
   setPreviewTopN,
   cardEmbeddings,
   deck,
+  myDecks,
   t,
   setFocusMode,
   onStartFocusStudy
 }) => {
   if (!previewFocalNode) return null;
 
-  let clusterCount = 1; 
-  if (cardEmbeddings && deck && previewFocalNode.embedding) {
-     if (previewMode === 'threshold') {
-        deck.forEach(q => {
-           if (q.id !== previewFocalNode.id && cardEmbeddings[q.id]) {
-              if (cosineSimilarity(cardEmbeddings[q.id], previewFocalNode.embedding) >= previewThreshold) {
-                 clusterCount++;
-              }
-           }
-        });
-     } else {
-        clusterCount = Math.min(previewTopN, deck.length);
-     }
-  }
+  const triggerHaptic = () => {
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      try { navigator.vibrate(10); } catch (e) {}
+    }
+  };
+
+  const clusterCards = React.useMemo(() => {
+    if (!cardEmbeddings || !deck || !previewFocalNode || !previewFocalNode.embedding) {
+      return [previewFocalNode];
+    }
+    if (previewMode === 'threshold') {
+      return deck.filter(q => q.id === previewFocalNode.id || (cardEmbeddings[q.id] && cosineSimilarity(cardEmbeddings[q.id], previewFocalNode.embedding) >= previewThreshold));
+    } else {
+      const sorted = [...deck].sort((a, b) => {
+        const simA = (cardEmbeddings[a.id] && a.id !== previewFocalNode.id) ? cosineSimilarity(cardEmbeddings[a.id], previewFocalNode.embedding) : (a.id === previewFocalNode.id ? 2.0 : -2.0);
+        const simB = (cardEmbeddings[b.id] && b.id !== previewFocalNode.id) ? cosineSimilarity(cardEmbeddings[b.id], previewFocalNode.embedding) : (b.id === previewFocalNode.id ? 2.0 : -2.0);
+        if (simB !== simA) return simB - simA;
+        return String(a.id).localeCompare(String(b.id));
+      });
+      return sorted.slice(0, Math.min(previewTopN, deck.length));
+    }
+  }, [cardEmbeddings, deck, previewFocalNode, previewMode, previewThreshold, previewTopN]);
+
+  const clusterCount = clusterCards.length;
+  const currentCardIdx = clusterCards.findIndex(q => q.id === previewFocalNode.id);
+
+  const cycleCard = (dir) => {
+    triggerHaptic();
+    const targetIdx = (currentCardIdx + dir + clusterCards.length) % clusterCards.length;
+    const targetNode = clusterCards[targetIdx];
+    if (targetNode) {
+      setPreviewFocalNode({
+        ...targetNode,
+        originalIndex: deck.findIndex(d => d.id === targetNode.id),
+        score: targetNode.isMastered ? 10 : (targetNode.score || 0),
+        subgroup: (targetNode._sourceDeckId && myDecks ? myDecks.find(d => d.id === targetNode._sourceDeckId)?.name : null) || targetNode.subgroup || targetNode.category || targetNode.deckId || null,
+        embedding: cardEmbeddings[targetNode.id]
+      });
+    }
+  };
 
   return (
     <div className="absolute bottom-2 left-2 right-2 sm:bottom-4 sm:left-auto sm:right-4 sm:w-96 neu-panel p-3 sm:p-4 z-30 flex flex-col pointer-events-auto animate-fade-in shadow-xl rounded-xl sm:rounded-2xl max-h-[75vh] overflow-y-auto">
@@ -50,7 +77,10 @@ export const GraphPreviewPanel = ({
              {clusterCount} {t.cardsPreview || "Cards"}
            </span>
            <button 
-             onClick={() => setPreviewFocalNode(null)}
+             onClick={() => {
+               triggerHaptic();
+               setPreviewFocalNode(null);
+             }}
              className="w-5 h-5 sm:w-6 sm:h-6 rounded-full neu-btn flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-main)] text-[10px] sm:text-xs font-bold leading-none"
              title="Close preview"
            >
@@ -59,8 +89,26 @@ export const GraphPreviewPanel = ({
          </div>
       </div>
 
-      <div className="text-xs sm:text-sm font-medium text-[var(--text-main)] mb-2 sm:mb-4 line-clamp-2" title={previewFocalNode.question}>
-         {previewFocalNode.question}
+      <div className="flex items-center justify-between gap-2 mb-2 sm:mb-4 bg-[var(--bg-main)]/50 p-2 rounded-lg border border-white/5">
+         <button 
+           onClick={() => cycleCard(-1)}
+           disabled={clusterCount <= 1}
+           className="neu-btn w-6 h-6 flex items-center justify-center rounded-md text-[var(--text-muted)] hover:text-[var(--text-main)] text-xs disabled:opacity-30 disabled:pointer-events-none"
+           title="Previous card in cluster"
+         >
+           ◀
+         </button>
+         <div className="text-xs sm:text-sm font-medium text-[var(--text-main)] line-clamp-2 text-center flex-1" title={previewFocalNode.question}>
+            {previewFocalNode.question}
+         </div>
+         <button 
+           onClick={() => cycleCard(1)}
+           disabled={clusterCount <= 1}
+           className="neu-btn w-6 h-6 flex items-center justify-center rounded-md text-[var(--text-muted)] hover:text-[var(--text-main)] text-xs disabled:opacity-30 disabled:pointer-events-none"
+           title="Next card in cluster"
+         >
+           ▶
+         </button>
       </div>
       
       <div className="flex gap-1.5 sm:gap-2 mb-2 sm:mb-4 bg-[var(--bg-main)] p-1 rounded-lg border border-white/5">

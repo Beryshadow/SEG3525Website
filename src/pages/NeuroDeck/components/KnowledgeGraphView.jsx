@@ -74,19 +74,29 @@ export const KnowledgeGraphView = ({ deck, myDecks, cardEmbeddings, t, onGoToCar
   const initSimulation = () => {
     if (!deck || deck.length === 0 || !cardEmbeddings) return;
 
-    const nodes = deck.map((q, index) => ({
-      id: q.id,
-      originalIndex: index,
-      question: q.question,
-      score: q.isMastered ? 10 : (q.score || 0),
-      subgroup: (q._sourceDeckId && myDecks ? myDecks.find(d => d.id === q._sourceDeckId)?.name : null) || q.subgroup || q.category || q.deckId || null,
-      x: Math.random() * dimensions.width,
-      y: Math.random() * dimensions.height,
-      vx: 0,
-      vy: 0,
-      radius: 8 + (q.attempts > 0 ? 4 : 0),
-      embedding: cardEmbeddings[q.id]
-    }));
+    const GOLDEN_ANGLE = 137.507764 * (Math.PI / 180);
+    const cx = dimensions.width / 2;
+    const cy = dimensions.height / 2;
+    const spacing = Math.min(dimensions.width, dimensions.height) / (2.5 * Math.sqrt(deck.length || 1));
+
+    const nodes = deck.map((q, index) => {
+      const angle = index * GOLDEN_ANGLE;
+      const radius = Math.sqrt(index + 1) * spacing;
+      return {
+        id: q.id,
+        originalIndex: index,
+        question: q.question,
+        score: q.isMastered ? 10 : (q.score || 0),
+        subgroup: (q._sourceDeckId && myDecks ? myDecks.find(d => d.id === q._sourceDeckId)?.name : null) || q.subgroup || q.category || q.deckId || null,
+        x: cx + radius * Math.cos(angle),
+        y: cy + radius * Math.sin(angle),
+        vx: 0,
+        vy: 0,
+        radius: 8 + (q.attempts > 0 ? 4 : 0),
+        attempts: q.attempts || 0,
+        embedding: cardEmbeddings[q.id]
+      };
+    });
 
     const numNodes = nodes.length;
     let globalMax = -Infinity;
@@ -420,6 +430,17 @@ export const KnowledgeGraphView = ({ deck, myDecks, cardEmbeddings, t, onGoToCar
           ctx.strokeStyle = isFocusedNode ? '#ffffff' : (hoveredNode && hoveredNode.id === n.id ? '#ffffff' : themeColors.shadowD);
         }
         ctx.stroke();
+
+        // Pulsing weakness halo for cards with failed attempts (score 0 with attempts > 0)
+        const isWeakNode = n.score === 0 && (n.attempts || 0) > 0;
+        if (isWeakNode && !isDimmed) {
+          const pulse = Math.sin(Date.now() * 0.004 + n.originalIndex * 1.5) * 0.5 + 0.5;
+          ctx.beginPath();
+          ctx.arc(n.x, n.y, n.radius + 3 + pulse * 2.5, 0, 2 * Math.PI);
+          ctx.lineWidth = 1.5;
+          ctx.strokeStyle = `rgba(239, 68, 68, ${0.45 + pulse * 0.4})`;
+          ctx.stroke();
+        }
         
         ctx.globalAlpha = 1.0;
       }

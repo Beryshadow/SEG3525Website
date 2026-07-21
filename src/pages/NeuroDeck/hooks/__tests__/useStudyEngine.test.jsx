@@ -6,6 +6,7 @@ import {
   applyProportionalDeficit, 
   getSemanticallyPrioritizedCardIndex, 
   getDueCards,
+  getCardWeaknessWeight,
   useStudyEngine
 } from '../useStudyEngine';
 
@@ -80,6 +81,29 @@ describe('Study Engine Logic & Filtering', () => {
 
     const idx = getSemanticallyPrioritizedCardIndex(deck, lowestCards, embeddings);
     expect(idx).toBe(1);
+  });
+
+  test('getCardWeaknessWeight ranks score 0 with 2 attempts higher than 1 attempt, and unattempted higher than 5/10', () => {
+    const card2Attempts = { id: '1', score: 0, attempts: 2, isMastered: false };
+    const card1Attempt = { id: '2', score: 0, attempts: 1, isMastered: false };
+    const cardUnattempted = { id: '3', score: 0, attempts: 0, isMastered: false };
+    const cardPartialMastery = { id: '4', score: 5, attempts: 3, isMastered: false };
+    const cardMastered = { id: '5', score: 9, attempts: 5, isMastered: true };
+
+    const w2 = getCardWeaknessWeight(card2Attempts);
+    const w1 = getCardWeaknessWeight(card1Attempt);
+    const wUn = getCardWeaknessWeight(cardUnattempted);
+    const wPart = getCardWeaknessWeight(cardPartialMastery);
+    const wMast = getCardWeaknessWeight(cardMastered);
+
+    // Score 0 with 2 attempts > Score 0 with 1 attempt
+    expect(w2).toBeGreaterThan(w1);
+    // Score 0 with 1 attempt > Score 0 unattempted
+    expect(w1).toBeGreaterThan(wUn);
+    // Score 0 unattempted > Score 5/10 (mastery avoidance)
+    expect(wUn).toBeGreaterThan(wPart);
+    // Fully mastered = 0
+    expect(wMast).toBe(0);
   });
 
   test('getDueCards returns cards scheduled for review', () => {
