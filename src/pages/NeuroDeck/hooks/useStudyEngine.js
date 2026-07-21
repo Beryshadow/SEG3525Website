@@ -126,14 +126,17 @@ export const getSemanticallyPrioritizedCardIndex = (fullDeck, lowestScoreCards, 
       const sortedBySimilarity = [...lowestScoreCards].sort((a, b) => {
          const simA = (cardEmbeddings && cardEmbeddings[a.id]) ? cosineSimilarity(cardEmbeddings[a.id], weaknessVector) : 0;
          const simB = (cardEmbeddings && cardEmbeddings[b.id]) ? cosineSimilarity(cardEmbeddings[b.id], weaknessVector) : 0;
-         return simB - simA; 
+         if (simB !== simA) {
+            return simB - simA; 
+         }
+         return String(a.id).localeCompare(String(b.id));
       });
       return fullDeck.findIndex(q => q.id === sortedBySimilarity[0].id);
   }
   
-  // Fallback to random if semantic analysis fails
-  const selected = lowestScoreCards[Math.floor(Math.random() * lowestScoreCards.length)];
-  return fullDeck.findIndex(q => q.id === selected.id);
+  // Deterministic fallback by card ID if no embeddings or previous attempts exist
+  const sortedByStableKey = [...lowestScoreCards].sort((a, b) => String(a.id).localeCompare(String(b.id)));
+  return fullDeck.findIndex(q => q.id === sortedByStableKey[0].id);
 };
 
 export const getDueCards = (activeDeck, currentTurn = 0) => {
@@ -205,6 +208,39 @@ export function useStudyEngine({
       return deck.findIndex(q => q.id === lowestScoreCards[0].id);
     }
   }, [cardOrderMode, cardEmbeddings, questionTypeSettings, computeActiveDeckPool]);
+
+  const getDeterministicNextCardIndex = useCallback((deck) => {
+    if (!deck || deck.length === 0) return 0;
+    
+    let activeDeck = computeActiveDeckPool(deck);
+    activeDeck = applyProportionalDeficit(activeDeck, deck, questionTypeSettings);
+    let dueCards = getDueCards(activeDeck, 0);
+
+    if (dueCards.length === 0) {
+      return deck.findIndex(q => q.id === (activeDeck[0] ? activeDeck[0].id : deck[0].id)); 
+    }
+
+    dueCards.sort((a, b) => (a.score || 0) - (b.score || 0));
+    const lowestScore = dueCards[0].score || 0;
+    const lowestScoreCards = dueCards.filter(q => (q.score || 0) === lowestScore);
+
+    if (cardOrderMode === 'semantic') {
+      return getSemanticallyPrioritizedCardIndex(deck, lowestScoreCards, cardEmbeddings);
+    } else {
+      const sortedByStableKey = [...lowestScoreCards].sort((a, b) => String(a.id).localeCompare(String(b.id)));
+      return deck.findIndex(q => q.id === sortedByStableKey[0].id);
+    }
+  }, [cardOrderMode, cardEmbeddings, questionTypeSettings, computeActiveDeckPool]);
+
+  const jumpToDeterministicPriorityCard = useCallback(() => {
+    if (!currentDeck || currentDeck.length === 0) return false;
+    const targetIndex = getDeterministicNextCardIndex(currentDeck);
+    if (targetIndex !== -1) {
+      setCurrentIndex(targetIndex);
+      return true;
+    }
+    return false;
+  }, [currentDeck, getDeterministicNextCardIndex, setCurrentIndex]);
 
   const updateCardStats = useCallback((id, newScore, firstTry, skipped) => {
     let nextDeck = [...currentDeck];
@@ -278,6 +314,8 @@ export function useStudyEngine({
   return {
     computeActiveDeckPool,
     selectNextCard,
+    getDeterministicNextCardIndex,
+    jumpToDeterministicPriorityCard,
     updateCardStats,
     handleManualNavigation
   };

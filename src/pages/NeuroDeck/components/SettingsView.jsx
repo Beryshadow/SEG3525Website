@@ -10,8 +10,8 @@ export const SettingsView = ({
   onExportProgress, onImportProgress,
   myDecks, loadedDeckId, onSaveDeckToCache, onOverwriteDeck, onLoadDeckFromCache, 
   onDeleteDeckFromCache, onToggleDeckCompleted, onRenameDeck, onDirectDropSave,
-  onMoveDeck, onBatchDeleteDecks, onBatchMoveDecks, syncCode, pairingCode, isGeneratingCode, setSyncCode, onGenerateSyncCode, onConnectSyncCode, onDisconnectSyncCode, onClearCloudData,
-  onExportWithoutProgress, onShareToCode, onImportFromCode, t, showToast, servingMode, onServingModeChange
+  onMoveDeck, onBatchDeleteDecks, onBatchMoveDecks, syncCode, syncHash, pairingCode, isGeneratingCode, setSyncCode, onGenerateSyncCode, onConnectSyncCode, onDisconnectSyncCode, onClearCloudData,
+  onExportWithoutProgress, onShareToCode, onImportFromCode, t, showToast, servingMode, onServingModeChange, onJumpToPriorityCard
 }) => {
   const [jsonInput, setJsonInput] = useState("");
   const [newDeckName, setNewDeckName] = useState("");
@@ -653,6 +653,24 @@ export const SettingsView = ({
           ))}
         </div>
 
+        <div className="mt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 neu-pressed rounded-xl">
+          <div className="flex-1">
+            <span className="font-bold text-xs sm:text-sm text-[var(--text-main)] block uppercase tracking-wider">
+              {t.jumpToPriorityCard || "Jump to Priority Question"}
+            </span>
+            <span className="text-[10px] sm:text-xs text-[var(--text-muted)] block mt-0.5">
+              {t.jumpToPriorityCardDesc || "Deterministically jump to the algorithm's next priority card to easily start at the exact same spot across synced devices."}
+            </span>
+          </div>
+          <button 
+            onClick={onJumpToPriorityCard} 
+            className="neu-btn px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-widest text-[var(--accent)] hover:text-[var(--text-main)] transition-colors flex items-center gap-2 whitespace-nowrap self-stretch sm:self-auto justify-center"
+          >
+            <i className="fas fa-crosshairs text-sm"></i>
+            <span>{t.jumpToPriorityCard || "Jump to Priority Question"}</span>
+          </button>
+        </div>
+
         <div className="mt-8 border-t border-white/5 pt-8">
            <h3 className="text-sm sm:text-base font-black text-[var(--text-main)] mb-4 flex items-center uppercase tracking-widest">
              <i className="fas fa-layer-group mr-2 sm:mr-4 text-[var(--accent)]"></i> {t.servingModeLabel || "Serving Mode"}
@@ -915,7 +933,14 @@ export const SettingsView = ({
         </h2>
         <div className="flex flex-col sm:flex-row gap-4 items-center">
           <div className="flex-1 w-full">
-            <label className="text-xs font-bold text-[var(--text-muted)] block mb-1 uppercase tracking-widest">{t.syncCodeLabel || "Sync Code:"}</label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs font-bold text-[var(--text-muted)] block uppercase tracking-widest">{t.syncCodeLabel || "Sync Code:"}</label>
+              {syncCode && syncHash && (
+                <span className="px-2.5 py-0.5 rounded-full bg-[var(--accent)]/10 text-[var(--accent)] font-mono font-bold text-xs border border-[var(--accent)]/30 animate-pulse">
+                  {t.syncTokenHashLabel || "Token Hash:"} [{syncHash}]
+                </span>
+              )}
+            </div>
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-2">
               <input 
                 type="text" 

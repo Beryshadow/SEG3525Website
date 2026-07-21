@@ -259,7 +259,14 @@ export const TRANSLATIONS = {
     newDeck: "Nouveau Paquet",
     confirmClearCloudDataTitle: "Effacer les Données Cloud",
     confirmClearCloudDataMessage: "Êtes-vous sûr de vouloir effacer complètement toutes vos données de synchronisation cloud ? Cela supprimera définitivement tous les codes associés à votre appareil.",
-    wipeData: "Effacer les Données"
+    wipeData: "Effacer les Données",
+    jumpToPriorityCard: "Aller à la question prioritaire",
+    jumpToPriorityCardDesc: "Sautez de façon déterministe vers la prochaine question prioritaire selon l'algorithme pour démarrer au même endroit entre appareils synchronisés.",
+    syncTokenHashLabel: "Hash du Token :",
+    footerCourse: "Créé pour le cours SEG3525",
+    footerSubtitle: "Moteur de Cartes Mémoire Cognitif",
+    syncActive: "SYNCHRO ACTIVE",
+    syncOffline: "SYNCHRO LOCALE (HORS LIGNE)"
   },
   EN: {
     appTitle: "NeuroDeck",
@@ -521,7 +528,14 @@ export const TRANSLATIONS = {
     newDeck: "New Deck",
     confirmClearCloudDataTitle: "Clear Cloud Data",
     confirmClearCloudDataMessage: "Are you sure you want to completely wipe all your cloud sync data? This will permanently delete all codes associated with your dataset.",
-    wipeData: "Wipe Data"
+    wipeData: "Wipe Data",
+    jumpToPriorityCard: "Jump to Priority Question",
+    jumpToPriorityCardDesc: "Deterministically jump to the algorithm's next priority card to easily start at the exact same spot across synced devices.",
+    syncTokenHashLabel: "Token Hash:",
+    footerCourse: "Created for the SEG3525 course",
+    footerSubtitle: "Cognitive Flashcard Engine",
+    syncActive: "SYNC ACTIVE",
+    syncOffline: "SYNC LOCAL (OFFLINE)"
   }
 };
 

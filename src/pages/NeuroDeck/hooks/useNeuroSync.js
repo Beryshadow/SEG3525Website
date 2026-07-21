@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { getTokenHash } from '../utils/helpers';
 
 const SYNC_API_BASE = import.meta.env.DEV ? 'http://localhost:3001/api/sync' : '/api/sync';
 
@@ -18,6 +19,7 @@ export function useNeuroSync({
   const [syncCode, setSyncCode] = useState(() => {
     return localStorage.getItem('neurodeck-sync-code') || "";
   });
+  const syncHash = getTokenHash(syncCode);
   const [syncVersion, setSyncVersion] = useState(() => {
     return parseInt(localStorage.getItem('neurodeck-sync-version')) || 0;
   });
@@ -209,8 +211,8 @@ export function useNeuroSync({
          setSyncVersion(data.version);
          if (manual) {
             setSyncCode(code);
+            showToast(t.cloudSyncPulled || "Cloud sync: Data pulled successfully.");
          }
-         showToast(t.cloudSyncPulled || "Cloud sync: Data pulled successfully.");
       } else if (manual) {
          showToast(t?.syncUpToDate || "Connected! You are already up to date.");
       }
@@ -224,7 +226,7 @@ export function useNeuroSync({
       handleCloudSyncDownload(codeToConnect, true);
   }, [handleCloudSyncDownload]);
 
-  const forcePushToCloud = useCallback(async (codeToUse) => {
+  const forcePushToCloud = useCallback(async (codeToUse, manual = false) => {
       const code = codeToUse || syncCode;
       if (!code) return;
       const payload = { myDecks, currentDeck, loadedDeckId, streak, selectedModel, cardOrderMode, servingMode, selectedEmbeddingModel, focusMode, questionTypeSettings };
@@ -237,7 +239,7 @@ export function useNeuroSync({
          });
          if (res.ok) {
             setSyncVersion(newVersion);
-            showToast(t.cloudSyncPushed || "Cloud sync: Data pushed initially.");
+            if (manual) showToast(t.cloudSyncPushed || "Cloud sync: Data pushed initially.");
          } else if (res.status === 410) {
             showToast(t.cloudDataWipedRemotely || "Cloud data was remotely wiped. Sync disabled.");
             setSyncCode("");
@@ -475,7 +477,6 @@ export function useNeuroSync({
              const resData = await res.json();
              if (resData.newSyncCode) {
                 setSyncCode(resData.newSyncCode);
-                showToast(t?.syncStreamConnected || "Cloud sync: Connected to stream.");
                 return;
              }
              if (res.ok) {
@@ -495,6 +496,7 @@ export function useNeuroSync({
 
   return {
     syncCode,
+    syncHash,
     setSyncCode,
     pairingCode,
     setPairingCode,

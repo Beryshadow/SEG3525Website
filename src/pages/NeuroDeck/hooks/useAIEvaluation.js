@@ -13,7 +13,8 @@ export const useAIEvaluation = ({ model, getEmbeddings, t, currentLangKey }) => 
     let maxScore = -1;
 
     for (const c of classes) {
-      const labelStr = c.label.toUpperCase();
+      if (!c) continue;
+      const labelStr = (c.label ? String(c.label) : "").toUpperCase();
       if (c.score > maxScore) {
         maxScore = c.score;
         topLabel = labelStr;
@@ -48,7 +49,8 @@ export const useAIEvaluation = ({ model, getEmbeddings, t, currentLangKey }) => 
 
     try {
       const truthTexts = correctAnswersArray;
-      const incorrectTexts = question.choices.filter(c => !correctAnswersArray.includes(c));
+      const choicesArray = Array.isArray(question?.choices) ? question.choices : [];
+      const incorrectTexts = choicesArray.filter(c => !correctAnswersArray.includes(c));
       const sepToken = model?.tokenizer?.sep_token || "[SEP]";
       const questionContext = currentLangKey === 'FR' ? `Question: ${question.question} Réponse:` : `Question: ${question.question} Answer:`;
       const statementUser = `${questionContext} ${userInput.trim()}`;

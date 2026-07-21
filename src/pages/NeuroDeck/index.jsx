@@ -222,7 +222,7 @@ export default function NeuroDeck() {
   } = useDeckManager({ myDecks, setMyDecks, currentDeck, setCurrentDeck, loadedDeckId, setLoadedDeckId, streak, setStreak, showToast, confirm, t });
 
   const {
-    computeActiveDeckPool, selectNextCard, updateCardStats, handleManualNavigation
+    computeActiveDeckPool, selectNextCard, updateCardStats, handleManualNavigation, jumpToDeterministicPriorityCard
   } = useStudyEngine({
     currentDeck, setCurrentDeck, setStreak, setCurrentIndex, currentIndex, t,
     focusMode, questionTypeSettings, cardEmbeddings, cardOrderMode,
@@ -230,7 +230,7 @@ export default function NeuroDeck() {
   });
 
   const {
-    syncCode, setSyncCode, pairingCode, setPairingCode, isGeneratingCode, syncVersion, datasetId, handleCloudSyncDownload,
+    syncCode, syncHash, setSyncCode, pairingCode, setPairingCode, isGeneratingCode, syncVersion, datasetId, handleCloudSyncDownload,
     handleConnectSyncCode, forcePushToCloud, handleGenerateSyncCode,
     handleClearCloudData, handleShareToCode, handleImportFromCode
   } = useNeuroSync({
@@ -239,6 +239,16 @@ export default function NeuroDeck() {
     servingMode, setServingMode, selectedEmbeddingModel, setSelectedEmbeddingModel,
     focusMode, setFocusMode, questionTypeSettings, setQuestionTypeSettings, showToast, confirm, currentIndex, t
   });
+
+  const handleJumpToPriorityCard = useCallback(() => {
+    const success = jumpToDeterministicPriorityCard();
+    if (success) {
+      setView('study');
+      showToast(t.jumpedToPriorityCard || "Jumped to priority question!");
+    } else {
+      showToast(t.noQuestionsAvailable || "No questions available in active deck.");
+    }
+  }, [jumpToDeterministicPriorityCard, setView, showToast, t]);
 
   // Automatically connect if ?sync= or ?share= is provided in the URL
   useEffect(() => {
@@ -262,10 +272,17 @@ export default function NeuroDeck() {
   const isDeckMastered = currentDeck.length > 0 && currentDeck.every(q => q.isMastered);
 
   const activePool = useMemo(() => computeActiveDeckPool(currentDeck), [currentDeck, computeActiveDeckPool]);
-  const currentCard = currentDeck.length > 0 ? currentDeck[currentIndex] : null;
+  const safeIndex = (currentIndex >= 0 && currentIndex < currentDeck.length) ? currentIndex : 0;
+  const currentCard = currentDeck.length > 0 ? currentDeck[safeIndex] : null;
   const activeIndex = currentCard ? activePool.findIndex(q => q.id === currentCard.id) : -1;
   const displayIndex = Math.max(0, activeIndex);
   const displayTotal = activePool.length > 0 ? activePool.length : currentDeck.length;
+
+  useEffect(() => {
+    if (currentDeck.length > 0 && currentIndex >= currentDeck.length) {
+      setCurrentIndex(Math.max(0, currentDeck.length - 1));
+    }
+  }, [currentDeck.length, currentIndex]);
 
   useEffect(() => {
     if (activePool.length > 0 && activeIndex === -1 && currentDeck.length > 0) {
@@ -429,6 +446,7 @@ export default function NeuroDeck() {
             onBatchDeleteDecks={handleBatchDeleteDecks}
             onBatchMoveDecks={handleBatchMoveDecks}
             syncCode={syncCode}
+            syncHash={syncHash}
             pairingCode={pairingCode}
             isGeneratingCode={isGeneratingCode}
             setSyncCode={setSyncCode}
@@ -439,14 +457,58 @@ export default function NeuroDeck() {
             onExportWithoutProgress={handleExportWithoutProgress}
             onShareToCode={handleShareToCode}
             onImportFromCode={handleImportFromCode}
+            onJumpToPriorityCard={handleJumpToPriorityCard}
             t={t}
             showToast={showToast}
           />
         )}
       </main>
 
+      <footer className="w-full max-w-7xl mx-auto px-4 pt-12 pb-8 mt-12 text-center lg:text-left">
+        <div className="neu-pressed p-6 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="flex flex-col items-center md:items-start text-center md:text-left">
+            <h3 className="font-bold text-lg text-[var(--accent)] mb-1 flex items-center gap-2">
+              <span>NeuroDeck</span>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--accent)]/10 text-[var(--accent)] border border-[var(--accent)]/20 font-mono">
+                v2.0
+              </span>
+            </h3>
+            <p className="text-xs text-[var(--text-muted)] mb-0">
+              <span>{t.footerCourse || "Created for the SEG3525 course"}</span> • Ryan Beland
+            </p>
+          </div>
+
+          <div className="flex flex-col items-center gap-2">
+            {syncCode ? (
+              <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 text-emerald-500 text-xs font-bold font-mono border border-emerald-500/20 shadow-sm">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>{t.syncActive || "SYNC ACTIVE"}</span>
+                {syncHash && <span className="opacity-90">[{syncHash}]</span>}
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 text-amber-500 text-xs font-bold border border-amber-500/20">
+                <span className="w-2.5 h-2.5 rounded-full bg-amber-500 opacity-60"></span>
+                <span>{t.syncOffline || "SYNC LOCAL (OFFLINE)"}</span>
+              </span>
+            )}
+            <span className="text-[11px] text-[var(--text-muted)] font-medium">
+              {myDecks.length} {t.items || "decks"} • {currentDeck?.length || 0} {t.cards || "cards"}
+            </span>
+          </div>
+
+          <div className="flex flex-col items-center md:items-end text-center md:text-right gap-1">
+            <p className="text-xs text-[var(--text-muted)] mb-0">
+              &copy; 2026 Université d'Ottawa / University of Ottawa.
+            </p>
+            <span className="text-[11px] text-[var(--text-muted)] opacity-80 font-mono">
+              Mis à jour / Updated: {import.meta.env.VITE_BUILD_TIME}
+            </span>
+          </div>
+        </div>
+      </footer>
+
       {toastMessage && (
-         <div className="fixed bottom-6 right-6 z-[250] neu-panel px-6 py-4 border-l-4 border-[var(--accent)] max-w-sm flex items-center gap-3 shadow-2xl animate-fade-in">
+         <div className="fixed bottom-4 right-4 left-4 sm:left-auto sm:bottom-6 sm:right-6 z-[250] neu-panel px-5 py-3.5 border-l-4 border-[var(--accent)] max-w-full sm:max-w-sm flex items-center gap-3 shadow-2xl animate-fade-in">
            <i className="fas fa-info-circle text-[var(--accent)] text-xl"></i>
            <span className="text-sm font-bold text-[var(--text-main)]">{toastMessage}</span>
          </div>

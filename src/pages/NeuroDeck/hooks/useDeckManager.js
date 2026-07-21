@@ -245,9 +245,10 @@ export function useDeckManager({
   }, [currentDeck, loadedDeckId, myDecks]);
 
   const handleBatchImportDecks = useCallback((decksData, targetParentId = null) => {
+     const generateUniqueId = () => crypto.randomUUID ? crypto.randomUUID() : (Date.now().toString(36) + Math.random().toString(36).substring(2));
      const idMap = {};
      decksData.forEach(d => {
-        idMap[d.id] = Date.now().toString() + Math.random().toString();
+        idMap[d.id] = generateUniqueId();
      });
      
      const newDecks = decksData.map(d => {
@@ -270,12 +271,13 @@ export function useDeckManager({
         if (parsed[0].deck !== undefined) {
           handleBatchImportDecks(parsed);
         } else {
+          const generateUniqueId = () => crypto.randomUUID ? crypto.randomUUID() : (Date.now().toString(36) + Math.random().toString(36).substring(2));
           const formatted = parsed.map((q) => {
             const correctAnswersArray = q.correctAnswers || (q.correctAnswer ? [q.correctAnswer] : []);
             return {
               ...q,
               correctAnswers: correctAnswersArray,
-              id: q.id || Date.now().toString() + Math.random().toString(),
+              id: q.id || generateUniqueId(),
               score: 0,
               dueTurn: 0,
               attempts: 0,
