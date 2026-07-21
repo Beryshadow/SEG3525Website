@@ -37,20 +37,16 @@ async function hasWebGpu() {
   return false;
 }
 
-const loadPipelineWithRetries = async (modelName, device, maxRetries = 3) => {
+const loadPipelineWithRetries = async (modelName, device, maxRetries = 2) => {
   let lastErr;
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      const options = {
+      return await pipeline("feature-extraction", modelName, {
         device,
         progress_callback: (data) => {
           self.postMessage({ type: 'progress', data });
         }
-      };
-      if (attempt === 1) {
-        options.dtype = "q8";
-      }
-      return await pipeline("feature-extraction", modelName, options);
+      });
     } catch (e) {
       lastErr = e;
       console.warn(`Embedding pipeline load attempt ${attempt} failed for ${modelName}:`, e);
@@ -79,11 +75,11 @@ self.addEventListener('message', async (event) => {
           backendUsed = "WebGPU";
         } catch (webGpuErr) {
           console.warn("WebGPU initialization failed. Falling back to WASM...", webGpuErr);
-          extractor = await loadPipelineWithRetries(modelName, "wasm", 3);
+          extractor = await loadPipelineWithRetries(modelName, "wasm", 2);
           backendUsed = "WASM";
         }
       } else {
-        extractor = await loadPipelineWithRetries(modelName, "wasm", 3);
+        extractor = await loadPipelineWithRetries(modelName, "wasm", 2);
         backendUsed = "WASM";
       }
 
