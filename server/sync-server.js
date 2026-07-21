@@ -60,7 +60,28 @@ setInterval(() => {
             console.log(`[CLEANUP] Deleted expired wiped code: ${code}`);
         }
     }
+    for (const [ip, limit] of getRateLimits.entries()) {
+        if (now > limit.resetTime) {
+            getRateLimits.delete(ip);
+        }
+    }
 }, 60 * 1000); // Check every minute
+
+// Keep-alive heartbeat interval every 25 seconds for SSE subscribers to prevent proxy timeouts
+setInterval(() => {
+    for (const [code, subscribers] of subscriptions.entries()) {
+        for (const subscriber of subscribers) {
+            try {
+                subscriber.write(': keepalive\n\n');
+            } catch (e) {
+                subscribers.delete(subscriber);
+            }
+        }
+        if (subscribers.size === 0) {
+            subscriptions.delete(code);
+        }
+    }
+}, 25 * 1000);
 
 // Validate sync code to prevent NoSQL/Path Traversal/Prototype pollution style attacks
 function isValidCode(code) {
@@ -147,12 +168,19 @@ app.post('/api/sync/:code', async (req, res) => {
         type: type // 'pairing', 'sync', or 'share'
     });
     
-    // Broadcast to SSE subscribers
+    // Broadcast to SSE subscribers with exception-safe write & automatic pruning
     const subscribers = subscriptions.get(code);
     if (subscribers) {
-        subscribers.forEach(subscriber => {
-            subscriber.write(`data: ${JSON.stringify({ version: newVersion })}\n\n`);
-        });
+        for (const subscriber of subscribers) {
+            try {
+                subscriber.write(`data: ${JSON.stringify({ version: newVersion })}\n\n`);
+            } catch (err) {
+                subscribers.delete(subscriber);
+            }
+        }
+        if (subscribers.size === 0) {
+            subscriptions.delete(code);
+        }
     }
 
     console.log(`[SYNC] Saved ${type} data for code: ${code}, version: ${newVersion}`);
@@ -253,6 +281,9 @@ app.get('/api/sync/:code/subscribe', (req, res) => {
         subscriptions.set(code, new Set());
     }
     const subscribers = subscriptions.get(code);
+    if (subscribers.size >= 10) {
+        return res.status(429).json({ error: 'Too many active subscribers for this sync code' });
+    }
     subscribers.add(res);
     
     const ip = req.ip || req.connection.remoteAddress;
@@ -345,6 +376,9 @@ app.get('/api/sync/:code/version', (req, res) => {
     if (!entry) {
         return res.status(404).json({ error: 'No data found for this sync code' });
     }
+
+    res.json({ version: entry.version });
+});
 
 const fs = require('fs');
 const { execSync } = require('child_process');
