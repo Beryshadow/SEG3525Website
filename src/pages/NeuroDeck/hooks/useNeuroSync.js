@@ -72,6 +72,18 @@ export function useNeuroSync({
              handleConnectSyncCode(code);
              return;
           }
+
+          // Check if already imported
+          const alreadyImported = myDecks.find(d => d.originalShareCode === code);
+          if (alreadyImported) {
+              // If it's a hierarchy, find the root deck that we previously imported
+              const rootToLoad = myDecks.find(d => d.originalShareCode === code && d.parentId === null) || alreadyImported;
+              setCurrentDeck(rootToLoad.deck);
+              setLoadedDeckId(rootToLoad.id);
+              showToast(t.deckAlreadyImported || "Deck already imported. Loaded from library!");
+              return;
+          }
+
           if (data.data.sharedDecks) {
              const newDecks = data.data.sharedDecks;
              const idMap = {};
@@ -81,7 +93,7 @@ export function useNeuroSync({
                 return { ...d, id: newId, originalId: d.id };
              });
              const finalizedDecks = remappedDecks.map(d => {
-                const finalized = { ...d, parentId: d.parentId && idMap[d.parentId] ? idMap[d.parentId] : null };
+                const finalized = { ...d, parentId: d.parentId && idMap[d.parentId] ? idMap[d.parentId] : null, originalShareCode: code };
                 delete finalized.originalId;
                 return finalized;
              });
@@ -105,7 +117,8 @@ export function useNeuroSync({
                  name: data.data.sharedName || `Imported Deck ${code}`,
                  deck: newDeck,
                  completed: false,
-                 parentId: null
+                 parentId: null,
+                 originalShareCode: code
                };
                setMyDecks(prev => [newDeckObj, ...prev]);
                setCurrentDeck(newDeckObj.deck);
