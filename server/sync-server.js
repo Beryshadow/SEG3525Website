@@ -59,7 +59,7 @@ function isValidCode(code) {
 };
 
 // POST: Save or update sync data
-app.post('/api/sync/:code', (req, res) => {
+app.post('/api/sync/:code', async (req, res) => {
     const code = req.params.code.toUpperCase();
     const ip = req.ip || req.connection.remoteAddress;
     console.log(`[SYNC-POST] IP: ${ip} | Code: ${code} | Action: Attempting to save/update data`);
