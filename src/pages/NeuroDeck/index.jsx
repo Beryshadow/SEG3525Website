@@ -162,19 +162,23 @@ export default function NeuroDeck() {
     const toEmbed = currentDeck.filter(q => !cardEmbeddings[q.id]);
     if (toEmbed.length === 0) return;
 
-    const texts = toEmbed.map(q => q.question);
+    // Process in chunks of 5 cards so state updates live for smooth progress bar animation
+    const chunkSize = 5;
+    const chunk = toEmbed.slice(0, chunkSize);
+    const texts = chunk.map(q => q.question);
+
     getEmbeddings(texts).then(res => {
-       if (res && res.length === toEmbed.length) {
+       if (res && res.length === chunk.length) {
           setCardEmbeddings(prev => {
              const next = { ...prev };
-             for(let i=0; i<toEmbed.length; i++) next[toEmbed[i].id] = res[i];
+             for (let i = 0; i < chunk.length; i++) next[chunk[i].id] = res[i];
              return next;
           });
           activeEmbeddingModelRef.current = selectedEmbeddingModel;
        }
     }).catch(console.error);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentDeck, getEmbeddings, embeddingStatus]); 
+  }, [currentDeck, getEmbeddings, embeddingStatus, cardEmbeddings]); 
 
   const [streak, setStreak] = useState(() => {
     try { return parseInt(localStorage.getItem('neurodeck-streak')) || 0; } catch (e) { return 0; }

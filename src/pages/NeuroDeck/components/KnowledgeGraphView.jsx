@@ -438,23 +438,32 @@ export const KnowledgeGraphView = ({ deck, myDecks, cardEmbeddings, t, onGoToCar
 
         <div ref={wrapperRef} className="relative flex-1 rounded-xl overflow-hidden cursor-crosshair">
           {deck && deck.some(q => !cardEmbeddings[q.id]) && (
-            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[var(--bg-main)] bg-opacity-80 backdrop-blur-sm rounded-2xl">
-              <NetworkIcon className="text-4xl text-[var(--accent)] mb-4 animate-pulse" />
-              <h3 className="text-xl font-black uppercase tracking-widest text-[var(--text-main)] mb-2">
+            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[var(--bg-main)] bg-opacity-85 backdrop-blur-md rounded-2xl p-6 transition-all duration-300">
+              <NetworkIcon className="text-5xl text-[var(--accent)] mb-4 animate-pulse" />
+              <h3 className="text-xl font-black uppercase tracking-widest text-[var(--text-main)] mb-2 text-center">
                 {t.analyzing || "Analyzing Context..."}
               </h3>
               <p className="text-[var(--text-muted)] text-sm mb-6 max-w-md text-center">
                 {t.generatingEmbeddingsDesc || "Generating neural embeddings for your knowledge graph. This only happens once."}
               </p>
-              <div className="w-64 h-3 bg-black/20 dark:bg-white/10 rounded-full overflow-hidden relative border border-white/5 shadow-inner">
+
+              <div className="w-72 sm:w-80 h-3.5 bg-black/30 dark:bg-white/10 rounded-full overflow-hidden relative border border-white/10 shadow-inner">
                  <div 
-                   className={`absolute left-0 top-0 bottom-0 bg-[var(--accent)] rounded-full ${embeddingStatus === "ready" ? "w-full animate-indeterminate opacity-80" : "transition-all duration-300"}`}
-                   style={embeddingStatus === "loading" ? { width: `${embeddingProgress || 0}%` } : {}}
+                   className="absolute left-0 top-0 bottom-0 bg-[var(--accent)] rounded-full transition-all duration-300 shadow-[0_0_10px_rgba(99,102,241,0.5)]"
+                   style={{
+                     width: embeddingStatus === "loading"
+                       ? `${Math.max(5, embeddingProgress || 0)}%`
+                       : `${Math.max(8, Math.round((deck.filter(q => cardEmbeddings[q.id]).length / deck.length) * 100))}%`
+                   }}
                  ></div>
                  <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent"></div>
               </div>
-              <div className="mt-2 text-xs font-bold text-[var(--text-muted)] tracking-widest uppercase">
-                {embeddingStatus === "loading" ? `${t.downloadingAiModel || "Downloading AI Model..."} ${embeddingProgress}%` : (t.extractingData || "Extracting Data...")}
+
+              <div className="mt-3 text-xs font-bold text-[var(--accent)] tracking-widest uppercase flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[var(--accent)] animate-ping"></span>
+                {embeddingStatus === "loading"
+                  ? `${t.downloadingAiModel || "Downloading AI Model..."} ${embeddingProgress || 0}%`
+                  : `${t.extractingData || "Extracting Knowledge Vector Features..."} (${deck.filter(q => cardEmbeddings[q.id]).length} / ${deck.length})`}
               </div>
             </div>
           )}
