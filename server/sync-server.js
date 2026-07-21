@@ -26,6 +26,9 @@ const FIVE_MINUTES_MS = 5 * 60 * 1000;
 // Pub/Sub active connections: Map<syncCode, Set<Response>>
 const subscriptions = new Map();
 
+// Tombstone for remote wipe: Map<syncCode, timestamp>
+const wipedCodes = new Map();
+
 let queueLength = 0;
 const MAX_QUEUE_LENGTH = 100;
 let nextAvailableTime = 0;
@@ -51,6 +54,12 @@ setInterval(() => {
             console.log(`[CLEANUP] Deleted expired migration for code: ${code}`);
         }
     }
+    for (const [code, timestamp] of wipedCodes.entries()) {
+        if (now - timestamp > THREE_DAYS_MS) {
+            wipedCodes.delete(code);
+            console.log(`[CLEANUP] Deleted expired wiped code: ${code}`);
+        }
+    }
 }, 60 * 1000); // Check every minute
 
 // Validate sync code to prevent NoSQL/Path Traversal/Prototype pollution style attacks
@@ -67,6 +76,10 @@ app.post('/api/sync/:code', async (req, res) => {
 
     if (!isValidCode(code)) {
         return res.status(400).json({ error: 'Invalid sync code format' });
+    }
+
+    if (wipedCodes.has(code)) {
+        return res.status(410).json({ error: 'Data wiped remotely' });
     }
 
     const isPairing = type === 'pairing';
@@ -180,12 +193,23 @@ app.delete('/api/sync/clear/:datasetId', (req, res) => {
     let deletedCount = 0;
     for (const [code, entry] of syncStore.entries()) {
         if (entry.datasetId === datasetId) {
+            // Broadcast wipe to SSE clients
+            const clients = subscriptions.get(code);
+            if (clients) {
+                clients.forEach(client => {
+                    client.write(`data: ${JSON.stringify({ type: 'wiped' })}\n\n`);
+                    client.end();
+                });
+                subscriptions.delete(code);
+            }
+            wipedCodes.set(code, Date.now());
             syncStore.delete(code);
             deletedCount++;
         }
     }
     for (const [code, entry] of pairingStore.entries()) {
         if (entry.datasetId === datasetId) {
+            wipedCodes.set(code, Date.now());
             pairingStore.delete(code);
             deletedCount++;
         }
@@ -209,6 +233,15 @@ app.get('/api/sync/:code/subscribe', (req, res) => {
     const code = req.params.code.toUpperCase();
     if (!isValidCode(code)) {
         return res.status(400).json({ error: 'Invalid sync code format' });
+    }
+
+    if (wipedCodes.has(code)) {
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+        res.flushHeaders();
+        res.write(`data: ${JSON.stringify({ type: 'wiped' })}\n\n`);
+        return res.end();
     }
 
     res.setHeader('Content-Type', 'text/event-stream');
@@ -263,6 +296,10 @@ app.get('/api/sync/:code', (req, res) => {
     
     if (!isValidCode(code)) {
         return res.status(400).json({ error: 'Invalid sync code format' });
+    }
+
+    if (wipedCodes.has(code)) {
+        return res.status(410).json({ error: 'Data wiped remotely' });
     }
 
     if (migrationStore.has(code)) {

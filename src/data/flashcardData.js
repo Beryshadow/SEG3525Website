@@ -244,7 +244,8 @@ export const TRANSLATIONS = {
     cardsDeleted: "Cartes supprimées !",
     successfullyImported: "Importé avec succès",
     decksDeletedMsg: "Paquets supprimés.",
-    decksMovedMsg: "Paquets déplacés."
+    decksMovedMsg: "Paquets déplacés.",
+    cloudDataWipedRemotely: "Les données cloud ont été effacées à distance. Synchronisation désactivée."
   },
   EN: {
     appTitle: "NeuroDeck",
@@ -491,7 +492,8 @@ export const TRANSLATIONS = {
     cardsDeleted: "Cards deleted!",
     successfullyImported: "Successfully imported",
     decksDeletedMsg: "Decks deleted.",
-    decksMovedMsg: "Decks moved."
+    decksMovedMsg: "Decks moved.",
+    cloudDataWipedRemotely: "Cloud data was remotely wiped. Sync disabled."
   }
 };
 

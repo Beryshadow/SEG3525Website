@@ -117,6 +117,11 @@ export function useNeuroSync({
     if (!code) return;
     try {
       const res = await fetch(`${SYNC_API_BASE}/${code}`);
+      if (res.status === 410) {
+         showToast(t.cloudDataWipedRemotely || "Cloud data was remotely wiped. Sync disabled.");
+         setSyncCode("");
+         return;
+      }
       if (res.status === 404) {
          if (code.length >= 64) {
              // Server reset or session expired. Reconcile by pushing local state.
@@ -200,6 +205,9 @@ export function useNeuroSync({
          if (res.ok) {
             setSyncVersion(newVersion);
             showToast(t.cloudSyncPushed || "Cloud sync: Data pushed initially.");
+         } else if (res.status === 410) {
+            showToast(t.cloudDataWipedRemotely || "Cloud data was remotely wiped. Sync disabled.");
+            setSyncCode("");
          } else {
             let reason = "Server error";
             if (res.status === 413) reason = "Data too large to sync";
@@ -362,6 +370,11 @@ export function useNeuroSync({
        eventSource.onmessage = (event) => {
            try {
                const data = JSON.parse(event.data);
+               if (data.type === 'wiped') {
+                   showToast(t.cloudDataWipedRemotely || "Cloud data was remotely wiped. Sync disabled.");
+                   setSyncCode("");
+                   return;
+               }
                if (data.error === 'not_found') {
                    if (syncCode && syncCode.length >= 64) {
                        // Server reset or session expired. Reconcile by pushing local state.
@@ -424,6 +437,9 @@ export function useNeuroSync({
              }
              if (res.ok) {
                 setSyncVersion(newVersion);
+             } else if (res.status === 410) {
+                showToast(t.cloudDataWipedRemotely || "Cloud data was remotely wiped. Sync disabled.");
+                setSyncCode("");
              } else if (res.status === 413) {
                 showToast(t.autoSyncFailedSize || "Auto-sync failed: Data too large");
              }
