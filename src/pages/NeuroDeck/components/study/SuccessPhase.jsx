@@ -94,7 +94,6 @@ export const SuccessPhase = ({
           <i className="fas fa-chevron-right ml-2"></i>
         </button>
       </div>
-      </div>
 
       {debugData && (
         <div className="mt-4 rounded-xl sm:rounded-2xl border border-amber-500/30 bg-amber-500/5 overflow-hidden">
