@@ -321,7 +321,10 @@ export const TRANSLATIONS = {
     debugActive: "Débogage Actif",
     enableDebug: "Activer le Débogage",
     debugEnabledToast: "Télémétrie de débogage IA activée",
-    debugDisabledToast: "Télémétrie de débogage IA désactivée"
+    debugDisabledToast: "Télémétrie de débogage IA désactivée",
+    iWasWrongGenerous: "Attendez, j'avais tort (L'IA était trop généreuse)",
+    tooGenerousToast: "Sévérité de l'IA augmentée. Score ajusté à 3/10",
+    strictnessAdjusted: "Sévérité de l'IA augmentée (Score ajusté à 3/10)"
   },
   EN: {
     appTitle: "NeuroDeck",
@@ -638,7 +641,10 @@ export const TRANSLATIONS = {
     debugActive: "Debug Active",
     enableDebug: "Enable Debug",
     debugEnabledToast: "AI Debug Telemetry Enabled",
-    debugDisabledToast: "AI Debug Telemetry Disabled"
+    debugDisabledToast: "AI Debug Telemetry Disabled",
+    iWasWrongGenerous: "Wait, I was wrong (The AI was too generous)",
+    tooGenerousToast: "AI strictness increased. Score adjusted to 3/10",
+    strictnessAdjusted: "AI Strictness Increased (Score set to 3/10)"
   }
 };
 

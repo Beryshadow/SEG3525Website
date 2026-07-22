@@ -285,6 +285,22 @@ export const updateLeniencyBiasOnFail = () => {
   return finalBias;
 };
 
+export const updateLeniencyBiasOnTooGenerous = () => {
+  const currentBias = getStoredLeniencyBias();
+  // Strong tightening signal when user flags the AI as too generous (increases model strictness)
+  const target = currentBias - 0.08;
+  const finalBias = Math.max(-0.15, target);
+
+  try {
+    localStorage.setItem('neurodeck-leniency-bias', finalBias.toString());
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('storage'));
+    }
+  } catch (e) {}
+
+  return finalBias;
+};
+
 
 
 
@@ -390,10 +406,13 @@ export const evaluateInputCore = async (userInput, question, correctAnswersArray
   // Compute token overlap for keyword concept rescue
   let maxTokenOverlap = 0;
   let maxTruthCoverage = 0;
+  let maxTruthTokenCount = 0;
   for (const truth of validTruths) {
     const details = getTokenOverlapDetails(userInput, truth);
     if (details.overlap > maxTokenOverlap) maxTokenOverlap = details.overlap;
     if (details.truthCoverage > maxTruthCoverage) maxTruthCoverage = details.truthCoverage;
+    const tokens = normalizeText(truth).split(/\s+/).filter(w => w.length > 1);
+    if (tokens.length > maxTruthTokenCount) maxTruthTokenCount = tokens.length;
   }
 
   // --- 1. REUSE GRAPH PRE-COMPUTED EMBEDDINGS & COMPUTE USER EMBEDDING (< 5ms) ---
@@ -568,6 +587,14 @@ export const evaluateInputCore = async (userInput, question, correctAnswersArray
     const isVagueInput = inputTokens.length <= 10 && (fillerCount / Math.max(1, inputTokens.length)) >= 0.35;
     if (isVagueInput) {
        effectiveTruthScore = Math.min(effectiveTruthScore, 0.35);
+       hits = 0;
+    }
+
+    // High-complexity reference answer check: If reference answer is detailed (>= 5 key tokens)
+    // and student answer covers less than 22% of key reference concepts, cap score as incomplete (prevent false 10/10)
+    const isOverlyBriefIncompleteAnswer = maxTruthTokenCount >= 5 && maxTruthCoverage < 0.22 && !isSameStance;
+    if (isOverlyBriefIncompleteAnswer) {
+       effectiveTruthScore = Math.min(effectiveTruthScore, 0.45);
        hits = 0;
     }
 

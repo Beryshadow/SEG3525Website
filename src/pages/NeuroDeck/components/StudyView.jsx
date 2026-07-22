@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { getCorrectAnswers, shuffleArray } from '../utils/helpers';
-import { useAIEvaluation, updateLeniencyBiasOnOverride, updateLeniencyBiasOnNormalPass, updateLeniencyBiasOnFail } from '../hooks/useAIEvaluation';
+import { useAIEvaluation, updateLeniencyBiasOnOverride, updateLeniencyBiasOnNormalPass, updateLeniencyBiasOnFail, updateLeniencyBiasOnTooGenerous } from '../hooks/useAIEvaluation';
 import { StudyHeader } from './study/StudyHeader';
 import { TextInputPhase } from './study/TextInputPhase';
 import { MCQPhase } from './study/MCQPhase';
@@ -25,6 +25,8 @@ export const StudyView = ({
   const [wrongClicks, setWrongClicks] = useState(0);
   const [clickedWrongChoices, setClickedWrongChoices] = useState(new Set()); 
   const [skippedToMCQ, setSkippedToMCQ] = useState(false); 
+  const [wasRightClicked, setWasRightClicked] = useState(false);
+  const [wasGenerousClicked, setWasGenerousClicked] = useState(false);
 
   const [selectedChoices, setSelectedChoices] = useState(new Set());
   const [shakingChoices, setShakingChoices] = useState(new Set());
@@ -68,6 +70,7 @@ export const StudyView = ({
     setClickedWrongChoices(new Set());
     setSkippedToMCQ(false);
     setWasRightClicked(false);
+    setWasGenerousClicked(false);
     setSelectedChoices(new Set());
     setShakingChoices(new Set());
     setCalculatedScore(initialPhase === "pass" ? (question?.score || 0) : 0);
@@ -231,12 +234,10 @@ export const StudyView = ({
         type: "wrong",
         sim: result.score,
         hotColdScore: result.hotColdScore,
-        overridden: false,
+        overridden: false
       });
     }
   };
-
-  const [wasRightClicked, setWasRightClicked] = useState(false);
 
   const handleOverrideAI = useCallback(() => {
     // Smooth EMA Gradient Descent step (alpha = 0.25) to prevent pingponging
@@ -253,6 +254,15 @@ export const StudyView = ({
       showToast(t?.overrideTune || t?.leniencyTuned || "Wait, my typed answer was right! (Tune AI)");
     }
   }, [tempSimScore, showToast, t]);
+
+  const handleTooGenerous = useCallback(() => {
+    updateLeniencyBiasOnTooGenerous();
+    setWasGenerousClicked(true);
+    setCalculatedScore(3);
+    if (showToast) {
+      showToast(t?.tooGenerousToast || "AI strictness increased. Score adjusted to 3/10");
+    }
+  }, [showToast, t]);
 
 
 
@@ -374,6 +384,8 @@ export const StudyView = ({
             skippedToMCQ={skippedToMCQ}
             handleIWasRight={handleOverrideAI}
             wasRightClicked={wasRightClicked}
+            handleTooGenerous={handleTooGenerous}
+            wasGenerousClicked={wasGenerousClicked}
             debugData={debugData}
             t={t}
           />

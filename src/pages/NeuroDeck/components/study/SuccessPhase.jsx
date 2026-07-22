@@ -12,6 +12,8 @@ export const SuccessPhase = ({
   skippedToMCQ,
   handleIWasRight,
   wasRightClicked,
+  handleTooGenerous,
+  wasGenerousClicked,
   debugData,
   t
 }) => {
@@ -82,6 +84,25 @@ export const SuccessPhase = ({
               <i className="fas fa-thumbs-up text-sm"></i>
               <span>{t?.overrideTune || t?.iWasRight || "Wait, my typed answer was right! (Tune AI)"}</span>
             </button>
+          </div>
+        )}
+
+        {hasUserInput && !skippedToMCQ && evalMethod === "text" && (
+          <div className="my-3 sm:my-4">
+            {!wasGenerousClicked ? (
+              <button
+                onClick={handleTooGenerous}
+                className="neu-btn px-5 py-2.5 sm:px-7 sm:py-3 font-bold uppercase tracking-wider text-amber-400 hover:text-amber-300 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs flex items-center justify-center gap-2 shadow-md active:scale-95 transition-all mx-auto border border-amber-500/30 bg-amber-500/10"
+              >
+                <i className="fas fa-balance-scale-left text-xs"></i>
+                <span>{t?.iWasWrongGenerous || "Wait, I was wrong (The AI was too generous)"}</span>
+              </button>
+            ) : (
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[10px] sm:text-xs font-bold font-mono">
+                <i className="fas fa-check-circle text-amber-400"></i>
+                <span>{t?.strictnessAdjusted || "AI Strictness Increased (Score set to 3/10)"}</span>
+              </div>
+            )}
           </div>
         )}
 
