@@ -8,6 +8,10 @@ export const SuccessPhase = ({
   evalMethod,
   question,
   userInput,
+  hasUserInput,
+  skippedToMCQ,
+  handleIWasRight,
+  wasRightClicked,
   t
 }) => {
   const expectedAnswer = question?.correctAnswer || (question?.correctAnswers && question.correctAnswers.join(', ')) || (question?.answer || null);
@@ -31,7 +35,7 @@ export const SuccessPhase = ({
 
         {/* Neumorphic Answer Comparison Panels */}
         <div className="w-full max-w-xl my-2 sm:my-3 space-y-3 sm:space-y-4 text-left">
-          {userInput && userInput.trim() && evalMethod === 'text' && (
+          {userInput && userInput.trim() && (
             <div className="neu-flat p-3.5 sm:p-5 rounded-xl sm:rounded-2xl border border-white/5">
               <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-[var(--text-muted)] flex items-center gap-1.5 mb-1.5">
                 <i className="fas fa-user-edit text-[var(--accent)]"></i>
@@ -68,6 +72,18 @@ export const SuccessPhase = ({
           )}
         </div>
 
+        {hasUserInput && skippedToMCQ && !wasRightClicked && calculatedScore < 10 && (
+          <div className="my-3 sm:my-4">
+            <button
+              onClick={handleIWasRight}
+              className="neu-btn px-6 py-3 sm:px-8 sm:py-3.5 font-black uppercase tracking-widest text-[color:var(--color-success)] hover:text-white rounded-xl sm:rounded-2xl text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md active:scale-95 transition-all mx-auto"
+            >
+              <i className="fas fa-thumbs-up text-sm"></i>
+              <span>{t?.overrideTune || t?.iWasRight || "Wait, my typed answer was right! (Tune AI)"}</span>
+            </button>
+          </div>
+        )}
+
         <button
           ref={nextBtnRef}
           onClick={handleNext}
@@ -80,3 +96,4 @@ export const SuccessPhase = ({
     </div>
   );
 };
+

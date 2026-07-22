@@ -137,12 +137,15 @@ export const SettingsView = ({
 
   const AVAILABLE_MODELS = [
     { id: "Xenova/nli-deberta-v3-small", name: "DeBERTa-v3 NLI (Small)", desc: t.fastLightweight || "High-accuracy Cross-Encoder" },
+    { id: "Xenova/mdeberta-v3-base-xnli-multilingual-nli-2mil7", name: "mDeBERTa-v3 Multilingual NLI", desc: "Multilingual NLI (French, English, Spanish, 15+ Languages)" },
     { id: "Xenova/nli-deberta-v3-base", name: "DeBERTa-v3 NLI (Base)", desc: t.moreAccurate || "Maximum accuracy (Slower)" },
     { id: "Xenova/nli-deberta-v3-large", name: "DeBERTa-v3 NLI (Large)", desc: t.highQuality || "Highest accuracy (Slowest)" }
   ];
 
   const AVAILABLE_EMBEDDING_MODELS = [
     { id: "Xenova/all-MiniLM-L6-v2", name: "MiniLM-L6-v2 (Fast)", desc: t.embeddingFast || "Very fast, lightweight (22MB)" },
+    { id: "Xenova/multilingual-e5-small", name: "Multilingual E5 Small", desc: "SOTA Multilingual Embeddings (French, English, 100+ Langs)" },
+    { id: "Xenova/paraphrase-multilingual-MiniLM-L12-v2", name: "Multilingual Paraphrase L12", desc: "Multilingual Paraphrase Detection (118MB)" },
     { id: "Xenova/all-MiniLM-L12-v2", name: "MiniLM-L12-v2 (Balanced)", desc: t.embeddingBalanced || "Better accuracy, slightly slower (120MB)" },
     { id: "Xenova/bge-base-en-v1.5", name: "BGE Base EN (High Quality)", desc: t.embeddingHQ || "State of the art accuracy (438MB)" }
   ];
@@ -300,8 +303,7 @@ export const SettingsView = ({
     { id: 'decks', icon: <SaveIcon />, label: t.myDecksTitle || "My Decks" },
     { id: 'algorithm', icon: <ClockIcon />, label: "Algorithm Selection" },
     { id: 'backup', icon: <DownloadIcon />, label: t.dataBackup || "Data Backup" },
-    { id: 'nli', icon: <CpuIcon />, label: t.aiModelTitle || "NLI Model" },
-    { id: 'embedding', icon: <BrainIcon />, label: t.embeddingModelTitle || "Embedding Model" },
+    { id: 'nli', icon: <CpuIcon />, label: t.aiModelTitle || "AI Models" },
     { id: 'generator', icon: <SparklesIcon />, label: t.llmGeneratorTitle || "AI Generator" },
     { id: 'sync', icon: <UploadIcon />, label: t.cloudSyncTitle || "Cloud Sync" },
     { id: 'raw', icon: <EditIcon />, label: t.rawDeckImport || "Raw Import" }
@@ -874,39 +876,48 @@ export const SettingsView = ({
           />
       </div>
 
-      <div id="settings-nli" className={`neu-panel p-4 sm:p-8 md:p-12 ${activeTab === 'nli' ? 'block' : 'hidden lg:block'}`}>
-        <h2 className="text-lg sm:text-2xl font-black text-[var(--text-main)] mb-4 sm:mb-8 flex items-center uppercase tracking-widest">
-          <CpuIcon className="mr-2 sm:mr-4 text-[var(--accent)] text-lg sm:text-2xl" /> {t.aiModelTitle || "NLI Model (Grading)"}
+      <div id="settings-nli" className={`neu-panel p-4 sm:p-8 md:p-12 ${activeTab === 'nli' || activeTab === 'embedding' ? 'block' : 'hidden lg:block'}`}>
+        <h2 className="text-lg sm:text-2xl font-black text-[var(--text-main)] mb-6 sm:mb-8 flex items-center uppercase tracking-widest">
+          <CpuIcon className="mr-2 sm:mr-4 text-[var(--accent)] text-lg sm:text-2xl" /> {t.aiModelTitle || "AI Models Configuration"}
         </h2>
-        <div className="flex flex-col gap-2 sm:gap-4">
-          {AVAILABLE_MODELS.map((m) => (
-            <label key={m.id} className={`p-4 sm:p-6 rounded-xl sm:rounded-2xl cursor-pointer flex items-center text-left transition-all duration-300 ${selectedModel === m.id ? "neu-pressed text-[var(--accent)]" : "neu-btn text-[var(--text-main)]"}`}>
-              <input type="radio" name="ai-model" value={m.id} checked={selectedModel === m.id} onChange={(e) => onModelChange(e.target.value)} className="hidden" />
-              <div>
-                <div className="font-black uppercase tracking-widest text-xs sm:text-base">{m.name}</div>
-                <div className="text-[9px] sm:text-xs font-medium opacity-70 mt-1">{m.desc}</div>
-              </div>
-            </label>
-          ))}
+        
+        {/* NLI Cross-Encoder Selection */}
+        <div className="mb-8 sm:mb-10">
+          <h3 className="text-xs sm:text-sm font-black text-[var(--accent)] mb-3 uppercase tracking-widest flex items-center">
+            <CpuIcon className="mr-2" /> {t.nliModelSubtitle || "NLI Cross-Encoder (Text Grading)"}
+          </h3>
+          <div className="flex flex-col gap-2 sm:gap-4">
+            {AVAILABLE_MODELS.map((m) => (
+              <label key={m.id} className={`p-4 sm:p-6 rounded-xl sm:rounded-2xl cursor-pointer flex items-center text-left transition-all duration-300 ${selectedModel === m.id ? "neu-pressed text-[var(--accent)]" : "neu-btn text-[var(--text-main)]"}`}>
+                <input type="radio" name="ai-model" value={m.id} checked={selectedModel === m.id} onChange={(e) => onModelChange(e.target.value)} className="hidden" />
+                <div>
+                  <div className="font-black uppercase tracking-widest text-xs sm:text-base">{m.name}</div>
+                  <div className="text-[9px] sm:text-xs font-medium opacity-70 mt-1">{m.desc}</div>
+                </div>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {/* Embedding Model Selection */}
+        <div className="pt-6 sm:pt-8 border-t border-white/10">
+          <h3 className="text-xs sm:text-sm font-black text-[var(--accent)] mb-3 uppercase tracking-widest flex items-center">
+            <BrainIcon className="mr-2" /> {t.embeddingModelTitle || "Embedding Model (Semantic Focus & Graph)"}
+          </h3>
+          <div className="flex flex-col gap-2 sm:gap-4">
+            {AVAILABLE_EMBEDDING_MODELS.map((m) => (
+              <label key={m.id} className={`p-4 sm:p-6 rounded-xl sm:rounded-2xl cursor-pointer flex items-center text-left transition-all duration-300 ${selectedEmbeddingModel === m.id ? "neu-pressed text-[var(--accent)]" : "neu-btn text-[var(--text-main)]"}`}>
+                <input type="radio" name="embedding-model" value={m.id} checked={selectedEmbeddingModel === m.id} onChange={(e) => onEmbeddingModelChange(e.target.value)} className="hidden" />
+                <div>
+                  <div className="font-black uppercase tracking-widest text-xs sm:text-base">{m.name}</div>
+                  <div className="text-[9px] sm:text-xs font-medium opacity-70 mt-1">{m.desc}</div>
+                </div>
+              </label>
+            ))}
+          </div>
         </div>
       </div>
 
-      <div id="settings-embedding" className={`neu-panel p-4 sm:p-8 md:p-12 ${activeTab === 'embedding' ? 'block' : 'hidden lg:block'}`}>
-        <h2 className="text-lg sm:text-2xl font-black text-[var(--text-main)] mb-4 sm:mb-8 flex items-center uppercase tracking-widest">
-          <BrainIcon className="mr-2 sm:mr-4 text-[var(--accent)] text-lg sm:text-2xl" /> {t.embeddingModelTitle || "Embedding Model (Semantic Focus & Graph)"}
-        </h2>
-        <div className="flex flex-col gap-2 sm:gap-4">
-          {AVAILABLE_EMBEDDING_MODELS.map((m) => (
-            <label key={m.id} className={`p-4 sm:p-6 rounded-xl sm:rounded-2xl cursor-pointer flex items-center text-left transition-all duration-300 ${selectedEmbeddingModel === m.id ? "neu-pressed text-[var(--accent)]" : "neu-btn text-[var(--text-main)]"}`}>
-              <input type="radio" name="embedding-model" value={m.id} checked={selectedEmbeddingModel === m.id} onChange={(e) => onEmbeddingModelChange(e.target.value)} className="hidden" />
-              <div>
-                <div className="font-black uppercase tracking-widest text-xs sm:text-base">{m.name}</div>
-                <div className="text-[9px] sm:text-xs font-medium opacity-70 mt-1">{m.desc}</div>
-              </div>
-            </label>
-          ))}
-        </div>
-      </div>
 
       <div id="settings-generator" className={`neu-panel p-4 sm:p-8 md:p-12 flex flex-col sm:flex-row justify-between items-center gap-6 ${activeTab === 'generator' ? 'block' : 'hidden lg:flex'}`}>
         <div className="text-left">

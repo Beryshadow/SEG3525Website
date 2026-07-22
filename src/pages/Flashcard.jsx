@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { useSharedLogic } from '../shared';
 import { TRANSLATIONS, DEFAULT_DECK, STOP_WORDS } from '../data/flashcardData';
+import { updateLeniencyBiasOnOverride, updateLeniencyBiasOnNormalPass, updateLeniencyBiasOnFail } from './NeuroDeck/hooks/useAIEvaluation';
+
 
 // --- ICONS ---
 const BrainIcon = () => <i className="fas fa-brain text-xl"></i>;
@@ -670,6 +672,7 @@ const StudyView = ({
     setWrongClicks(0);
     setClickedWrongChoices(new Set());
     setSkippedToMCQ(false);
+    setWasRightClicked(false);
     setSelectedChoices(new Set());
     setShakingChoices(new Set());
     setCalculatedScore(0);
@@ -898,6 +901,7 @@ const StudyView = ({
       setEvalMethod("text");
 
       if (hits === validTruths.length && validTruths.length > 0) {
+        updateLeniencyBiasOnNormalPass();
         setPhase("success");
         setCalculatedScore(calculateNewScore("text"));
       } else if (hits > 0) {
@@ -932,12 +936,24 @@ const StudyView = ({
     }
   };
 
+  const [wasRightClicked, setWasRightClicked] = useState(false);
+
   const handleOverrideAI = () => {
+    const aiScoreRatio = tempSimScore > 0 ? (tempSimScore / 10.0) : 0.4;
+    updateLeniencyBiasOnOverride(aiScoreRatio);
+
+    setWasRightClicked(true);
     setPhase("success");
     setEvalMethod("text");
-    setCalculatedScore(calculateNewScore("text"));
+    setCalculatedScore(10);
     setFeedback(null);
+
+    if (showToast) {
+      showToast(t.overrideTune || t.iWasRight || "Wait, my typed answer was right! (Tune AI)");
+    }
   };
+
+
 
   const generateSmartHint = async () => {
     setIsGeneratingHint(true);
@@ -1315,13 +1331,14 @@ const StudyView = ({
                 : (t.pressNumber || "Select all that apply and submit.")}
             </p>
 
-            {feedback && !feedback.overridden && !skippedToMCQ && (
-              <div className="mt-4 sm:mt-8 pt-3 sm:pt-4 border-t border-white/5 text-center">
+            {userInput && userInput.trim() && (
+              <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-white/5 flex flex-col items-center">
                 <button
                   onClick={handleOverrideAI}
-                  className="text-[10px] sm:text-xs font-bold text-[var(--text-muted)] hover:text-[#10b981] transition-colors uppercase tracking-widest"
+                  className="neu-btn px-6 py-3 sm:px-8 sm:py-3.5 font-black uppercase tracking-widest text-[color:var(--color-success)] hover:text-white rounded-xl sm:rounded-2xl text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md active:scale-95 transition-all w-full sm:w-auto"
                 >
-                  {t.iWasRight || "I was right (Override AI)"}
+                  <i className="fas fa-thumbs-up text-sm"></i>
+                  <span>{t.overrideTune || t.iWasRight || "Wait, my typed answer was right! (Tune AI)"}</span>
                 </button>
               </div>
             )}
@@ -1340,16 +1357,26 @@ const StudyView = ({
                   {t.scoreLabel} <strong className="text-sm sm:text-lg text-[var(--text-main)]">{calculatedScore}</strong>/10
                 </p>
               </div>
-              <div className="flex flex-col items-center sm:items-end w-full sm:w-auto">
+              <div className="flex flex-col items-center sm:items-end w-full sm:w-auto gap-2">
                 <button
                   ref={nextBtnRef}
                   onClick={handleNext}
-                  className="neu-btn w-full sm:w-auto px-4 sm:px-8 py-2 sm:py-4 font-black uppercase tracking-widest text-[#10b981] mb-2 sm:mb-3 text-[10px] sm:text-sm rounded-lg sm:rounded-2xl"
+                  className="neu-btn w-full sm:w-auto px-4 sm:px-8 py-2 sm:py-4 font-black uppercase tracking-widest text-[#10b981] text-[10px] sm:text-sm rounded-lg sm:rounded-2xl"
                 >
                   {t.nextQuestion} <i className="fas fa-arrow-right ml-2"></i>
                 </button>
+                {userInput && userInput.trim() && skippedToMCQ && !wasRightClicked && calculatedScore < 10 && (
+                  <button
+                    onClick={handleOverrideAI}
+                    className="neu-btn px-4 py-2 font-black uppercase tracking-widest text-[color:var(--color-success)] text-[10px] sm:text-xs rounded-lg flex items-center justify-center gap-1.5 active:scale-95 transition-all"
+                  >
+                    <i className="fas fa-thumbs-up text-xs"></i>
+                    <span>{t.overrideTune || t.iWasRight || "Wait, my typed answer was right! (Tune AI)"}</span>
+                  </button>
+                )}
               </div>
             </div>
+
 
             <div className="grid grid-cols-1 gap-3 sm:gap-4 opacity-70">
               {question.choices.map((choice, idx) => {
@@ -1425,6 +1452,7 @@ const SettingsView = ({
 
   const AVAILABLE_MODELS = [
     { id: "Xenova/nli-deberta-v3-small", name: "DeBERTa-v3 NLI (Small)", desc: t.fastLightweight || "High-accuracy Cross-Encoder" },
+    { id: "Xenova/mdeberta-v3-base-xnli-multilingual-nli-2mil7", name: "mDeBERTa-v3 Multilingual NLI", desc: "Multilingual NLI (French, English, 15+ Langs)" },
     { id: "Xenova/nli-deberta-v3-base", name: "DeBERTa-v3 NLI (Base)", desc: t.moreAccurate || "Maximum accuracy (Slower)" }
   ];
 

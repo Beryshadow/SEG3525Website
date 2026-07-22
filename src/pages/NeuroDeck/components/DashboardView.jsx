@@ -101,10 +101,40 @@ export const DashboardView = ({ deck, t, onGoToCard, onUpdateCards, onDeleteCard
     }
   };
 
+  const totalQuestions = deck.length;
+  const totalAttempts = useMemo(() => deck.reduce((acc, q) => acc + (q.attempts || 0), 0), [deck]);
+  const studiedCards = useMemo(() => deck.filter(q => (q.attempts || 0) > 0).length, [deck]);
+  const masteredCards = useMemo(() => deck.filter(q => q.isMastered || q.score >= 10).length, [deck]);
+  const dueCards = useMemo(() => deck.filter(q => !q.isMastered && (q.dueTurn === undefined || q.dueTurn <= 0)).length, [deck]);
+  const masteryPercent = totalQuestions > 0 ? Math.round((masteredCards / totalQuestions) * 100) : 0;
+
+  const [leniencyBias, setLeniencyBias] = useState(() => {
+    try {
+      return parseFloat(localStorage.getItem('neurodeck-leniency-bias')) || 0;
+    } catch (e) {
+      return 0;
+    }
+  });
+
+  useEffect(() => {
+    const syncBias = () => {
+      try {
+        const val = parseFloat(localStorage.getItem('neurodeck-leniency-bias')) || 0;
+        setLeniencyBias(val);
+      } catch (e) {}
+    };
+    syncBias();
+    window.addEventListener('storage', syncBias);
+    return () => window.removeEventListener('storage', syncBias);
+  }, []);
+
+  const maxBias = 0.25;
+  const strictnessPercent = Math.max(0, Math.min(100, Math.round((1 - (leniencyBias / maxBias)) * 100)));
+
   return (
     <div className="w-full animate-fade-in">
       <div className="neu-panel p-4 sm:p-8 md:p-12">
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-5 sm:mb-10 gap-3 sm:gap-0">
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-5 sm:mb-8 gap-3 sm:gap-0">
           <h2 className="text-lg sm:text-2xl font-black text-[var(--text-main)] flex items-center uppercase tracking-widest">
             <ActivityIcon className="mr-2 sm:mr-4 text-[var(--accent)] text-lg sm:text-2xl" /> {t.dashboardTitle}
           </h2>
@@ -119,12 +149,105 @@ export const DashboardView = ({ deck, t, onGoToCard, onUpdateCards, onDeleteCard
                  </button>
               </div>
             )}
-            <div className="neu-pressed flex-1 lg:flex-none px-3 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-2xl flex items-center justify-between lg:justify-start">
-              <span className="text-[var(--text-muted)] font-black text-[9px] sm:text-xs uppercase tracking-widest mr-2 sm:mr-3">{t.average}</span>
-              <span className="font-black text-[var(--accent)] text-xs sm:text-base">{averageScore}/10</span>
+            {/* Strictness / Leniency Progress Bar */}
+            <div 
+              className="neu-pressed flex-1 lg:flex-none px-3.5 sm:px-5 py-2 sm:py-2 rounded-lg sm:rounded-2xl flex flex-col justify-center min-w-[170px] sm:min-w-[210px]"
+              title={`Strictness: ${strictnessPercent}% (Untuned: 100% Strict)`}
+            >
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[var(--text-muted)] font-black text-[9px] sm:text-xs uppercase tracking-widest flex items-center gap-1.5">
+                  <i className="fas fa-sliders-h text-[var(--accent)] text-[10px]"></i>
+                  {t.strictness || "Strictness:"}
+                </span>
+                <span className="font-mono font-black text-xs text-[var(--accent)]">
+                  {strictnessPercent}%
+                </span>
+              </div>
+              <div className="w-full h-2 rounded-full neu-flat overflow-hidden p-0.5 relative bg-black/20">
+                <div 
+                  className="h-full rounded-full transition-all duration-500 bg-gradient-to-r from-[var(--accent)] via-purple-500 to-emerald-500 shadow-sm" 
+                  style={{ width: `${strictnessPercent}%` }}
+                ></div>
+              </div>
             </div>
           </div>
         </div>
+
+        {/* Analytics & Metrics Stat Cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
+          {/* Card 1: Total Answers */}
+          <div className="neu-pressed p-3.5 sm:p-5 rounded-xl sm:rounded-2xl flex flex-col justify-between border-l-4 border-purple-500">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[var(--text-muted)] font-black text-[9px] sm:text-xs uppercase tracking-widest">
+                {t.totalAnswered || "Total Answers"}
+              </span>
+              <i className="fas fa-layer-group text-purple-400 text-xs sm:text-sm"></i>
+            </div>
+            <div className="flex items-baseline justify-between mt-1">
+              <span className="font-mono font-black text-lg sm:text-2xl text-[var(--text-main)]">
+                {totalAttempts}
+              </span>
+              <span className="text-[9px] sm:text-xs font-bold text-[var(--text-muted)]">
+                {studiedCards}/{totalQuestions} {t.cardsStudied || "Studied"}
+              </span>
+            </div>
+          </div>
+
+          {/* Card 2: Mastered Cards */}
+          <div className="neu-pressed p-3.5 sm:p-5 rounded-xl sm:rounded-2xl flex flex-col justify-between border-l-4 border-emerald-500">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[var(--text-muted)] font-black text-[9px] sm:text-xs uppercase tracking-widest">
+                {t.cardsMastered || "Mastered Cards"}
+              </span>
+              <i className="fas fa-medal text-emerald-400 text-xs sm:text-sm"></i>
+            </div>
+            <div className="flex items-baseline justify-between mt-1">
+              <span className="font-mono font-black text-lg sm:text-2xl text-emerald-400">
+                {masteredCards}
+              </span>
+              <span className="text-[9px] sm:text-xs font-black text-emerald-500">
+                {masteryPercent}%
+              </span>
+            </div>
+          </div>
+
+          {/* Card 3: Average Score */}
+          <div className="neu-pressed p-3.5 sm:p-5 rounded-xl sm:rounded-2xl flex flex-col justify-between border-l-4 border-amber-500">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[var(--text-muted)] font-black text-[9px] sm:text-xs uppercase tracking-widest">
+                {t.average || "Average Score"}
+              </span>
+              <i className="fas fa-star text-amber-400 text-xs sm:text-sm"></i>
+            </div>
+            <div className="flex items-baseline justify-between mt-1">
+              <span className="font-mono font-black text-lg sm:text-2xl text-amber-400">
+                {averageScore}
+              </span>
+              <span className="text-[9px] sm:text-xs font-bold text-[var(--text-muted)]">
+                /10
+              </span>
+            </div>
+          </div>
+
+          {/* Card 4: Due for Review */}
+          <div className="neu-pressed p-3.5 sm:p-5 rounded-xl sm:rounded-2xl flex flex-col justify-between border-l-4 border-blue-500">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[var(--text-muted)] font-black text-[9px] sm:text-xs uppercase tracking-widest">
+                {t.dueForReview || "Due for Review"}
+              </span>
+              <i className="fas fa-clock text-blue-400 text-xs sm:text-sm"></i>
+            </div>
+            <div className="flex items-baseline justify-between mt-1">
+              <span className="font-mono font-black text-lg sm:text-2xl text-blue-400">
+                {dueCards}
+              </span>
+              <span className="text-[9px] sm:text-xs font-bold text-[var(--text-muted)]">
+                cards
+              </span>
+            </div>
+          </div>
+        </div>
+
 
         <div className="mb-6 relative">
           <input 
@@ -141,7 +264,97 @@ export const DashboardView = ({ deck, t, onGoToCard, onUpdateCards, onDeleteCard
           )}
         </div>
 
-        <div className="overflow-x-auto neu-pressed rounded-xl sm:rounded-3xl p-1 sm:p-2">
+        {/* Mobile View: Touch-Friendly Card List (No Horizontal Scrollbar Required) */}
+        <div className="block sm:hidden space-y-3">
+          <div className="flex items-center justify-between p-3 neu-flat rounded-xl text-[10px] text-[var(--text-muted)] font-black uppercase tracking-widest">
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <input type="checkbox" checked={selectedIds.size === displayedDeck.length && displayedDeck.length > 0} onChange={toggleSelectAll} className="cursor-pointer" />
+              <span>Select All ({displayedDeck.length})</span>
+            </label>
+            <div className="flex gap-3">
+              <button onClick={() => handleSort('attempts')} className="hover:text-[var(--accent)] flex items-center gap-1 select-none">
+                {t.attemptsCol} {sortField === 'attempts' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+              </button>
+              <button onClick={() => handleSort('score')} className="hover:text-[var(--accent)] flex items-center gap-1 select-none">
+                {t.scoreCol} {sortField === 'score' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+              </button>
+            </div>
+          </div>
+
+          {displayedDeck.map((q, i) => (
+            <div
+              key={i}
+              onClick={() => onGoToCard(i)}
+              className="neu-flat p-4 rounded-xl flex flex-col gap-3 border border-white/5 cursor-pointer hover:border-[var(--accent)] transition-all active:scale-[0.99]"
+            >
+              <div className="flex items-start gap-3">
+                <input
+                  type="checkbox"
+                  checked={selectedIds.has(q.id)}
+                  onChange={(e) => toggleSelect(q.id, e)}
+                  onClick={(e) => e.stopPropagation()}
+                  className="mt-1 cursor-pointer flex-shrink-0"
+                />
+                <p className="text-xs font-semibold text-[var(--text-main)] leading-relaxed flex-1 break-words">
+                  {q.question}
+                </p>
+              </div>
+
+              <div className="flex items-center justify-between pt-2 border-t border-white/5 text-xs">
+                <span className="text-[10px] font-black uppercase tracking-wider text-[var(--text-muted)]">
+                  {t.attemptsCol}: <strong className="text-[var(--text-main)]">{q.attempts}</strong>
+                </span>
+
+                <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
+                  {q.isMastered ? (
+                    <span className="text-purple-500 bg-purple-500/10 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest">
+                      Mastered
+                    </span>
+                  ) : (
+                    <select
+                      value={q.score}
+                      onChange={(e) => {
+                        onUpdateCards([{ id: q.id, changes: { score: parseInt(e.target.value) } }]);
+                      }}
+                      className={`neu-pressed px-2 py-1 rounded text-[10px] font-black outline-none uppercase tracking-widest ${
+                        q.attempts === 0 ? "text-[var(--text-muted)]" :
+                        q.score <= 3 ? "text-red-500" :
+                        q.score <= 7 ? "text-orange-500" :
+                        "text-green-500"
+                      }`}
+                    >
+                      {[0,1,2,3,4,5,6,7,8,9,10].map(n => <option key={n} value={n} className="bg-[var(--bg-main)]">{n}/10</option>)}
+                    </select>
+                  )}
+
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onUpdateCards([{ id: q.id, changes: { score: 0, attempts: 0, isMastered: false } }]); }}
+                    className="neu-btn p-1.5 text-[var(--text-muted)] hover:text-orange-500 rounded-lg text-xs"
+                    title="Reset Score"
+                  >
+                    <RefreshIcon />
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onDeleteCards([q.id]); }}
+                    className="neu-btn p-1.5 text-[var(--text-muted)] hover:text-red-500 rounded-lg text-xs"
+                    title="Delete Card"
+                  >
+                    <TrashIcon />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+
+          {displayedDeck.length === 0 && (
+            <div className="py-8 text-center text-[var(--text-muted)] text-xs font-medium neu-flat rounded-xl">
+              Deck is completely empty. Import some cards!
+            </div>
+          )}
+        </div>
+
+        {/* Desktop View: Full Data Table (Hidden on Mobile) */}
+        <div className="hidden sm:block overflow-x-auto neu-pressed rounded-xl sm:rounded-3xl p-1 sm:p-2">
           <table className="w-full text-left border-collapse min-w-[600px]">
             <thead>
               <tr className="text-[var(--text-muted)] text-[9px] sm:text-xs uppercase tracking-widest border-b border-white/5">
@@ -242,6 +455,7 @@ export const DashboardView = ({ deck, t, onGoToCard, onUpdateCards, onDeleteCard
             </tbody>
           </table>
         </div>
+
       </div>
     </div>
   );

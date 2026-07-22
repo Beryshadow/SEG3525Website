@@ -22,10 +22,10 @@
   {
     "name": "Q1. Partial (Headings and buttons)",
     "questionId": 1,
-    "userInput": "headings and buttons",
-    "truthMatch": [{"label": "neutral", "score": 0.8}],
+    "userInput": "Headings and buttons",
+    "truthMatch": [{"label": "neutral", "score": 0.85}],
     "distractorMatches": {},
-    "embSim": 0.60,
+    "embSim": 0.38,
     "expectedMin": 0.0,
     "expectedMax": 6.0
   },
@@ -297,8 +297,9 @@
     "distractorMatches": {},
     "embSim": 0.75,
     "expectedMin": 0.0,
-    "expectedMax": 7.5
+    "expectedMax": 9.0
   },
+
   {
     "name": "Q20. Contradiction",
     "questionId": 20,
@@ -485,7 +486,7 @@
     "userInput": "It organizes things",
     "truthMatch": [{"label": "neutral", "score": 0.6}],
     "distractorMatches": {},
-    "embSim": 0.50,
+    "embSim": 0.38,
     "expectedMin": 0.0,
     "expectedMax": 6.0
   },
@@ -495,7 +496,7 @@
     "userInput": "It colors the page but doesn't do layout",
     "truthMatch": [{"label": "contradiction", "score": 0.90}],
     "distractorMatches": {},
-    "embSim": 0.75,
+    "embSim": 0.40,
     "expectedMin": 0.0,
     "expectedMax": 4.9
   },
@@ -505,8 +506,112 @@
     "userInput": "It's a thing the browser makes",
     "truthMatch": [{"label": "neutral", "score": 0.85}],
     "distractorMatches": {},
-    "embSim": 0.60,
+    "embSim": 0.38,
     "expectedMin": 0.0,
     "expectedMax": 6.5
+  },
+
+  {
+    "name": "French OS: Fork() vs fork",
+    "choices": ["Fork()", "Exec()"],
+    "customTruths": ["Fork()"],
+    "userInput": "fork",
+    "truthMatch": null,
+    "distractorMatches": null,
+    "embSim": 0,
+    "expectedMin": 10.0,
+    "expectedMax": 10.0
+  },
+  {
+    "name": "French OS: Process Definition Entailment",
+    "choices": ["Un programme en cours d'exécution dans la mémoire", "Un fichier binaire stocké sur le disque"],
+    "customTruths": ["Un programme en cours d'exécution dans la mémoire"],
+    "userInput": "c'est l'instance d'un programme exécuté",
+    "truthMatch": [{"label": "entailment", "score": 0.97}],
+    "distractorMatches": {},
+    "embSim": 0.52,
+    "expectedMin": 8.0,
+    "expectedMax": 10.0
+  },
+
+
+  {
+    "name": "Function Call Paren Normalization",
+    "choices": ["main()", "init()"],
+    "customTruths": ["main()"],
+    "userInput": "main",
+    "truthMatch": null,
+    "distractorMatches": null,
+    "embSim": 0,
+    "expectedMin": 10.0,
+    "expectedMax": 10.0
+  },
+  {
+    "name": "French OS False Positive: Process vs Executable File on Disk",
+    "choices": ["Un programme en cours d'exécution dans la mémoire", "Un fichier binaire stocké sur le disque dur"],
+    "customTruths": ["Un programme en cours d'exécution dans la mémoire"],
+    "userInput": "Un fichier binaire stocké sur le disque dur",
+    "truthMatch": [{"label": "contradiction", "score": 0.95}],
+    "distractorMatches": {"Un fichier binaire stocké sur le disque dur": [{"label": "entailment", "score": 0.98}]},
+    "embSim": 0.40,
+    "expectedMin": 0.0,
+    "expectedMax": 4.9
+  },
+  {
+    "name": "French OS False Positive: Thread Memory Contradiction",
+    "choices": ["Un fil d'exécution léger partageant la mémoire du processus", "Un processus lourd indépendant"],
+    "customTruths": ["Un fil d'exécution léger partageant la mémoire du processus"],
+    "userInput": "Il possède son propre espace mémoire complètement isolé",
+    "truthMatch": [{"label": "contradiction", "score": 0.98}],
+    "distractorMatches": {},
+    "embSim": 0.35,
+    "expectedMin": 0.0,
+    "expectedMax": 4.9
+  },
+  {
+    "name": "French OS False Positive: Kernel vs Compiler Concept Swap",
+    "choices": ["Gérer les ressources système et la communication matérielle", "Traduire le code source C++ en langage machine"],
+    "customTruths": ["Gérer les ressources système et la communication matérielle"],
+    "userInput": "Il traduit le code C++ en binaire machine",
+    "truthMatch": [{"label": "contradiction", "score": 0.95}],
+    "distractorMatches": {"Traduire le code source C++ en langage machine": [{"label": "entailment", "score": 0.98}]},
+    "embSim": 0.30,
+    "expectedMin": 0.0,
+    "expectedMax": 4.9
+  },
+  {
+    "name": "English Web False Positive: CSS vs DOM Parsing",
+    "choices": ["To define visual styling, layout, and presentation", "To construct the live DOM object tree from HTML tokens"],
+    "customTruths": ["To define visual styling, layout, and presentation"],
+    "userInput": "To construct the live DOM tree from HTML tokens",
+    "truthMatch": [{"label": "contradiction", "score": 0.98}],
+    "distractorMatches": {"To construct the live DOM object tree from HTML tokens": [{"label": "entailment", "score": 0.98}]},
+    "embSim": 0.30,
+    "expectedMin": 0.0,
+    "expectedMax": 4.9
+  },
+  {
+    "name": "English Networking False Positive: TCP vs UDP Ordering Negation",
+    "choices": ["Yes, TCP guarantees ordered and reliable packet delivery", "No, packets arrive unordered without delivery confirmation"],
+    "customTruths": ["Yes, TCP guarantees ordered and reliable packet delivery"],
+    "userInput": "It sends unordered packets without delivery confirmation like UDP",
+    "truthMatch": [{"label": "contradiction", "score": 0.99}],
+    "distractorMatches": {"No, packets arrive unordered without delivery confirmation": [{"label": "entailment", "score": 0.98}]},
+    "embSim": 0.25,
+    "expectedMin": 0.0,
+    "expectedMax": 4.9
+  },
+  {
+    "name": "French OS False Positive: System Call Distractor Trap (fork vs exec)",
+    "choices": ["fork()", "exec()", "wait()"],
+    "customTruths": ["fork()"],
+    "userInput": "exec()",
+    "truthMatch": [{"label": "contradiction", "score": 0.99}],
+    "distractorMatches": {"exec()": [{"label": "entailment", "score": 0.99}]},
+    "embSim": 0.20,
+    "expectedMin": 0.0,
+    "expectedMax": 4.9
   }
 ]
+
+

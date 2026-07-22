@@ -10,6 +10,8 @@ export const MCQPhase = ({
   toggleChoice,
   handleSubmitMCQ,
   feedback,
+  hasUserInput,
+  handleIWasRight,
   t
 }) => {
   return (
@@ -75,6 +77,18 @@ export const MCQPhase = ({
             className="neu-btn px-4 sm:px-8 py-3 sm:py-4 w-full font-black uppercase tracking-widest text-[var(--accent)] text-[10px] sm:text-sm rounded-lg sm:rounded-xl disabled:opacity-50"
           >
             {t.submitSelection || "Submit Selection"}
+          </button>
+        </div>
+      )}
+
+      {hasUserInput && (
+        <div className="pt-3 sm:pt-4 border-t border-white/5 flex flex-col items-center">
+          <button
+            onClick={handleIWasRight}
+            className="neu-btn px-6 py-3 sm:px-8 sm:py-3.5 font-black uppercase tracking-widest text-[color:var(--color-success)] hover:text-white rounded-xl sm:rounded-2xl text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md active:scale-95 transition-all w-full sm:w-auto"
+          >
+            <i className="fas fa-thumbs-up text-sm"></i>
+            <span>{t?.overrideTune || t?.iWasRight || "Wait, my typed answer was right! (Tune AI)"}</span>
           </button>
         </div>
       )}

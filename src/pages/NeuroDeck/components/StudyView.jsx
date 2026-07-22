@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { getCorrectAnswers, shuffleArray } from '../utils/helpers';
-import { useAIEvaluation } from '../hooks/useAIEvaluation';
+import { useAIEvaluation, updateLeniencyBiasOnOverride, updateLeniencyBiasOnNormalPass, updateLeniencyBiasOnFail } from '../hooks/useAIEvaluation';
 import { StudyHeader } from './study/StudyHeader';
 import { TextInputPhase } from './study/TextInputPhase';
 import { MCQPhase } from './study/MCQPhase';
 import { LongQuestionPhase } from './study/LongQuestionPhase';
 import { SuccessPhase } from './study/SuccessPhase';
+
 
 export const StudyView = ({
   question, currentIndex, totalCards, model, modelStatus, modelError, progressPercent, onComplete,
@@ -65,6 +66,7 @@ export const StudyView = ({
     setWrongClicks(0);
     setClickedWrongChoices(new Set());
     setSkippedToMCQ(false);
+    setWasRightClicked(false);
     setSelectedChoices(new Set());
     setShakingChoices(new Set());
     setCalculatedScore(initialPhase === "pass" ? (question?.score || 0) : 0);
@@ -105,10 +107,12 @@ export const StudyView = ({
     const correctSet = new Set(correctAnswersArray);
 
     if (correctSet.has(choice)) {
+      updateLeniencyBiasOnNormalPass();
       setPhase("success");
       setEvalMethod("mcq");
       setCalculatedScore(calculateNewScore("mcq", wrongClicks));
     } else {
+      updateLeniencyBiasOnFail();
       setWrongClicks(prev => prev + 1);
       setShakingChoices(new Set([choice]));
       setClickedWrongChoices(prev => {
@@ -186,6 +190,7 @@ export const StudyView = ({
     }
 
     if (result.status === "success") {
+      updateLeniencyBiasOnNormalPass();
       setTempSimScore(result.score);
       setEvalMethod("text");
       setPhase("success");
@@ -226,12 +231,25 @@ export const StudyView = ({
     }
   };
 
-  const handleOverrideAI = () => {
-    setPhase("success");
+  const [wasRightClicked, setWasRightClicked] = useState(false);
+
+  const handleOverrideAI = useCallback(() => {
+    // Smooth EMA Gradient Descent step (alpha = 0.25) to prevent pingponging
+    const aiScoreRatio = tempSimScore > 0 ? (tempSimScore / 10.0) : 0.4;
+    updateLeniencyBiasOnOverride(aiScoreRatio);
+
+    setWasRightClicked(true);
+    setCalculatedScore(10.0);
     setEvalMethod("text");
-    setCalculatedScore(calculateNewScore("text"));
+    setPhase("success");
     setFeedback(null);
-  };
+
+    if (showToast) {
+      showToast(t?.overrideTune || t?.leniencyTuned || "Wait, my typed answer was right! (Tune AI)");
+    }
+  }, [tempSimScore, showToast, t]);
+
+
 
   const handleShowHint = () => {
     if (question && question.hint) {
@@ -254,10 +272,12 @@ export const StudyView = ({
     const missedCount = correctSet.size - correctCount;
 
     if (correctCount === correctSet.size && wrongCount === 0) {
+      updateLeniencyBiasOnNormalPass();
       setPhase("success");
       setEvalMethod("mcq");
       setCalculatedScore(calculateNewScore("mcq", wrongClicks));
     } else {
+      updateLeniencyBiasOnFail();
       setWrongClicks(prev => prev + 1);
       setShakingChoices(currentShakes);
       setTimeout(() => setShakingChoices(new Set()), 500);
@@ -345,6 +365,10 @@ export const StudyView = ({
             evalMethod={evalMethod}
             question={question}
             userInput={userInput}
+            hasUserInput={!!(userInput && userInput.trim())}
+            skippedToMCQ={skippedToMCQ}
+            handleIWasRight={handleOverrideAI}
+            wasRightClicked={wasRightClicked}
             t={t}
           />
         ) : isLongQuestion ? (
@@ -368,6 +392,8 @@ export const StudyView = ({
             toggleChoice={toggleChoice}
             handleSubmitMCQ={handleSubmitMCQ}
             feedback={feedback}
+            hasUserInput={!!(userInput && userInput.trim())}
+            handleIWasRight={handleOverrideAI}
             t={t}
           />
         ) : (

@@ -179,6 +179,7 @@ export default function SerialRecall() {
               <div className="flex flex-col gap-4">
                 {[
                   { id: "Xenova/nli-deberta-v3-small", name: "DeBERTa-v3 NLI (Small)", desc: "High-accuracy Cross-Encoder (Fast)" },
+                  { id: "Xenova/mdeberta-v3-base-xnli-multilingual-nli-2mil7", name: "mDeBERTa-v3 Multilingual NLI", desc: "Multilingual NLI (French, English, 15+ Langs)" },
                   { id: "Xenova/nli-deberta-v3-base", name: "DeBERTa-v3 NLI (Base)", desc: "Maximum accuracy (Slower)" }
                 ].map((m) => (
                   <label key={m.id} className={`p-4 sm:p-6 rounded-xl sm:rounded-2xl cursor-pointer flex items-center text-left transition-all duration-300 ${selectedModel === m.id ? "neu-pressed text-[var(--accent)]" : "neu-btn text-[var(--text-main)]"}`}>
