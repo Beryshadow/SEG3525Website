@@ -15,7 +15,9 @@ import { DashboardView } from './components/DashboardView';
 import { StudyView } from './components/StudyView';
 import { KnowledgeGraphView } from './components/KnowledgeGraphView';
 import ConfirmModal from './components/ConfirmModal';
+import { clearAIEvaluationCaches } from './hooks/useAIEvaluation';
 import { BrainIcon, SettingsIcon, ActivityIcon, CpuIcon, FireIcon, NetworkIcon } from './components/Icons';
+
 
 const SYNC_API_BASE = import.meta.env.DEV ? 'http://localhost:3001/api/sync' : '/api/sync';
 
@@ -282,6 +284,21 @@ export default function NeuroDeck() {
     focusMode, setFocusMode, questionTypeSettings, setQuestionTypeSettings, showToast, confirm, currentIndex, t
   });
 
+  const handleClearAICache = useCallback(async () => {
+    clearAIEvaluationCaches();
+    setCardEmbeddings({});
+    try {
+      if ('caches' in window) {
+        const keys = await caches.keys();
+        await Promise.all(
+          keys.filter(k => k.includes('transformers') || k.includes('onnx') || k.includes('huggingface'))
+              .map(k => caches.delete(k))
+        );
+      }
+    } catch(e) {}
+    showToast(t.aiCacheCleared || "AI Cache & Model Embeddings Cleared!");
+  }, [setCardEmbeddings, showToast, t]);
+
   const handleJumpToPriorityCard = useCallback(() => {
     const success = jumpToDeterministicPriorityCard();
     if (success) {
@@ -291,6 +308,7 @@ export default function NeuroDeck() {
       showToast(t.noQuestionsAvailable || "No questions available in active deck.");
     }
   }, [jumpToDeterministicPriorityCard, setView, showToast, t]);
+
 
   // Automatically connect if ?sync= or ?share= is provided in the URL
   useEffect(() => {
@@ -522,9 +540,11 @@ export default function NeuroDeck() {
             onShareToCode={handleShareToCode}
             onImportFromCode={handleImportFromCode}
             onJumpToPriorityCard={handleJumpToPriorityCard}
+            onClearAICache={handleClearAICache}
             t={t}
             showToast={showToast}
           />
+
         )}
       </main>
 

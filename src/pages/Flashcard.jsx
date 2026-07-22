@@ -597,8 +597,13 @@ export default function Flashcard() {
             onToggleDeckCompleted={handleToggleDeckCompleted}
             onRenameDeck={handleRenameDeck}
             onDirectDropSave={handleDirectDropSave}
+            onClearAICache={() => {
+              clearAIEvaluationCaches();
+              showToast(t.aiCacheCleared || "AI Cache & Model Embeddings Cleared!");
+            }}
             t={t}
           />
+
         )}
         {view === "dashboard" && (
           <DashboardView 

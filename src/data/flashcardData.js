@@ -48,6 +48,11 @@ export const TRANSLATIONS = {
     embeddingModelTitle: "Modèle de Plongement (Focus Sémantique & Graphe)",
     fastLightweight: "Rapide & Léger (~22MB)",
     moreAccurate: "Plus Précis (~133MB)",
+    clearAiCacheTitle: "Effacer le cache IA & Modèles chargés",
+    clearAiCacheDesc: "Purger les vecteurs d'intégration graphiques pré-calculés, les caches d'évaluation et la mémoire du modèle.",
+    clearAiCacheBtn: "Effacer le cache IA",
+    aiCacheCleared: "Cache IA et intégrations vectorielles effacés !",
+
     highQuality: "Haute Qualité (~438MB)",
     embeddingFast: "Très rapide, léger (22MB)",
     embeddingBalanced: "Meilleure précision, légèrement plus lent (120MB)",

@@ -11,8 +11,9 @@ export const SettingsView = ({
   myDecks, loadedDeckId, onSaveDeckToCache, onOverwriteDeck, onLoadDeckFromCache, 
   onDeleteDeckFromCache, onToggleDeckCompleted, onRenameDeck, onDirectDropSave,
   onMoveDeck, onBatchDeleteDecks, onBatchMoveDecks, syncCode, syncHash, pairingCode, isGeneratingCode, setSyncCode, onGenerateSyncCode, onConnectSyncCode, onDisconnectSyncCode, onClearCloudData,
-  onExportWithoutProgress, onShareToCode, onImportFromCode, t, showToast, servingMode, onServingModeChange, onJumpToPriorityCard
+  onExportWithoutProgress, onShareToCode, onImportFromCode, t, showToast, servingMode, onServingModeChange, onJumpToPriorityCard, onClearAICache
 }) => {
+
   const [jsonInput, setJsonInput] = useState("");
   const [newDeckName, setNewDeckName] = useState("");
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
@@ -916,7 +917,28 @@ export const SettingsView = ({
             ))}
           </div>
         </div>
+
+        {/* Clear AI Cache & Loaded Models */}
+        <div className="mt-8 sm:mt-10 pt-6 sm:pt-8 border-t border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h4 className="text-xs sm:text-sm font-black uppercase tracking-widest text-[var(--text-main)] flex items-center gap-2">
+              <i className="fas fa-broom text-[var(--accent)]"></i>
+              {t.clearAiCacheTitle || "Clear AI Cache & Loaded Models"}
+            </h4>
+            <p className="text-[9px] sm:text-xs text-[var(--text-muted)] font-medium mt-1 leading-relaxed max-w-md">
+              {t.clearAiCacheDesc || "Purge pre-calculated graph vector embeddings, evaluation caches, and loaded neural model memory."}
+            </p>
+          </div>
+          <button
+            onClick={onClearAICache}
+            className="neu-btn px-4 sm:px-6 py-2.5 sm:py-3 text-[10px] sm:text-xs font-bold uppercase tracking-widest rounded-xl text-orange-500 hover:text-red-500 transition-colors flex items-center gap-2 self-stretch sm:self-auto justify-center"
+          >
+            <i className="fas fa-trash-alt"></i>
+            <span>{t.clearAiCacheBtn || "Clear AI Cache"}</span>
+          </button>
+        </div>
       </div>
+
 
 
       <div id="settings-generator" className={`neu-panel p-4 sm:p-8 md:p-12 flex flex-col sm:flex-row justify-between items-center gap-6 ${activeTab === 'generator' ? 'block' : 'hidden lg:flex'}`}>
