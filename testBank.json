@@ -621,8 +621,30 @@
     "embSim": 0.85,
     "expectedMin": 8.0,
     "expectedMax": 10.0
+  },
+
+  {
+    "name": "French Binary Stance: Input 'Non' vs Truth 'Non, le PCB ne contient que...'",
+    "choices": [
+      "Non, le PCB ne contient que l'état (registres, limites, etc.) ; il a des pointeurs vers l'image du programme (qui contient les données) restée en mémoire",
+      "Oui, le PCB est une copie exacte et complète de toute la RAM allouée au processus",
+      "Oui, mais seulement si le processus est très petit",
+      "Non, le PCB ne contient que le code source, pas les variables",
+      "Non, les variables globales sont effacées lors d'une interruption"
+    ],
+    "customTruths": ["Non, le PCB ne contient que l'état (registres, limites, etc.) ; il a des pointeurs vers l'image du programme (qui contient les données) restée en mémoire"],
+    "userInput": "Non",
+    "truthMatch": [{"label": "entailment", "score": 0.90}],
+    "distractorMatches": {
+      "Non, le PCB ne contient que le code source, pas les variables": [{"label": "entailment", "score": 0.90}],
+      "Non, les variables globales sont effacées lors d'une interruption": [{"label": "entailment", "score": 0.90}]
+    },
+    "embSim": 0.50,
+    "expectedMin": 8.0,
+    "expectedMax": 10.0
   }
 ]
+
 
 
 

@@ -187,6 +187,16 @@ export const getEntailmentScores = (output) => {
 };
 
 
+export const getBinaryStance = (text) => {
+  if (!text || typeof text !== 'string') return null;
+  const firstWord = text.trim().toLowerCase().split(/\s+/)[0].replace(/[^\p{L}]/gu, '');
+  const yesSet = new Set(['oui', 'yes', 'vrai', 'true', 'si', 'ja', 'da']);
+  const noSet = new Set(['non', 'no', 'faux', 'false', 'nein', 'nyet']);
+  if (yesSet.has(firstWord)) return 'YES';
+  if (noSet.has(firstWord)) return 'NO';
+  return null;
+};
+
 export const evaluateInputCore = async (userInput, question, correctAnswersArray = [], model = null, getEmbeddings = null, cardEmbeddings = null, t = null, currentLangKey = 'EN') => {
   if (!userInput || typeof userInput !== 'string' || !userInput.trim()) return null;
   
@@ -262,6 +272,11 @@ export const evaluateInputCore = async (userInput, question, correctAnswersArray
     maxEmbeddingSim = cosineSimilarity(inputEmb, questionEmb);
   }
 
+  // Detect universal binary stances (Yes/No, Oui/Non, True/False, Vrai/Faux)
+  const inputStance = getBinaryStance(userInput);
+  const truthStance = validTruths[0] ? getBinaryStance(validTruths[0]) : null;
+  const isSameStance = inputStance && truthStance && inputStance === truthStance;
+
   // --- 2. MULTI-DIRECTIONAL DUAL-PASS DIRECT NLI CROSS-ENCODER EVALUATION ---
   try {
     const sepToken = model?.tokenizer?.sep_token || "[SEP]";
@@ -327,18 +342,22 @@ export const evaluateInputCore = async (userInput, question, correctAnswersArray
 
       for (const dist of distractorField) {
          const resInfo = resultsByOriginal.distractor[dist];
+         let avgEnt = 0;
          if (resInfo && resInfo.forward && resInfo.backward) {
-            const avgEnt = (resInfo.forward.entailment + resInfo.backward.entailment) / 2;
-            if (avgEnt > maxDistractorScore) {
-                maxDistractorScore = avgEnt;
-                closestIncorrectText = dist === compositeDistractor ? "Composite Distractor" : dist;
-            }
+            avgEnt = (resInfo.forward.entailment + resInfo.backward.entailment) / 2;
          } else if (resInfo && (resInfo.forward || resInfo.backward)) {
-            const singleEnt = (resInfo.forward || resInfo.backward).entailment;
-            if (singleEnt > maxDistractorScore) {
-                maxDistractorScore = singleEnt;
-                closestIncorrectText = dist === compositeDistractor ? "Composite Distractor" : dist;
-            }
+            avgEnt = (resInfo.forward || resInfo.backward).entailment;
+         }
+
+         // Discount same-stance distractors when user input matches the truth stance
+         const distStance = getBinaryStance(dist);
+         if (isSameStance && distStance === inputStance) {
+            avgEnt = avgEnt * 0.3;
+         }
+
+         if (avgEnt > maxDistractorScore) {
+             maxDistractorScore = avgEnt;
+             closestIncorrectText = dist === compositeDistractor ? "Composite Distractor" : dist;
          }
       }
 
@@ -388,14 +407,23 @@ export const evaluateInputCore = async (userInput, question, correctAnswersArray
       effectiveSim = Math.max(maxEmbeddingSim, maxTokenOverlap * 0.85);
     }
 
-    const hasHighSemanticEquivalence = maxEmbeddingSim >= 0.85 || (detectedLang === 'FR' && maxEmbeddingSim >= 0.82) || maxTokenOverlap >= 0.55;
+    const hasHighSemanticEquivalence = maxEmbeddingSim >= 0.85 || (detectedLang === 'FR' && maxEmbeddingSim >= 0.82) || maxTokenOverlap >= 0.55 || isSameStance;
 
-    if (hasHighSemanticEquivalence && (effectiveSim >= baseRescueThreshold) && !isStrongContradiction) {
-       effectiveTruthScore = Math.max(avgEntailment, effectiveSim);
+    if (isSameStance) {
+      effectiveTruthScore = Math.max(effectiveTruthScore, 0.88);
+      if (hits === 0) {
+        hits = 1;
+      }
+    }
+
+
+    if (hasHighSemanticEquivalence && (effectiveSim >= baseRescueThreshold || isSameStance) && !isStrongContradiction) {
+       effectiveTruthScore = Math.max(avgEntailment, effectiveSim, isSameStance ? 0.88 : 0);
        if (hits === 0 && effectiveTruthScore > maxDistractorScore) {
            hits = 1;
        }
     }
+
 
     let mappedScore10 = 0;
     if (hits === validTruths.length && validTruths.length > 0) {
