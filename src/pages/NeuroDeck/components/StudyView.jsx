@@ -191,7 +191,8 @@ export const StudyView = ({
       return;
     }
 
-    setDebugData(result._debug || null);
+    const isDebugEnabled = typeof localStorage !== 'undefined' && localStorage.getItem('neurodeck-debug') === 'true';
+    setDebugData(isDebugEnabled ? (result._debug || null) : null);
 
     if (result.status === "success") {
       updateLeniencyBiasOnNormalPass();

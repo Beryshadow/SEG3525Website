@@ -95,9 +95,9 @@ export const SuccessPhase = ({
         </button>
       </div>
 
-      {debugData && (
+      {debugData && (typeof localStorage !== 'undefined' && localStorage.getItem('neurodeck-debug') === 'true') && (
         <div className="mt-4 rounded-xl sm:rounded-2xl border border-amber-500/30 bg-amber-500/5 overflow-hidden">
-          <details open>
+          <details>
             <summary className="p-3 sm:p-4 text-[10px] sm:text-xs font-black uppercase tracking-widest text-amber-500 cursor-pointer flex items-center gap-2">
               <i className="fas fa-bug"></i> AI Debug Telemetry (Success)
             </summary>

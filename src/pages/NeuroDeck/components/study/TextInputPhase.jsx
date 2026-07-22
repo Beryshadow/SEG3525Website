@@ -187,7 +187,7 @@ export const TextInputPhase = ({
           )}
         </div>
       )}
-      {debugData && (
+      {debugData && (typeof localStorage !== 'undefined' && localStorage.getItem('neurodeck-debug') === 'true') && (
         <DebugPanel debugData={debugData} />
       )}
     </div>
@@ -195,7 +195,7 @@ export const TextInputPhase = ({
 };
 
 const DebugPanel = ({ debugData }) => {
-  const [expanded, setExpanded] = React.useState(true);
+  const [expanded, setExpanded] = React.useState(false);
   const d = debugData;
   
   const rows = [
