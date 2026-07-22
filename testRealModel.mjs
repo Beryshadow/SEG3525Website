@@ -33,7 +33,7 @@ const testNamesToRun = [
     "M18. Order Dependent False Positive Trap"
 ];
 
-const testsToRun = allTests.filter(t => t.name === "M16. Leniency (Different Wording, Same Logic)");
+const testsToRun = allTests.filter(t => testNamesToRun.includes(t.name) || t.name.includes("Binary Stance"));
 
 const questionMap = {};
 for (const q of DEFAULT_DECK) {

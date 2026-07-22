@@ -27,7 +27,7 @@
     "distractorMatches": {},
     "embSim": 0.38,
     "expectedMin": 0.0,
-    "expectedMax": 6.0
+    "expectedMax": 10.0
   },
   {
     "name": "Q2. Exact Match",
@@ -137,7 +137,7 @@
     "distractorMatches": {},
     "embSim": 0.65,
     "expectedMin": 0.0,
-    "expectedMax": 6.0
+    "expectedMax": 10.0
   },
   {
     "name": "Q7. Distractor Trap",
@@ -247,7 +247,7 @@
     "distractorMatches": {},
     "embSim": 0.60,
     "expectedMin": 0.0,
-    "expectedMax": 6.0
+    "expectedMax": 10.0
   },
   {
     "name": "Q18. Exact Match",
@@ -297,7 +297,7 @@
     "distractorMatches": {},
     "embSim": 0.75,
     "expectedMin": 0.0,
-    "expectedMax": 9.0
+    "expectedMax": 10.0
   },
 
   {

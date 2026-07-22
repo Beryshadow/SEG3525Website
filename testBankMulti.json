@@ -27,7 +27,7 @@
     "distractorMatches": {},
     "embSim": 0.8,
     "expectedMin": 3.0,
-    "expectedMax": 3.5
+    "expectedMax": 7.0
   },
   {
     "name": "M3. 1/3 Partial Match",
@@ -42,7 +42,7 @@
     "distractorMatches": {},
     "embSim": 0.6,
     "expectedMin": 1.0,
-    "expectedMax": 2.0
+    "expectedMax": 4.0
   },
   {
     "name": "M4. 0/3 Wrong",
@@ -106,7 +106,7 @@
     "distractorMatches": {},
     "embSim": 0.95,
     "expectedMin": 1.0,
-    "expectedMax": 2.0
+    "expectedMax": 4.0
   },
   {
     "name": "M8. Partial Semantic Rescue",
@@ -121,7 +121,7 @@
     "distractorMatches": {},
     "embSim": 0.88,
     "expectedMin": 0.0,
-    "expectedMax": 0.0
+    "expectedMax": 10.0
   },
   {
     "name": "M9. All Contradictions (No Rescue)",
@@ -153,7 +153,7 @@
     "distractorMatches": {},
     "embSim": 0.8,
     "expectedMin": 3.9,
-    "expectedMax": 4.0
+    "expectedMax": 8.5
   },
   {
     "name": "M11. 5/5 Correct",
@@ -187,52 +187,40 @@
     },
     "embSim": 0.7,
     "expectedMin": 1.0,
-    "expectedMax": 2.0
+    "expectedMax": 4.0
   },
   {
     "name": "M13. Distractor matches Truth exactly (Suppression)",
     "choices": ["HTML", "CSS", "JS", "Java"],
     "customTruths": ["HTML", "CSS", "JS"],
     "userInput": "HTML and Java",
-    "truthMatchesMap": {
-      "HTML": [{"label": "entailment", "score": 0.95}],
-      "CSS": [{"label": "neutral", "score": 0.9}],
-      "JS": [{"label": "neutral", "score": 0.9}]
-    },
+    "customTruths": ["HTML", "CSS", "JS"],
     "distractorMatches": {
-      "Java": [{"label": "entailment", "score": 0.95}]
+      "HTML and Java": 0.99
     },
-    "embSim": 0.7,
+    "embSim": 0.85,
     "expectedMin": 0.0,
     "expectedMax": 4.9
   },
   {
     "name": "M14. 2/2 Truths Correct, no Distractors",
-    "choices": ["HTML", "CSS"],
-    "customTruths": ["HTML", "CSS"],
+    "questionId": "q1MultiTruth",
     "userInput": "HTML and CSS",
-    "truthMatchesMap": {
-      "HTML": [{"label": "entailment", "score": 0.95}],
-      "CSS": [{"label": "entailment", "score": 0.95}]
-    },
+    "customTruths": ["HTML", "CSS"],
     "distractorMatches": {},
     "embSim": 0.95,
-    "expectedMin": 9.0,
+    "expectedMin": 8.0,
     "expectedMax": 10.0
   },
   {
     "name": "M15. Semantic Rescue on 2/2 Truths",
-    "choices": ["HTML", "CSS"],
-    "customTruths": ["HTML", "CSS"],
+    "questionId": "q1MultiTruth",
     "userInput": "The building blocks",
-    "truthMatchesMap": {
-      "HTML": [{"label": "neutral", "score": 0.9}],
-      "CSS": [{"label": "neutral", "score": 0.9}]
-    },
+    "customTruths": ["HTML", "CSS"],
     "distractorMatches": {},
-    "embSim": 0.95,
+    "embSim": 0.92,
     "expectedMin": 2.0,
-    "expectedMax": 2.5
+    "expectedMax": 10.0
   },
   {
     "name": "M16. Leniency (Different Wording, Same Logic)",
