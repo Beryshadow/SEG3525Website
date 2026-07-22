@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { getTokenHash } from '../utils/helpers';
+import { getTokenHash, reconcileProgressData } from '../utils/helpers';
 
 const SYNC_API_BASE = import.meta.env.DEV ? 'http://localhost:3001/api/sync' : '/api/sync';
 
@@ -148,7 +148,7 @@ export function useNeuroSync({
     }
   };
 
-  const handleCloudSyncDownload = useCallback(async (code, manual = false) => {
+  const handleCloudSyncDownload = useCallback(async (code, manual = false, forceReconcile = false) => {
     if (!code) return;
     try {
       const res = await fetch(`${SYNC_API_BASE}/${code}`);
@@ -182,13 +182,13 @@ export function useNeuroSync({
          showToast(t.connectingSecureChannel || "Connecting to secure channel...");
          setSyncCode(data.data.pointer);
          setPairingCode(code); // Remember the pairing code we just used
-         setTimeout(() => handleCloudSyncDownload(data.data.pointer, true), 100);
+         setTimeout(() => handleCloudSyncDownload(data.data.pointer, true, true), 100);
          return;
       }
       if (data && data.data && data.data.newSyncCode) {
          showToast(t.syncSessionMoved || "Sync session moved! Reconnecting...");
          setSyncCode(data.data.newSyncCode);
-         setTimeout(() => handleCloudSyncDownload(data.data.newSyncCode, true), 100);
+         setTimeout(() => handleCloudSyncDownload(data.data.newSyncCode, true, true), 100);
          return;
       }
       if (data && data.data && (data.data.sharedDeck || data.data.sharedDecks)) {
@@ -196,22 +196,51 @@ export function useNeuroSync({
          handleImportFromCode(code);
          return;
       }
-      if (data && data.version > syncVersion) {
+      
+      if (data && (forceReconcile || manual || data.version > syncVersion)) {
          isPullingRef.current = true;
-         if (data.data.myDecks) setMyDecks(data.data.myDecks);
-         if (data.data.currentDeck) setCurrentDeck(data.data.currentDeck);
-         if (data.data.loadedDeckId !== undefined) setLoadedDeckId(data.data.loadedDeckId);
-         if (data.data.streak !== undefined) setStreak(data.data.streak);
-         if (data.data.selectedModel) setSelectedModel(data.data.selectedModel);
-         if (data.data.cardOrderMode) setCardOrderMode(data.data.cardOrderMode);
-         if (data.data.servingMode) setServingMode(data.data.servingMode);
-         if (data.data.selectedEmbeddingModel) setSelectedEmbeddingModel(data.data.selectedEmbeddingModel);
-         if (data.data.focusMode) setFocusMode(data.data.focusMode);
-         if (data.data.questionTypeSettings) setQuestionTypeSettings(data.data.questionTypeSettings);
-         setSyncVersion(data.version);
-         if (manual) {
+         
+         // Smart Progress Reconciliation
+         const localState = { myDecks, currentDeck, loadedDeckId, streak };
+         const reconciled = reconcileProgressData(localState, data.data || {});
+
+         if (reconciled.myDecks) setMyDecks(reconciled.myDecks);
+         if (reconciled.currentDeck) setCurrentDeck(reconciled.currentDeck);
+         if (reconciled.loadedDeckId !== undefined) setLoadedDeckId(reconciled.loadedDeckId);
+         if (reconciled.streak !== undefined) setStreak(reconciled.streak);
+
+         if (data.data?.selectedModel) setSelectedModel(data.data.selectedModel);
+         if (data.data?.cardOrderMode) setCardOrderMode(data.data.cardOrderMode);
+         if (data.data?.servingMode) setServingMode(data.data.servingMode);
+         if (data.data?.selectedEmbeddingModel) setSelectedEmbeddingModel(data.data.selectedEmbeddingModel);
+         if (data.data?.focusMode) setFocusMode(data.data.focusMode);
+         if (data.data?.questionTypeSettings) setQuestionTypeSettings(data.data.questionTypeSettings);
+
+         const newVer = Math.max(data.version || 0, Date.now());
+         setSyncVersion(newVer);
+
+         if (manual || forceReconcile) {
             setSyncCode(code);
-            showToast(t.cloudSyncPulled || "Cloud sync: Data pulled successfully.");
+            showToast(t.cloudSyncPulled || "Cloud sync: Progress merged & synced successfully.");
+            
+            // Push reconciled merged payload back to cloud channel so both devices share unified progress
+            const reconciledPayload = {
+               myDecks: reconciled.myDecks,
+               currentDeck: reconciled.currentDeck,
+               loadedDeckId: reconciled.loadedDeckId,
+               streak: reconciled.streak,
+               selectedModel: data.data?.selectedModel || selectedModel,
+               cardOrderMode: data.data?.cardOrderMode || cardOrderMode,
+               servingMode: data.data?.servingMode || servingMode,
+               selectedEmbeddingModel: data.data?.selectedEmbeddingModel || selectedEmbeddingModel,
+               focusMode: data.data?.focusMode || focusMode,
+               questionTypeSettings: data.data?.questionTypeSettings || questionTypeSettings
+            };
+            fetch(`${SYNC_API_BASE}/${code}`, {
+               method: 'POST',
+               headers: { 'Content-Type': 'application/json' },
+               body: JSON.stringify({ data: reconciledPayload, version: newVer, datasetId, type: 'sync' })
+            }).catch(err => console.error("Reconciled push error:", err));
          }
       } else if (manual) {
          showToast(t?.syncUpToDate || "Connected! You are already up to date.");
@@ -220,10 +249,11 @@ export function useNeuroSync({
        console.error("Auto-pull error", err);
        if (manual) showToast(err.message === "Failed to fetch" ? (t?.syncNetError || "Network connection failed.") : (t?.syncError || "An unexpected error occurred."));
     }
-  }, [syncVersion, showToast, setMyDecks, setCurrentDeck, setLoadedDeckId, setStreak, setSelectedModel, setCardOrderMode, setServingMode, setSelectedEmbeddingModel, setFocusMode, setQuestionTypeSettings, t]);
+  }, [syncVersion, myDecks, currentDeck, loadedDeckId, streak, selectedModel, cardOrderMode, servingMode, setSelectedEmbeddingModel, focusMode, questionTypeSettings, datasetId, showToast, setMyDecks, setCurrentDeck, setLoadedDeckId, setStreak, setSelectedModel, setCardOrderMode, setServingMode, setFocusMode, setQuestionTypeSettings, t]);
 
   const handleConnectSyncCode = useCallback((codeToConnect) => {
-      handleCloudSyncDownload(codeToConnect, true);
+      setSyncVersion(0);
+      handleCloudSyncDownload(codeToConnect, true, true);
   }, [handleCloudSyncDownload]);
 
   const forcePushToCloud = useCallback(async (codeToUse, manual = false) => {

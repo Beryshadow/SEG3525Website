@@ -27,3 +27,136 @@ export const getTokenHash = (token) => {
   return positive.toString(36).substring(0, 3).toUpperCase().padStart(3, '0');
 };
 
+/**
+ * Smart Progress Reconciliator: Merges local and cloud state without data loss.
+ * Prioritizes higher study progress for cards/decks and merges deck collections.
+ */
+export const reconcileProgressData = (localData = {}, cloudData = {}) => {
+  if (!localData || !localData.myDecks) return cloudData || {};
+  if (!cloudData || !cloudData.myDecks) return localData || {};
+
+  // Helper to reconcile progress of two card items
+  const reconcileCard = (cardA, cardB) => {
+    if (!cardA) return cardB;
+    if (!cardB) return cardA;
+
+    const attemptsA = cardA.attempts || 0;
+    const attemptsB = cardB.attempts || 0;
+    const scoreA = cardA.score || 0;
+    const scoreB = cardB.score || 0;
+    const masteredA = !!(cardA.isMastered || cardA.mastered);
+    const masteredB = !!(cardB.isMastered || cardB.mastered);
+
+    const isMastered = masteredA || masteredB;
+    const score = Math.max(scoreA, scoreB);
+    const attempts = Math.max(attemptsA, attemptsB);
+    const lastReviewed = (cardA.lastReviewed && cardB.lastReviewed)
+      ? (new Date(cardA.lastReviewed) > new Date(cardB.lastReviewed) ? cardA.lastReviewed : cardB.lastReviewed)
+      : (cardA.lastReviewed || cardB.lastReviewed);
+
+    let history = Array.isArray(cardA.history) ? [...cardA.history] : [];
+    if (Array.isArray(cardB.history)) {
+      const existing = new Set(history.map(h => h.timestamp || h.date || JSON.stringify(h)));
+      for (const h of cardB.history) {
+        if (h && !existing.has(h.timestamp || h.date || JSON.stringify(h))) {
+          history.push(h);
+        }
+      }
+    }
+
+    const base = attemptsB >= attemptsA ? cardB : cardA;
+    return {
+      ...base,
+      score,
+      attempts,
+      isMastered,
+      mastered: isMastered,
+      lastReviewed,
+      history
+    };
+  };
+
+  // Helper to reconcile a card array (deck)
+  const reconcileCardArray = (cardsA = [], cardsB = []) => {
+    const cardMap = new Map();
+    for (const card of cardsA) {
+      const key = card.id || card.question;
+      if (key) cardMap.set(key, card);
+    }
+    const result = [];
+    const processedKeys = new Set();
+
+    for (const cardB of cardsB) {
+      const key = cardB.id || cardB.question;
+      if (key && cardMap.has(key)) {
+        const mergedCard = reconcileCard(cardMap.get(key), cardB);
+        result.push(mergedCard);
+        processedKeys.add(key);
+      } else {
+        result.push(cardB);
+        if (key) processedKeys.add(key);
+      }
+    }
+
+    for (const cardA of cardsA) {
+      const key = cardA.id || cardA.question;
+      if (key && !processedKeys.has(key)) {
+        result.push(cardA);
+      }
+    }
+
+    return result;
+  };
+
+  // 1. Reconcile `myDecks`
+  const localDecks = Array.isArray(localData.myDecks) ? localData.myDecks : [];
+  const cloudDecks = Array.isArray(cloudData.myDecks) ? cloudData.myDecks : [];
+  const deckMap = new Map();
+
+  for (const d of localDecks) {
+    if (d && d.id) deckMap.set(d.id, d);
+  }
+
+  const mergedDecks = [];
+  const processedDeckIds = new Set();
+
+  for (const cloudDeck of cloudDecks) {
+    if (!cloudDeck || !cloudDeck.id) continue;
+    if (deckMap.has(cloudDeck.id)) {
+      const localDeck = deckMap.get(cloudDeck.id);
+      const mergedCardArray = reconcileCardArray(localDeck.deck || [], cloudDeck.deck || []);
+      mergedDecks.push({
+        ...localDeck,
+        ...cloudDeck,
+        name: cloudDeck.name || localDeck.name,
+        completed: (cloudDeck.completed || localDeck.completed) && (mergedCardArray.length > 0 ? mergedCardArray.every(c => c.isMastered || c.mastered) : false),
+        deck: mergedCardArray
+      });
+      processedDeckIds.add(cloudDeck.id);
+    } else {
+      mergedDecks.push(cloudDeck);
+      processedDeckIds.add(cloudDeck.id);
+    }
+  }
+
+  for (const localDeck of localDecks) {
+    if (localDeck && localDeck.id && !processedDeckIds.has(localDeck.id)) {
+      mergedDecks.push(localDeck);
+    }
+  }
+
+  // 2. Reconcile `currentDeck`
+  const mergedCurrentDeck = reconcileCardArray(localData.currentDeck || [], cloudData.currentDeck || []);
+
+  // 3. Reconcile `streak`
+  const mergedStreak = Math.max(localData.streak || 0, cloudData.streak || 0);
+
+  return {
+    ...cloudData,
+    myDecks: mergedDecks,
+    currentDeck: mergedCurrentDeck,
+    streak: mergedStreak,
+    loadedDeckId: cloudData.loadedDeckId !== undefined ? cloudData.loadedDeckId : localData.loadedDeckId
+  };
+};
+
