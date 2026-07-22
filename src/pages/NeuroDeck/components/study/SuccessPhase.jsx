@@ -72,7 +72,7 @@ export const SuccessPhase = ({
           )}
         </div>
 
-        {hasUserInput && skippedToMCQ && !wasRightClicked && calculatedScore < 10 && (
+        {hasUserInput && skippedToMCQ && !wasRightClicked && (
           <div className="my-3 sm:my-4">
             <button
               onClick={handleIWasRight}

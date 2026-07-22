@@ -1365,7 +1365,7 @@ const StudyView = ({
                 >
                   {t.nextQuestion} <i className="fas fa-arrow-right ml-2"></i>
                 </button>
-                {userInput && userInput.trim() && skippedToMCQ && !wasRightClicked && calculatedScore < 10 && (
+                {userInput && userInput.trim() && skippedToMCQ && !wasRightClicked && (
                   <button
                     onClick={handleOverrideAI}
                     className="neu-btn px-4 py-2 font-black uppercase tracking-widest text-[color:var(--color-success)] text-[10px] sm:text-xs rounded-lg flex items-center justify-center gap-1.5 active:scale-95 transition-all"

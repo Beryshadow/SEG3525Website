@@ -33,9 +33,9 @@ export const detectLanguageFRorEN = (text) => {
 };
 
 export const normalizeText = (text) => {
-
   if (!text || typeof text !== 'string') return '';
-  let cleaned = text.trim().toLowerCase();
+  // Fold diacritics / accents (e.g., é->e, è->e, ê->e, à->a, ô->o, û->u, ç->c)
+  let cleaned = text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase();
   // Strip parens from function calls e.g., "fork()" -> "fork", "main(void)" -> "main"
   cleaned = cleaned.replace(/\s*\([^)]*\)\s*/g, ' ');
   // Normalize quotes and apostrophes
@@ -53,7 +53,7 @@ export const getTokenOverlap = (strA, strB) => {
   const normB = normalizeText(strB);
   if (!normA || !normB) return 0;
 
-  const stopWords = new Set(['un', 'une', 'le', 'la', 'les', 'des', 'du', 'est', 'sont', 'dans', 'pour', 'avec', 'par', 'sur', 'qui', 'que', 'a', 'an', 'the', 'is', 'are', 'was', 'were', 'in', 'on', 'at', 'for', 'with', 'by', 'of', 'and', 'or', 'cest', 'd', 'l']);
+  const stopWords = new Set(['un', 'une', 'le', 'la', 'les', 'des', 'du', 'est', 'sont', 'dans', 'pour', 'avec', 'par', 'sur', 'qui', 'que', 'a', 'an', 'the', 'is', 'are', 'was', 'were', 'in', 'on', 'at', 'for', 'with', 'by', 'of', 'and', 'or', 'cest', 'd', 'l', 'to', 'such', 'as', 'de', 'en', 'etat', 'letat']);
   const stem = (w) => w.length > 5 ? w.slice(0, 5) : w;
 
   const tokensA = normA.split(/\s+/).filter(w => w.length > 1 && !stopWords.has(w)).map(stem);
@@ -67,10 +67,23 @@ export const getTokenOverlap = (strA, strB) => {
     if (setB.has(t)) intersection++;
   }
 
-  // Use harmonic mean / balanced ratio so short partial inputs don't score 1.0 unless coverage is substantial
-  const denom = Math.max(tokensA.length, Math.min(tokensB.length, tokensA.length * 1.5));
-  return intersection / denom;
+  const harmonicOverlap = intersection / Math.max(tokensA.length, Math.min(tokensB.length, tokensA.length * 1.5));
+  const inputCoverage = tokensA.length > 0 ? (intersection / tokensA.length) : 0;
+  const uniqueTruthTokens = new Set(tokensB);
+  const uniqueTruthCoverage = uniqueTruthTokens.size > 0 ? (intersection / uniqueTruthTokens.size) : 0;
+
+  if (inputCoverage >= 1.0 && uniqueTruthCoverage >= 0.70 && intersection >= 2) {
+    return 1.0;
+  }
+  if (inputCoverage >= 0.85 && uniqueTruthCoverage >= 0.50 && intersection >= 2) {
+    return Math.max(harmonicOverlap, 0.85);
+  }
+
+  return harmonicOverlap;
 };
+
+
+
 
 
 const embeddingCache = new Map();

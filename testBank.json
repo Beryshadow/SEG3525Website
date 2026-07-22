@@ -611,7 +611,18 @@
     "embSim": 0.20,
     "expectedMin": 0.0,
     "expectedMax": 4.9
+  },
+  {
+    "name": "French OS: Quantum Time Exhaustion State Transition (execution a pret)",
+    "customTruths": ["De l'état 'en exécution' à l'état 'prêt' (ready)"],
+    "userInput": "execution a pret.",
+    "truthMatch": [{"label": "neutral", "score": 0.5}, {"label": "entailment", "score": 0.5}],
+    "distractorMatches": {},
+    "embSim": 0.85,
+    "expectedMin": 8.0,
+    "expectedMax": 10.0
   }
 ]
+
 
 
