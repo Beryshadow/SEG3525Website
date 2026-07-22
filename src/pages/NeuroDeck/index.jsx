@@ -541,6 +541,10 @@ export default function NeuroDeck() {
             onImportFromCode={handleImportFromCode}
             onJumpToPriorityCard={handleJumpToPriorityCard}
             onClearAICache={handleClearAICache}
+            nliStatus={modelStatus}
+            evaluateNLI={model}
+            embeddingStatus={embeddingStatus}
+            getEmbeddings={getEmbeddings}
             t={t}
             showToast={showToast}
           />
