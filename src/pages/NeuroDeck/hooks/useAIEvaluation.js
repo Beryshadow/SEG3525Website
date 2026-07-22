@@ -189,7 +189,7 @@ export const getEntailmentScores = (output) => {
       maxScore = c.score;
       topLabel = labelStr;
     }
-    if (labelStr.includes('ENTAIL') || labelStr === 'LABEL_1' || labelStr === 'LABEL_0') {
+    if (labelStr.includes('ENTAIL') || labelStr === 'LABEL_0') {
        if (labelStr.includes('ENTAIL')) {
            entailmentScore = c.score;
        } else if (entailmentScore === 0) {
@@ -198,7 +198,7 @@ export const getEntailmentScores = (output) => {
     }
   }
   
-  const isEntailment = topLabel.includes('ENTAIL') || topLabel === 'LABEL_1' || topLabel === 'LABEL_0';
+  const isEntailment = topLabel.includes('ENTAIL') || topLabel === 'LABEL_0';
   const isContradiction = topLabel.includes('CONTRADICTION') || topLabel === 'LABEL_2';
   return { entailment: entailmentScore, isEntailment, isContradiction };
 };
@@ -345,9 +345,13 @@ export const evaluateInputCore = async (userInput, question, correctAnswersArray
     let isStrongContradiction = false;
 
     if (pairsToEvaluate.length > 0) {
-      const batchedOutputs = await model(pairsToEvaluate, { top_k: 5, topk: 5 });
-      if (!batchedOutputs) {
-         return { status: "wrong", score: 0.0, hotColdScore: maxEmbeddingSim };
+      let batchedOutputs = null;
+      try {
+        if (typeof model === 'function') {
+          batchedOutputs = await model(pairsToEvaluate, { top_k: 5, topk: 5 });
+        }
+      } catch (err) {
+        console.warn("NLI model evaluation failed:", err);
       }
 
       const normalizedOutputs = Array.isArray(batchedOutputs) 
