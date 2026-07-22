@@ -302,10 +302,11 @@ export const DashboardView = ({ deck, t, onGoToCard, onUpdateCards, onDeleteCard
 
           {displayedDeck.map((q, i) => (
             <div
-              key={i}
-              onClick={() => onGoToCard(i)}
+              key={q.id || i}
+              onClick={() => onGoToCard(q.id)}
               className="neu-flat p-4 rounded-xl flex flex-col gap-3 border border-white/5 cursor-pointer hover:border-[var(--accent)] transition-all active:scale-[0.99]"
             >
+
               <div className="flex items-start gap-3">
                 <input
                   type="checkbox"
@@ -408,7 +409,8 @@ export const DashboardView = ({ deck, t, onGoToCard, onUpdateCards, onDeleteCard
             </thead>
             <tbody>
               {displayedDeck.map((q, i) => (
-                <tr key={i} onClick={() => onGoToCard(i)} className="border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors cursor-pointer group">
+                <tr key={q.id || i} onClick={() => onGoToCard(q.id)} className="border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors cursor-pointer group">
+
                   <td className="py-2 px-2 sm:py-5 sm:px-6 text-center" onClick={e => e.stopPropagation()}>
                     <input type="checkbox" checked={selectedIds.has(q.id)} onChange={(e) => toggleSelect(q.id, e)} className="cursor-pointer" />
                   </td>

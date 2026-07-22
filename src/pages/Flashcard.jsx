@@ -326,10 +326,19 @@ export default function Flashcard() {
     setManualCardIndex(null); // Clear manual override to respect card ordering settings
   };
 
-  const goToDashboardCard = (index) => {
-    setManualCardIndex(index);
-    setView("study");
+  const goToDashboardCard = (cardIdOrIndex) => {
+    let targetIndex = -1;
+    if (typeof cardIdOrIndex === 'number') {
+      targetIndex = cardIdOrIndex;
+    } else {
+      targetIndex = deck.findIndex(c => String(c.id) === String(cardIdOrIndex) || String(c._id) === String(cardIdOrIndex));
+    }
+    if (targetIndex !== -1) {
+      setManualCardIndex(targetIndex);
+      setView("study");
+    }
   };
+
 
   // Dashboard batch/individual operations
   const handleUpdateCards = (updates) => {
