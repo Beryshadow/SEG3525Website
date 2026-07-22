@@ -1,4 +1,36 @@
-import { cosineSimilarity } from '../../../utilities/shared';
+const cosineSimilarity = (vecA, vecB) => {
+  if (!vecA || !vecB) return 0;
+  let dotProduct = 0, normA = 0, normB = 0;
+  for (let i = 0; i < vecA.length; i++) {
+    dotProduct += vecA[i] * vecB[i];
+    normA += vecA[i] * vecA[i];
+    normB += vecB[i] * vecB[i];
+  }
+  if (normA === 0 || normB === 0) return 0;
+  return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+};
+
+export const detectLanguageFRorEN = (text) => {
+  if (!text || typeof text !== 'string') return 'EN';
+  const clean = text.toLowerCase();
+  if (/[éèêëàâîïôûùç]/.test(clean)) return 'FR';
+  
+  const words = clean.split(/\W+/);
+  let frScore = 0;
+  let enScore = 0;
+  
+  const frWords = new Set(['le', 'la', 'les', 'des', 'du', 'un', 'une', 'est', 'sont', 'dans', 'pour', 'avec', 'par', 'sur', 'qui', 'que', 'quoi', 'comment', 'pourquoi', 'quand', 'ce', 'cette', 'ces', 'réponse']);
+  const enWords = new Set(['the', 'is', 'are', 'was', 'were', 'in', 'on', 'at', 'for', 'with', 'by', 'what', 'which', 'who', 'where', 'why', 'how', 'this', 'that', 'these', 'those', 'answer']);
+  
+  for (const w of words) {
+    if (frWords.has(w)) frScore++;
+    if (enWords.has(w)) enScore++;
+  }
+  
+  if (frScore > enScore) return 'FR';
+  if (enScore > frScore) return 'EN';
+  return 'EN';
+};
 
 const embeddingCache = new Map();
 const evalResultCache = new Map();
@@ -100,7 +132,8 @@ export const useAIEvaluation = ({ model, getEmbeddings, cardEmbeddings, t, curre
     // --- 2. MULTI-DIRECTIONAL MULTI-PASS NLI CROSS-ENCODER EVALUATION ---
     try {
       const sepToken = model?.tokenizer?.sep_token || "[SEP]";
-      const questionContext = currentLangKey === 'FR' ? `Question: ${question?.question || ''} Réponse:` : `Question: ${question?.question || ''} Answer:`;
+      const detectedLang = detectLanguageFRorEN(question?.question) || currentLangKey || 'EN';
+      const questionContext = detectedLang === 'FR' ? `Question: ${question?.question || ''} Réponse:` : `Question: ${question?.question || ''} Answer:`;
       const statementUser = `${questionContext} ${userInput.trim()}`;
 
       const pairsToEvaluate = [];

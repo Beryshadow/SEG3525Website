@@ -1,6 +1,4 @@
-// testAIEvaluation.js
-// This script simulates the AI Evaluation Pipeline (useAIEvaluation.js)
-// to test the NLI and Embedding fallback logic against a highly diverse set of edge cases.
+import { detectLanguageFRorEN } from './src/pages/NeuroDeck/hooks/useAIEvaluation.js';
 
 const cosineSimilarity = (vecA, vecB) => {
   let dotProduct = 0, normA = 0, normB = 0;
@@ -315,6 +313,20 @@ async function runTests() {
     passed++;
   } else {
     console.error(`❌ [FAIL] Graph Pre-Computed Embedding Reuse -> Score: ${resGraphEmb?.score?.toFixed(2)}`);
+  }
+
+  // Add micro language detector (FR vs EN) test case
+  const frQuestion = "Qu'est-ce que le DOM et comment fonctionne-t-il dans le navigateur ?";
+  const enQuestion = "What is the DOM tree and how does it render in modern web browsers?";
+  const frLang = detectLanguageFRorEN(frQuestion);
+  const enLang = detectLanguageFRorEN(enQuestion);
+
+  total++;
+  if (frLang === 'FR' && enLang === 'EN') {
+    console.log(`✅ [PASS] Micro Language Detector (FR: ${frLang}, EN: ${enLang})`);
+    passed++;
+  } else {
+    console.error(`❌ [FAIL] Micro Language Detector -> Expected FR/EN, got ${frLang}/${enLang}`);
   }
 
   console.log(`\n=== TEST SUMMARY: ${passed}/${total} PASSED ===\n`);

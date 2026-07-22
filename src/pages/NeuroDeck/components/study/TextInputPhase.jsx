@@ -1,5 +1,6 @@
 import React from 'react';
 import { LightbulbIcon, SparklesIcon, XIcon, PlayIcon } from '../Icons';
+import { detectLanguageFRorEN } from '../../hooks/useAIEvaluation';
 
 export const TextInputPhase = ({
   userInput,
@@ -18,15 +19,30 @@ export const TextInputPhase = ({
   question,
   t
 }) => {
+  const detectedLang = detectLanguageFRorEN(question?.question) || 'EN';
+  const dynamicPlaceholder = detectedLang === 'FR' 
+    ? "Tapez votre réponse en français... (Entrée pour valider)" 
+    : "Type your answer in English... (Press Enter to submit)";
+
   return (
     <div className="space-y-3 sm:space-y-6">
+      <div className="flex justify-between items-center px-1">
+        <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-[var(--text-muted)] flex items-center gap-1.5">
+          <i className="fas fa-keyboard text-[var(--accent)]"></i>
+          {t.yourInput || "Your Answer"}
+        </span>
+        <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-[var(--accent)]/10 text-[var(--accent)] border border-[var(--accent)]/20 shadow-xs">
+          {detectedLang === 'FR' ? 'FRANÇAIS' : 'ENGLISH'}
+        </span>
+      </div>
+
       <textarea
         className={`neu-pressed w-full h-20 sm:h-40 p-2.5 sm:p-6 border-0 rounded-xl sm:rounded-2xl resize-none transition-all bg-transparent text-[var(--text-main)] outline-none font-medium leading-relaxed text-xs sm:text-base ${
           feedback && !feedback.overridden
             ? (feedback.type === "close" ? "shadow-[inset_0_0_15px_rgba(59,130,246,0.3)]" : "shadow-[inset_0_0_15px_rgba(239,68,68,0.3)]")
             : ""
         }`}
-        placeholder={t.typeAnswerPlaceholder}
+        placeholder={dynamicPlaceholder}
         value={userInput}
         onChange={(e) => {
           setUserInput(e.target.value);
