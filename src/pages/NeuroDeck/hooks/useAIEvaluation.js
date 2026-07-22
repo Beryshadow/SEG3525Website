@@ -101,11 +101,17 @@ export const clearAIEvaluationCaches = () => {
 
 export const getStoredLeniencyBias = () => {
   try {
-    return parseFloat(localStorage.getItem('neurodeck-leniency-bias')) || 0;
+    if (typeof localStorage === 'undefined') return 0;
+    const stored = localStorage.getItem('neurodeck-leniency-bias');
+    if (stored !== null && !isNaN(parseFloat(stored))) {
+      return parseFloat(stored);
+    }
+    return 0.0625; // Default starting bias (75% strictness)
   } catch (e) {
     return 0;
   }
 };
+
 
 export const updateLeniencyBiasOnOverride = (aiScoreRatio = 0.4) => {
   const currentBias = getStoredLeniencyBias();
@@ -119,6 +125,9 @@ export const updateLeniencyBiasOnOverride = (aiScoreRatio = 0.4) => {
 
   try {
     localStorage.setItem('neurodeck-leniency-bias', boundedBias.toString());
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('storage'));
+    }
   } catch (e) {}
 
   return boundedBias;
@@ -126,15 +135,19 @@ export const updateLeniencyBiasOnOverride = (aiScoreRatio = 0.4) => {
 
 export const updateLeniencyBiasOnNormalPass = () => {
   const currentBias = getStoredLeniencyBias();
-  if (currentBias === 0) return 0;
+  const baseline = 0.0625;
+  if (currentBias === baseline) return baseline;
 
   // L2 Regularization weight decay (2% pull back to baseline per normal turn)
   // Prevents unbounded runaway leniency growth and lets strictness settle smoothly
-  const decayedBias = currentBias * 0.98;
-  const finalBias = Math.abs(decayedBias) < 0.005 ? 0 : decayedBias;
+  const decayedBias = baseline + (currentBias - baseline) * 0.98;
+  const finalBias = Math.abs(decayedBias - baseline) < 0.005 ? baseline : decayedBias;
 
   try {
     localStorage.setItem('neurodeck-leniency-bias', finalBias.toString());
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('storage'));
+    }
   } catch (e) {}
 
   return finalBias;
@@ -148,10 +161,14 @@ export const updateLeniencyBiasOnFail = () => {
 
   try {
     localStorage.setItem('neurodeck-leniency-bias', finalBias.toString());
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('storage'));
+    }
   } catch (e) {}
 
   return finalBias;
 };
+
 
 
 
@@ -387,15 +404,20 @@ export const evaluateInputCore = async (userInput, question, correctAnswersArray
     const avgEntailment = validTruths.length > 0 ? totalEntailment / validTruths.length : 0;
     let effectiveTruthScore = avgEntailment;
 
-    // Apply adaptive learned leniency bias from user supervision ("I was right" gradient updates)
-    let leniencyBias = 0;
+    // Apply adaptive learned leniency bias from user supervision / slider (Default starting strictness is 75%, bias = 0.0625)
+    let leniencyBias = 0.0625;
     try {
-      leniencyBias = parseFloat(localStorage.getItem('neurodeck-leniency-bias')) || 0;
+      const stored = localStorage.getItem('neurodeck-leniency-bias');
+      if (stored !== null && !isNaN(parseFloat(stored))) {
+        leniencyBias = parseFloat(stored);
+      }
     } catch(e) {}
 
-    if (leniencyBias !== 0) {
+    if (leniencyBias !== 0 && effectiveTruthScore > 0) {
       effectiveTruthScore = Math.min(1.0, Math.max(0.0, effectiveTruthScore + leniencyBias));
     }
+
+
 
     // Calibrated rescue threshold for multilingual (FR) or high token overlap / semantic similarity
     const baseRescueThreshold = detectedLang === 'FR' ? 0.50 : 0.72;

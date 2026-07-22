@@ -117,11 +117,15 @@ export const DashboardView = ({ deck, t, onGoToCard, onUpdateCards, onDeleteCard
   });
 
   useEffect(() => {
+    const defaultBias = 0.0625; // Default 75% strictness (1 - 0.75) * 0.25
     const syncBias = () => {
       try {
-        const val = parseFloat(localStorage.getItem('neurodeck-leniency-bias')) || 0;
+        const stored = localStorage.getItem('neurodeck-leniency-bias');
+        const val = stored !== null && !isNaN(parseFloat(stored)) ? parseFloat(stored) : defaultBias;
         setLeniencyBias(val);
-      } catch (e) {}
+      } catch (e) {
+        setLeniencyBias(defaultBias);
+      }
     };
     syncBias();
     window.addEventListener('storage', syncBias);
@@ -130,6 +134,16 @@ export const DashboardView = ({ deck, t, onGoToCard, onUpdateCards, onDeleteCard
 
   const maxBias = 0.25;
   const strictnessPercent = Math.max(0, Math.min(100, Math.round((1 - (leniencyBias / maxBias)) * 100)));
+
+  const handleStrictnessChange = (newPercent) => {
+    const clamped = Math.max(0, Math.min(100, newPercent));
+    const newBias = (1 - (clamped / 100)) * maxBias;
+    setLeniencyBias(newBias);
+    try {
+      localStorage.setItem('neurodeck-leniency-bias', newBias.toString());
+      window.dispatchEvent(new Event('storage'));
+    } catch (e) {}
+  };
 
   return (
     <div className="w-full animate-fade-in">
@@ -149,12 +163,12 @@ export const DashboardView = ({ deck, t, onGoToCard, onUpdateCards, onDeleteCard
                  </button>
               </div>
             )}
-            {/* Strictness / Leniency Progress Bar */}
+            {/* Interactive Strictness Progress Bar & Slider */}
             <div 
-              className="neu-pressed flex-1 lg:flex-none px-3.5 sm:px-5 py-2 sm:py-2 rounded-lg sm:rounded-2xl flex flex-col justify-center min-w-[170px] sm:min-w-[210px]"
-              title={`Strictness: ${strictnessPercent}% (Untuned: 100% Strict)`}
+              className="neu-pressed flex-1 lg:flex-none px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-2xl flex flex-col justify-center min-w-[190px] sm:min-w-[230px]"
+              title={`Strictness: ${strictnessPercent}% (Click or drag slider to adjust starting strictness)`}
             >
-              <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center justify-between mb-1.5">
                 <span className="text-[var(--text-muted)] font-black text-[9px] sm:text-xs uppercase tracking-widest flex items-center gap-1.5">
                   <i className="fas fa-sliders-h text-[var(--accent)] text-[10px]"></i>
                   {t.strictness || "Strictness:"}
@@ -163,15 +177,20 @@ export const DashboardView = ({ deck, t, onGoToCard, onUpdateCards, onDeleteCard
                   {strictnessPercent}%
                 </span>
               </div>
-              <div className="w-full h-2 rounded-full neu-flat overflow-hidden p-0.5 relative bg-black/20">
-                <div 
-                  className="h-full rounded-full transition-all duration-500 bg-gradient-to-r from-[var(--accent)] via-purple-500 to-emerald-500 shadow-sm" 
-                  style={{ width: `${strictnessPercent}%` }}
-                ></div>
+              <div className="relative w-full flex items-center">
+                <input 
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={strictnessPercent}
+                  onChange={(e) => handleStrictnessChange(parseInt(e.target.value))}
+                  className="w-full h-2 accent-[var(--accent)] cursor-pointer bg-black/20 rounded-full neu-flat appearance-none focus:outline-none"
+                />
               </div>
             </div>
           </div>
         </div>
+
 
         {/* Analytics & Metrics Stat Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
