@@ -29,6 +29,7 @@ export const StudyView = ({
   const [selectedChoices, setSelectedChoices] = useState(new Set());
   const [shakingChoices, setShakingChoices] = useState(new Set());
   const [calculatedScore, setCalculatedScore] = useState(0);
+  const [debugData, setDebugData] = useState(null);
 
   const nextBtnRef = useRef(null);
 
@@ -70,6 +71,7 @@ export const StudyView = ({
     setSelectedChoices(new Set());
     setShakingChoices(new Set());
     setCalculatedScore(initialPhase === "pass" ? (question?.score || 0) : 0);
+    setDebugData(null);
   }, [question, servingMode, isLongQuestion]);
 
   useEffect(() => {
@@ -188,6 +190,8 @@ export const StudyView = ({
       setPhase("input");
       return;
     }
+
+    setDebugData(result._debug || null);
 
     if (result.status === "success") {
       updateLeniencyBiasOnNormalPass();
@@ -369,6 +373,7 @@ export const StudyView = ({
             skippedToMCQ={skippedToMCQ}
             handleIWasRight={handleOverrideAI}
             wasRightClicked={wasRightClicked}
+            debugData={debugData}
             t={t}
           />
         ) : isLongQuestion ? (
@@ -412,6 +417,7 @@ export const StudyView = ({
             setPhase={setPhase}
             handleOverrideAI={handleOverrideAI}
             question={question}
+            debugData={debugData}
             t={t}
           />
         )}

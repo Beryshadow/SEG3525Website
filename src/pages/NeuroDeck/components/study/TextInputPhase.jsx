@@ -17,6 +17,7 @@ export const TextInputPhase = ({
   setPhase,
   handleOverrideAI,
   question,
+  debugData,
   t
 }) => {
   const detectedLang = detectLanguageFRorEN(question?.question) || 'EN';
@@ -184,6 +185,75 @@ export const TextInputPhase = ({
               </button>
             </div>
           )}
+        </div>
+      )}
+      {debugData && (
+        <DebugPanel debugData={debugData} />
+      )}
+    </div>
+  );
+};
+
+const DebugPanel = ({ debugData }) => {
+  const [expanded, setExpanded] = React.useState(true);
+  const d = debugData;
+  
+  const rows = [
+    ['Status', d.scoringBranch, d.scoringBranch === 'HIT_ALL' ? '#22c55e' : d.scoringBranch === 'PARTIAL' ? '#3b82f6' : '#ef4444'],
+    ['Hits', `${d.hits} / ${d.validTruthsLength}`],
+    ['──── STANCE ────', '', '#a855f7'],
+    ['inputStance', d.inputStance || 'null'],
+    ['truthStance', d.truthStance || 'null'],
+    ['isSameStance', String(d.isSameStance), d.isSameStance ? '#22c55e' : '#ef4444'],
+    ['──── NLI ────', '', '#a855f7'],
+    ['avgEntailment', d.avgEntailment],
+    ['effectiveTruthScore', d.effectiveTruthScore, d.effectiveTruthScore >= 0.85 ? '#22c55e' : d.effectiveTruthScore >= 0.5 ? '#eab308' : '#ef4444'],
+    ['maxDistractorScore', d.maxDistractorScore, d.maxDistractorScore > d.effectiveTruthScore ? '#ef4444' : '#22c55e'],
+    ['closestIncorrect', d.closestIncorrectText ? (d.closestIncorrectText.length > 40 ? d.closestIncorrectText.slice(0, 40) + '…' : d.closestIncorrectText) : 'none'],
+    ['isStrongContradiction', String(d.isStrongContradiction), d.isStrongContradiction ? '#ef4444' : '#22c55e'],
+    ['──── EMBEDDINGS ────', '', '#a855f7'],
+    ['maxEmbeddingSim', d.maxEmbeddingSim],
+    ['effectiveSim', d.effectiveSim],
+    ['maxTokenOverlap', d.maxTokenOverlap],
+    ['──── RESCUE ────', '', '#a855f7'],
+    ['hasHighSemanticEq', String(d.hasHighSemanticEquivalence), d.hasHighSemanticEquivalence ? '#22c55e' : '#ef4444'],
+    ['allowRescue', String(d.allowRescue), d.allowRescue ? '#22c55e' : '#ef4444'],
+    ['──── CONFIG ────', '', '#a855f7'],
+    ['detectedLang', d.detectedLang],
+    ['leniencyBias', d.leniencyBias],
+    ['correctAnswers', d.correctAnswersReceived?.length ? `[${d.correctAnswersReceived.length}] ${(d.correctAnswersReceived[0] || '').slice(0, 50)}…` : '⚠ EMPTY'],
+    ['choices', `${d.choicesReceived?.length || 0} choices, ${d.incorrectTextsCount} incorrect`],
+  ];
+
+  return (
+    <div className="mt-3 sm:mt-6 rounded-xl sm:rounded-2xl border border-amber-500/30 bg-amber-500/5 overflow-hidden">
+      <button 
+        onClick={() => setExpanded(!expanded)} 
+        className="w-full flex items-center justify-between p-3 sm:p-4 text-left"
+      >
+        <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-amber-500 flex items-center gap-2">
+          <i className="fas fa-bug"></i> AI Debug Telemetry
+        </span>
+        <i className={`fas fa-chevron-${expanded ? 'up' : 'down'} text-amber-500 text-xs`}></i>
+      </button>
+      {expanded && (
+        <div className="px-3 sm:px-4 pb-3 sm:pb-4">
+          <div className="overflow-x-auto">
+            <table className="w-full text-[9px] sm:text-xs font-mono">
+              <tbody>
+                {rows.map(([label, value, color], i) => (
+                  <tr key={i} className={label.startsWith('────') ? '' : 'border-t border-white/5'}>
+                    <td className="py-1 pr-3 font-bold text-[var(--text-muted)] whitespace-nowrap" style={label.startsWith('────') ? { color: color || 'var(--accent)', fontWeight: 900, paddingTop: '0.5rem' } : {}}>
+                      {label.startsWith('────') ? label.replace(/─/g, '') : label}
+                    </td>
+                    <td className="py-1 font-bold break-all" style={{ color: color || 'var(--text-main)' }}>
+                      {label.startsWith('────') ? '' : String(value ?? 'undefined')}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>

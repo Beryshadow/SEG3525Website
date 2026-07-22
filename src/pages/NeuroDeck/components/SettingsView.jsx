@@ -24,6 +24,13 @@ export const SettingsView = ({
   const [selectedDeckIds, setSelectedDeckIds] = useState(new Set());
   const [lastSelectedId, setLastSelectedId] = useState(null);
   const [targetMoveFolderId, setTargetMoveFolderId] = useState("");
+  const [isDebugEnabled, setIsDebugEnabled] = useState(() => {
+    try {
+      return typeof localStorage !== 'undefined' && localStorage.getItem('neurodeck-debug') === 'true';
+    } catch (e) {
+      return false;
+    }
+  });
 
   const handleBatchExport = (ids) => {
      ids.forEach(id => {
@@ -935,6 +942,35 @@ export const SettingsView = ({
           >
             <i className="fas fa-trash-alt"></i>
             <span>{t.clearAiCacheBtn || "Clear AI Cache"}</span>
+          </button>
+        </div>
+
+        {/* AI Debug Telemetry Toggle */}
+        <div className="mt-6 pt-6 border-t border-white/10 flex items-center justify-between gap-4">
+          <div>
+            <h4 className="text-xs sm:text-sm font-black uppercase tracking-widest text-[var(--text-main)] flex items-center gap-2">
+              <i className="fas fa-bug text-amber-500"></i>
+              {t.debugTelemetryTitle || "AI Debug Telemetry (Frontend Panel)"}
+            </h4>
+            <p className="text-[9px] sm:text-xs text-[var(--text-muted)] font-medium mt-1 leading-relaxed max-w-md">
+              {t.debugTelemetryDesc || "Show detailed breakdown of NLI entailment scores, stance detection, embedding similarities, and rescue rules on-screen after every answer."}
+            </p>
+          </div>
+          <button
+            onClick={() => {
+              const nextVal = !isDebugEnabled;
+              setIsDebugEnabled(nextVal);
+              try {
+                localStorage.setItem('neurodeck-debug', String(nextVal));
+              } catch(e) {}
+              if (showToast) {
+                showToast(nextVal ? "AI Debug Telemetry Enabled" : "AI Debug Telemetry Disabled");
+              }
+            }}
+            className={`neu-btn px-4 sm:px-6 py-2.5 sm:py-3 text-[10px] sm:text-xs font-bold uppercase tracking-widest rounded-xl transition-colors flex items-center gap-2 ${isDebugEnabled ? 'text-amber-500 border border-amber-500/30 bg-amber-500/10' : 'text-[var(--text-muted)]'}`}
+          >
+            <i className={`fas fa-${isDebugEnabled ? 'check-circle' : 'toggle-off'}`}></i>
+            <span>{isDebugEnabled ? "Debug Active" : "Enable Debug"}</span>
           </button>
         </div>
       </div>

@@ -12,6 +12,7 @@ export const SuccessPhase = ({
   skippedToMCQ,
   handleIWasRight,
   wasRightClicked,
+  debugData,
   t
 }) => {
   const expectedAnswer = question?.correctAnswer || (question?.correctAnswers && question.correctAnswers.join(', ')) || (question?.answer || null);
@@ -93,6 +94,31 @@ export const SuccessPhase = ({
           <i className="fas fa-chevron-right ml-2"></i>
         </button>
       </div>
+      </div>
+
+      {debugData && (
+        <div className="mt-4 rounded-xl sm:rounded-2xl border border-amber-500/30 bg-amber-500/5 overflow-hidden">
+          <details open>
+            <summary className="p-3 sm:p-4 text-[10px] sm:text-xs font-black uppercase tracking-widest text-amber-500 cursor-pointer flex items-center gap-2">
+              <i className="fas fa-bug"></i> AI Debug Telemetry (Success)
+            </summary>
+            <div className="px-3 sm:px-4 pb-3 sm:pb-4 overflow-x-auto">
+              <table className="w-full text-[9px] sm:text-xs font-mono">
+                <tbody>
+                  {Object.entries(debugData).map(([key, val]) => (
+                    <tr key={key} className="border-t border-white/5">
+                      <td className="py-1 pr-3 font-bold text-[var(--text-muted)] whitespace-nowrap">{key}</td>
+                      <td className="py-1 font-bold text-[var(--text-main)] break-all">
+                        {typeof val === 'object' && val !== null ? JSON.stringify(val) : String(val ?? 'null')}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </details>
+        </div>
+      )}
     </div>
   );
 };

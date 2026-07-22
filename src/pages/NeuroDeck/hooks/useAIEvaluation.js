@@ -474,6 +474,36 @@ export const evaluateInputCore = async (userInput, question, correctAnswersArray
 
     mappedScore10 = Math.max(0, Math.min(10, mappedScore10)); 
 
+    // Attach debug telemetry when debug mode is active
+    let debugData = null;
+    try {
+      if (typeof localStorage !== 'undefined' && localStorage.getItem('neurodeck-debug') === 'true') {
+        debugData = {
+          inputStance,
+          truthStance,
+          isSameStance,
+          isStrongContradiction,
+          avgEntailment: +avgEntailment.toFixed(4),
+          effectiveTruthScore: +effectiveTruthScore.toFixed(4),
+          maxDistractorScore: +maxDistractorScore.toFixed(4),
+          closestIncorrectText,
+          maxEmbeddingSim: +maxEmbeddingSim.toFixed(4),
+          effectiveSim: +effectiveSim.toFixed(4),
+          maxTokenOverlap: +maxTokenOverlap.toFixed(4),
+          hasHighSemanticEquivalence,
+          allowRescue,
+          detectedLang,
+          leniencyBias: +leniencyBias.toFixed(4),
+          hits,
+          validTruthsLength: validTruths.length,
+          scoringBranch: hits === validTruths.length && validTruths.length > 0 ? 'HIT_ALL' : hits > 0 ? 'PARTIAL' : 'NO_HITS',
+          correctAnswersReceived: safeCorrectAnswers,
+          choicesReceived: choicesArray,
+          incorrectTextsCount: incorrectTexts.length,
+        };
+      }
+    } catch(e) {}
+
     let finalResult = { status: "wrong", score: mappedScore10, hotColdScore: maxEmbeddingSim };
     if (hits === validTruths.length && validTruths.length > 0) {
       finalResult = { status: "success", score: mappedScore10, hotColdScore: maxEmbeddingSim };
@@ -492,6 +522,10 @@ export const evaluateInputCore = async (userInput, question, correctAnswersArray
          wrongSim: maxDistractorScore,
          wrongTarget: closestIncorrectText
       };
+    }
+
+    if (debugData) {
+      finalResult._debug = debugData;
     }
 
     if (evalResultCache.size > 200) {
