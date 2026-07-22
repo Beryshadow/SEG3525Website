@@ -53,7 +53,11 @@ export const getTokenOverlap = (strA, strB) => {
   const normB = normalizeText(strB);
   if (!normA || !normB) return 0;
 
-  const stopWords = new Set(['un', 'une', 'le', 'la', 'les', 'des', 'du', 'est', 'sont', 'dans', 'pour', 'avec', 'par', 'sur', 'qui', 'que', 'a', 'an', 'the', 'is', 'are', 'was', 'were', 'in', 'on', 'at', 'for', 'with', 'by', 'of', 'and', 'or', 'cest', 'd', 'l', 'to', 'such', 'as', 'de', 'en', 'etat', 'letat']);
+  // Purely linguistic stop words (English & French) - 100% domain-agnostic (no topic-specific terms)
+  const stopWords = new Set([
+    'un', 'une', 'le', 'la', 'les', 'des', 'du', 'de', 'en', 'est', 'sont', 'dans', 'pour', 'avec', 'par', 'sur', 'qui', 'que', 'a', 'au', 'aux', 'et', 'ou', 'ne', 'pas', 'cest', 'd', 'l',
+    'the', 'a', 'an', 'is', 'are', 'was', 'were', 'in', 'on', 'at', 'for', 'with', 'by', 'of', 'and', 'or', 'to', 'such', 'as', 'it', 'this', 'that', 'these', 'those'
+  ]);
   const stem = (w) => w.length > 5 ? w.slice(0, 5) : w;
 
   const tokensA = normA.split(/\s+/).filter(w => w.length > 1 && !stopWords.has(w)).map(stem);
@@ -72,15 +76,16 @@ export const getTokenOverlap = (strA, strB) => {
   const uniqueTruthTokens = new Set(tokensB);
   const uniqueTruthCoverage = uniqueTruthTokens.size > 0 ? (intersection / uniqueTruthTokens.size) : 0;
 
-  if (inputCoverage >= 1.0 && uniqueTruthCoverage >= 0.70 && intersection >= 2) {
+  if (inputCoverage >= 1.0 && uniqueTruthCoverage >= 0.50 && intersection >= 2) {
     return 1.0;
   }
-  if (inputCoverage >= 0.85 && uniqueTruthCoverage >= 0.50 && intersection >= 2) {
+  if (inputCoverage >= 0.85 && uniqueTruthCoverage >= 0.40 && intersection >= 2) {
     return Math.max(harmonicOverlap, 0.85);
   }
 
   return harmonicOverlap;
 };
+
 
 
 
