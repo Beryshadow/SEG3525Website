@@ -642,6 +642,29 @@
     "embSim": 0.50,
     "expectedMin": 8.0,
     "expectedMax": 10.0
+  },
+
+  {
+    "name": "French Binary Stance: 'Non' vs Mixed Non/Oui Distractors (q9Chapter2 regression)",
+    "choices": [
+      "Non, il doit d'abord passer à l'état 'prêt' et attendre d'être choisi par l'ordonnanceur",
+      "Oui, dès que son événement attendu se produit, il prend immédiatement le contrôle de l'UCT",
+      "Oui, mais seulement s'il a la priorité la plus haute absolue",
+      "Non, il doit d'abord passer par l'état 'nouveau' pour être réinitialisé",
+      "Oui, dans tous les systèmes d'exploitation modernes"
+    ],
+    "customTruths": ["Non, il doit d'abord passer à l'état 'prêt' et attendre d'être choisi par l'ordonnanceur"],
+    "userInput": "Non",
+    "truthMatch": [{"label": "neutral", "score": 0.70}],
+    "distractorMatches": {
+      "Non, il doit d'abord passer par l'état 'nouveau' pour être réinitialisé": [{"label": "entailment", "score": 0.85}],
+      "Oui, dès que son événement attendu se produit, il prend immédiatement le contrôle de l'UCT": [{"label": "neutral", "score": 0.60}],
+      "Oui, mais seulement s'il a la priorité la plus haute absolue": [{"label": "neutral", "score": 0.55}],
+      "Oui, dans tous les systèmes d'exploitation modernes": [{"label": "neutral", "score": 0.50}]
+    },
+    "embSim": 0.30,
+    "expectedMin": 8.0,
+    "expectedMax": 10.0
   }
 ]
 

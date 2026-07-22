@@ -103,13 +103,13 @@ async function runTests() {
     total++;
     clearAIEvaluationCaches();
     
-    const questionObj = test.questionId ? questionMap[test.questionId] : { choices: test.choices || [], correctAnswer: "" };
+    const questionObj = test.questionId ? questionMap[test.questionId] : { choices: test.choices || [], correctAnswers: [], correctAnswer: "" };
 
     if (!questionObj && test.questionId) {
         console.error(`❌ [FAIL] ${test.name} -> Missing Question ID ${test.questionId} in flashcardData.js`);
         continue;
     }
-    const correctAnswersArray = test.customTruths || [questionObj.correctAnswer];
+    const correctAnswersArray = test.customTruths || questionObj.correctAnswers || (questionObj.correctAnswer ? [questionObj.correctAnswer] : []);
     
     let res;
     if (test.truthMatch === null && !test.truthMatchesMap) {

@@ -1,0 +1,1150 @@
+[
+  {
+    "id": "17845855642600.5047616842355651",
+    "name": "2PROCESSUS",
+    "deck": [
+      {
+        "id": "q1Chapter2",
+        "question": "Quelle est la définition fondamentale d'un processus dans un système d'exploitation ?",
+        "correctAnswers": [
+          "Un programme en cours d'exécution"
+        ],
+        "choices": [
+          "Un programme en cours d'exécution",
+          "Le code source d'une application enregistré sur le disque",
+          "Une erreur matérielle interceptée par le noyau",
+          "L'unité centrale de traitement elle-même",
+          "Un fichier de configuration système"
+        ],
+        "hint": "C'est l'entité active, pas le fichier passif sur le disque.",
+        "score": 0,
+        "dueTurn": 32,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q2Chapter2",
+        "question": "Quels sont d'autres termes souvent utilisés comme synonymes de 'processus' ?",
+        "correctAnswers": [
+          "Job, task, user program (tâche, programme utilisateur)"
+        ],
+        "choices": [
+          "Job, task, user program (tâche, programme utilisateur)",
+          "Thread, semaphore, mutex",
+          "File, folder, directory",
+          "Kernel, shell, bash",
+          "Byte, bit, word"
+        ],
+        "hint": "Ce sont des termes historiques signifiant du 'travail' à faire.",
+        "score": 0,
+        "dueTurn": 0,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q3Chapter2",
+        "question": "Dans l'espace mémoire typique alloué à un processus, que contient la section 'texte' (text) ?",
+        "correctAnswers": [
+          "Le code exécutable (les instructions compilées) du programme"
+        ],
+        "choices": [
+          "Le code exécutable (les instructions compilées) du programme",
+          "Les variables globales et statiques",
+          "La mémoire allouée dynamiquement au moment de l'exécution",
+          "Les variables locales des fonctions appelées",
+          "Les paramètres de ligne de commande et les variables d'environnement"
+        ],
+        "hint": "C'est la partie statique qui contient ce que le processeur doit lire.",
+        "score": 0,
+        "dueTurn": 0,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q4Chapter2",
+        "question": "Dans la mémoire d'un processus, vers quelle direction le 'tas' (heap) et la 'pile' (stack) s'étendent-ils généralement ?",
+        "correctAnswers": [
+          "Ils s'étendent l'un vers l'autre (le tas vers le haut, la pile vers le bas) dans l'espace libre"
+        ],
+        "choices": [
+          "Ils s'étendent l'un vers l'autre (le tas vers le haut, la pile vers le bas) dans l'espace libre",
+          "Ils s'étendent tous les deux vers le bas, vers l'adresse 0",
+          "Ils s'étendent tous les deux vers le haut, vers l'adresse maximale",
+          "Ils sont de taille fixe et ne s'étendent jamais",
+          "Ils écrasent directement les sections 'texte' et 'données' s'ils grandissent"
+        ],
+        "hint": "Ils partent de deux extrémités opposées de la mémoire libre pour optimiser l'utilisation de l'espace.",
+        "score": 0,
+        "dueTurn": 0,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q5Chapter2",
+        "question": "Quels sont les 5 états de base qu'un processus peut traverser au cours de son cycle de vie ?",
+        "correctAnswers": [
+          "Nouveau, Prêt, En exécution, En attente, Terminé"
+        ],
+        "choices": [
+          "Nouveau, Prêt, En exécution, En attente, Terminé",
+          "Actif, Inactif, Suspendu, Zombi, Effacé",
+          "Chargé, Compilé, Lié, Exécuté, Fermé",
+          "Initialisé, Alloué, Zombi, Prêt, Bloqué",
+          "Nouveau, Zombi, Orphelin, Actif, Terminé"
+        ],
+        "hint": "Ces états décrivent si le processus a l'UCT, s'il l'attend, ou s'il attend un événement.",
+        "score": 0,
+        "dueTurn": 0,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q6Chapter2",
+        "question": "Que signifie l'état 'prêt' (ready) pour un processus ?",
+        "correctAnswers": [
+          "Le processus a tout ce dont il a besoin pour avancer et attend seulement que l'UCT (le processeur) lui soit assignée"
+        ],
+        "choices": [
+          "Le processus a tout ce dont il a besoin pour avancer et attend seulement que l'UCT (le processeur) lui soit assignée",
+          "Le processus est en train d'exécuter des instructions sur l'UCT",
+          "Le processus attend qu'une opération d'Entrée/Sortie se termine",
+          "Le processus est en train d'être chargé depuis le disque vers la mémoire RAM",
+          "Le processus vient tout juste de terminer son exécution"
+        ],
+        "hint": "Il est dans les starting-blocks, attendant le coup de feu de l'ordonnanceur.",
+        "score": 0,
+        "dueTurn": 0,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q7Chapter2",
+        "question": "Quelle transition d'état se produit lorsqu'un processus en cours d'exécution déclenche une opération d'Entrée/Sortie (E/S) ?",
+        "correctAnswers": [
+          "De l'état 'en exécution' à l'état 'en attente' (waiting)"
+        ],
+        "choices": [
+          "De l'état 'en exécution' à l'état 'en attente' (waiting)",
+          "De l'état 'en exécution' à l'état 'prêt' (ready)",
+          "De l'état 'en attente' à l'état 'en exécution'",
+          "De l'état 'prêt' à l'état 'en attente'",
+          "De l'état 'en exécution' à l'état 'terminé'"
+        ],
+        "hint": "Il ne peut plus avancer car il a besoin du résultat de l'E/S.",
+        "score": 0,
+        "dueTurn": 0,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q8Chapter2",
+        "question": "Quelle transition d'état se produit lorsqu'un processus a épuisé son quantum de temps alloué par la minuterie du système ?",
+        "correctAnswers": [
+          "De l'état 'en exécution' à l'état 'prêt' (ready)"
+        ],
+        "choices": [
+          "De l'état 'en exécution' à l'état 'prêt' (ready)",
+          "De l'état 'en exécution' à l'état 'en attente' (waiting)",
+          "De l'état 'prêt' à l'état 'en exécution'",
+          "De l'état 'en attente' à l'état 'prêt'",
+          "De l'état 'en exécution' à l'état 'suspendu'"
+        ],
+        "hint": "Il est encore capable de travailler (il n'attend pas d'E/S), mais il doit retourner faire la queue pour son tour.",
+        "score": 0,
+        "dueTurn": 0,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q9Chapter2",
+        "question": "Un processus peut-il passer directement de l'état 'en attente' à l'état 'en exécution' ?",
+        "correctAnswers": [
+          "Non, il doit d'abord passer à l'état 'prêt' et attendre d'être choisi par l'ordonnanceur"
+        ],
+        "choices": [
+          "Non, il doit d'abord passer à l'état 'prêt' et attendre d'être choisi par l'ordonnanceur",
+          "Oui, dès que son événement attendu se produit, il prend immédiatement le contrôle de l'UCT",
+          "Oui, mais seulement s'il a la priorité la plus haute absolue",
+          "Non, il doit d'abord passer par l'état 'nouveau' pour être réinitialisé",
+          "Oui, dans tous les systèmes d'exploitation modernes"
+        ],
+        "hint": "Regardez le diagramme des états : il n'y a pas de flèche directe entre ces deux états.",
+        "score": 0,
+        "dueTurn": 0,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q10Chapter2",
+        "question": "Que signifient les états 'suspendus' (prêt-suspendu et en attente-suspendu) dans le modèle à 7 états ?",
+        "correctAnswers": [
+          "Que le processus (ou une grande partie) a été temporairement transféré de la mémoire RAM vers le disque (swapped out) par le SE"
+        ],
+        "choices": [
+          "Que le processus (ou une grande partie) a été temporairement transféré de la mémoire RAM vers le disque (swapped out) par le SE",
+          "Que le processus a été mis en pause manuellement par l'utilisateur",
+          "Que le processus a provoqué une erreur fatale et attend d'être supprimé",
+          "Que le processus tourne dans une boucle infinie (attente active)",
+          "Que le processus est exécuté dans une machine virtuelle protégée"
+        ],
+        "hint": "C'est une action radicale du système d'exploitation pour libérer de la mémoire physique.",
+        "score": 0,
+        "dueTurn": 1,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q11Chapter2",
+        "question": "Que signifie le sigle PCB dans le contexte des systèmes d'exploitation ?",
+        "correctAnswers": [
+          "Process Control Block (Bloc de contrôle de processus)"
+        ],
+        "choices": [
+          "Process Control Block (Bloc de contrôle de processus)",
+          "Program Counter Buffer (Tampon du compteur de programme)",
+          "Printed Circuit Board (Circuit imprimé)",
+          "Process Cache Base (Base de cache du processus)",
+          "Priority Control Byte (Octet de contrôle de priorité)"
+        ],
+        "hint": "C'est la structure de données qui 'contrôle' tout ce qui concerne un 'processus'.",
+        "score": 0,
+        "dueTurn": 1,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q12Chapter2",
+        "question": "Quelle est l'utilité principale du PCB (Process Control Block) ?",
+        "correctAnswers": [
+          "Sauvegarder l'état complet et toutes les informations d'un processus lorsqu'il est interrompu, afin de pouvoir le reprendre exactement au même point plus tard"
+        ],
+        "choices": [
+          "Sauvegarder l'état complet et toutes les informations d'un processus lorsqu'il est interrompu, afin de pouvoir le reprendre exactement au même point plus tard",
+          "Stocker le code source complet du programme",
+          "Servir de tampon pour les données échangées entre deux processus",
+          "Gérer la hiérarchie des répertoires sur le disque dur",
+          "Traduire les adresses logiques en adresses physiques"
+        ],
+        "hint": "C'est la 'photographie' ou le 'carnet de notes' du processus quand il est mis en pause.",
+        "score": 0,
+        "dueTurn": 1,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q13Chapter2",
+        "question": "Quelles informations typiques trouve-t-on à l'intérieur d'un PCB ? Sélectionnez l'option la plus complète.",
+        "correctAnswers": [
+          "L'état du processus, le PID, le compteur de programme, les registres UCT, les limites de mémoire et la liste des fichiers ouverts"
+        ],
+        "choices": [
+          "L'état du processus, le PID, le compteur de programme, les registres UCT, les limites de mémoire et la liste des fichiers ouverts",
+          "Uniquement le code binaire du programme et les variables locales",
+          "Le nom de l'utilisateur, l'adresse IP et le mot de passe réseau",
+          "La liste de tous les processus du système et l'état de l'UCT",
+          "Uniquement le compteur de programme (pour savoir où reprendre)"
+        ],
+        "hint": "Il faut tout ce qui est nécessaire pour reprendre l'exécution à la milliseconde près.",
+        "score": 0,
+        "dueTurn": 1,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q14Chapter2",
+        "question": "À quoi sert spécifiquement le 'pointeur' mentionné comme premier champ du PCB ?",
+        "correctAnswers": [
+          "À lier le PCB à d'autres PCBs pour former des listes enchaînées (ex: file d'attente des processus prêts)"
+        ],
+        "choices": [
+          "À lier le PCB à d'autres PCBs pour former des listes enchaînées (ex: file d'attente des processus prêts)",
+          "À pointer vers l'adresse mémoire du disque dur où le programme est sauvegardé",
+          "À pointer vers l'instruction actuellement en cours d'exécution dans l'UCT",
+          "À relier le processus parent au processus enfant",
+          "À pointer vers le début de la mémoire virtuelle du processus"
+        ],
+        "hint": "Les processus attendent souvent en file indienne ; ce champ permet de construire ces files.",
+        "score": 0,
+        "dueTurn": 1,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q15Chapter2",
+        "question": "Est-ce que le PCB contient physiquement toutes les variables globales du programme (la mémoire de données) ?",
+        "correctAnswers": [
+          "Non, le PCB ne contient que l'état (registres, limites, etc.) ; il a des pointeurs vers l'image du programme (qui contient les données) restée en mémoire"
+        ],
+        "choices": [
+          "Non, le PCB ne contient que l'état (registres, limites, etc.) ; il a des pointeurs vers l'image du programme (qui contient les données) restée en mémoire",
+          "Oui, le PCB est une copie exacte et complète de toute la RAM allouée au processus",
+          "Oui, mais seulement si le processus est très petit",
+          "Non, le PCB ne contient que le code source, pas les variables",
+          "Non, les variables globales sont effacées lors d'une interruption"
+        ],
+        "hint": "Le PCB est petit et léger, il ne va pas copier des mégaoctets de données à chaque interruption.",
+        "score": 0,
+        "dueTurn": 1,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q16Chapter2",
+        "question": "Qu'est-ce que la commutation de contexte (context switching) ?",
+        "correctAnswers": [
+          "L'action du SE de sauvegarder l'état (PCB) du processus actuel interrompu, et de recharger l'état (PCB) du nouveau processus qui va prendre l'UCT"
+        ],
+        "choices": [
+          "L'action du SE de sauvegarder l'état (PCB) du processus actuel interrompu, et de recharger l'état (PCB) du nouveau processus qui va prendre l'UCT",
+          "L'action de passer du mode utilisateur au mode noyau",
+          "Le transfert des données d'un processus de la RAM vers le disque dur",
+          "La communication de données (IPC) entre deux processus distincts",
+          "Le changement d'adresse logique en adresse physique par le MMU"
+        ],
+        "hint": "C'est l'échange des 'carnets de notes' pour que le processeur change de tâche.",
+        "score": 0,
+        "dueTurn": 0,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q17Chapter2",
+        "question": "Pendant une commutation de contexte, que se passe-t-il au niveau de l'UCT (le processeur) du point de vue de l'utilisateur ?",
+        "correctAnswers": [
+          "L'UCT est occupée par le système d'exploitation à gérer la sauvegarde/rechargement, donc aucun travail utilisateur (processus) ne s'exécute"
+        ],
+        "choices": [
+          "L'UCT est occupée par le système d'exploitation à gérer la sauvegarde/rechargement, donc aucun travail utilisateur (processus) ne s'exécute",
+          "L'UCT exécute les deux processus simultanément pour éviter les retards",
+          "L'UCT est mise en mode veille profonde pour éviter la surchauffe",
+          "L'UCT continue d'exécuter le processus interrompu en arrière-plan",
+          "L'UCT est complètement inactive et attend que la mémoire RAM soit prête"
+        ],
+        "hint": "Ce changement a un 'coût' (overhead), c'est du temps perdu pour les applications de l'usager.",
+        "score": 0,
+        "dueTurn": 0,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q18Chapter2",
+        "question": "Où se trouvent physiquement les processus lorsqu'ils sont 'en attente' d'un périphérique (comme le disque dur) ?",
+        "correctAnswers": [
+          "Leurs PCBs sont placés dans une file d'attente spécifique associée à ce périphérique matériel précis"
+        ],
+        "choices": [
+          "Leurs PCBs sont placés dans une file d'attente spécifique associée à ce périphérique matériel précis",
+          "Ils sont tous placés dans une seule grande file d'attente générale appelée 'file des bloqués'",
+          "Ils sont renvoyés au tout début de la file d'attente des processus prêts",
+          "Ils sont immédiatement sauvegardés sur le disque dur et effacés de la RAM",
+          "Leurs PCBs sont détruits jusqu'à ce que l'opération d'E/S soit terminée"
+        ],
+        "hint": "Si vous attendez à la caisse 1, vous n'êtes pas dans la file de la caisse 2.",
+        "score": 0,
+        "dueTurn": 1,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q19Chapter2",
+        "question": "Qu'est-ce qui est réellement déplacé dans la mémoire système lorsqu'un processus change de file d'attente (de 'prêt' à 'attente E/S') ?",
+        "correctAnswers": [
+          "Seuls les pointeurs de listes enchaînées liant les PCBs sont modifiés ; les PCBs eux-mêmes ne bougent pas physiquement en mémoire"
+        ],
+        "choices": [
+          "Seuls les pointeurs de listes enchaînées liant les PCBs sont modifiés ; les PCBs eux-mêmes ne bougent pas physiquement en mémoire",
+          "Le bloc complet du PCB est copié d'une zone mémoire à une autre",
+          "Toute la mémoire allouée au processus (code, données) est déplacée physiquement en RAM",
+          "Le processus est déplacé de la mémoire cache vers la mémoire principale",
+          "Le processus est effacé de la RAM et réécrit à une autre adresse"
+        ],
+        "hint": "Déplacer physiquement des données prend du temps. Modifier une adresse de pointeur est instantané.",
+        "score": 0,
+        "dueTurn": 0,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q20Chapter2",
+        "question": "Quelle est la responsabilité de l'ordonnanceur à court terme (ou ordonnanceur UCT/processus) ?",
+        "correctAnswers": [
+          "Il est exécuté très fréquemment (chaque ms) pour choisir le prochain processus de la file 'prêt' qui obtiendra l'UCT"
+        ],
+        "choices": [
+          "Il est exécuté très fréquemment (chaque ms) pour choisir le prochain processus de la file 'prêt' qui obtiendra l'UCT",
+          "Il décide quels nouveaux programmes sont admis dans le système depuis le disque",
+          "Il décide quels processus doivent être swappés (suspendus) sur le disque dur",
+          "Il gère exclusivement l'ordre des requêtes d'Entrée/Sortie vers le disque dur",
+          "Il ferme les processus qui ont provoqué des erreurs de segmentation"
+        ],
+        "hint": "C'est celui qui agit le plus vite, 'à court terme'.",
+        "score": 0,
+        "dueTurn": 0,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q21Chapter2",
+        "question": "Quelle est la responsabilité de l'ordonnanceur à long terme (ordonnanceur de travaux/batch) ?",
+        "correctAnswers": [
+          "Il est exécuté plus rarement et décide quels processus (parmi ceux en attente sur le disque) sont admis dans la file 'prêt' en RAM, contrôlant le niveau de multiprogrammation"
+        ],
+        "choices": [
+          "Il est exécuté plus rarement et décide quels processus (parmi ceux en attente sur le disque) sont admis dans la file 'prêt' en RAM, contrôlant le niveau de multiprogrammation",
+          "Il choisit quel processus 'prêt' va s'exécuter sur le processeur dans la prochaine milliseconde",
+          "Il décide quels processus doivent être swappés (suspendus) pour libérer de l'espace",
+          "Il compile les programmes source pour créer des processus",
+          "Il gère la communication réseau entre processus sur le long terme"
+        ],
+        "hint": "Il gère l'entrée globale dans le système, comme un portier de boîte de nuit qui décide qui peut entrer.",
+        "score": 0,
+        "dueTurn": 0,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q22Chapter2",
+        "question": "Quelle est la responsabilité de l'ordonnanceur à moyen terme ?",
+        "correctAnswers": [
+          "Il gère le va-et-vient (swapping), décidant de suspendre des processus actifs en RAM vers le disque (et vice versa) lorsque la mémoire manque"
+        ],
+        "choices": [
+          "Il gère le va-et-vient (swapping), décidant de suspendre des processus actifs en RAM vers le disque (et vice versa) lorsque la mémoire manque",
+          "Il choisit quel processus de la file prêt va s'exécuter",
+          "Il décide quels nouveaux travaux sont créés dans le système",
+          "Il ordonnance les requêtes de lecture et écriture sur le disque (SSTF, SCAN)",
+          "Il est responsable de la création de nouveaux threads dans un processus"
+        ],
+        "hint": "C'est lui qui crée les états 'suspendus'.",
+        "score": 0,
+        "dueTurn": 0,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q23Chapter2",
+        "question": "Qu'est-ce qu'un processus parent et un processus enfant ?",
+        "correctAnswers": [
+          "Un processus existant (le parent) peut demander au système de créer un nouveau processus (l'enfant), créant ainsi une arborescence ou hiérarchie"
+        ],
+        "choices": [
+          "Un processus existant (le parent) peut demander au système de créer un nouveau processus (l'enfant), créant ainsi une arborescence ou hiérarchie",
+          "Le parent est le processus du noyau, et les enfants sont les processus des utilisateurs",
+          "L'enfant est un thread léger à l'intérieur du processus lourd (le parent)",
+          "Le parent est le programme source, l'enfant est le fichier exécutable compilé",
+          "C'est une métaphore pour désigner le système d'exploitation et les applications"
+        ],
+        "hint": "Les processus se multiplient en se 'clonant' ou en générant de nouvelles entités indépendantes.",
+        "score": 0,
+        "dueTurn": 0,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q24Chapter2",
+        "question": "Dans le monde UNIX, quel appel système crée un nouveau processus ?",
+        "correctAnswers": [
+          "fork()"
+        ],
+        "choices": [
+          "fork()",
+          "exec()",
+          "wait()",
+          "spawn()",
+          "createProcess()"
+        ],
+        "hint": "C'est le mot anglais pour 'fourche', symbolisant une séparation du chemin d'exécution en deux.",
+        "score": 0,
+        "dueTurn": 32,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q25Chapter2",
+        "question": "Juste après l'exécution de l'appel 'fork()' sous UNIX, quelle est la relation de mémoire entre le processus parent et l'enfant ?",
+        "correctAnswers": [
+          "Le nouveau processus enfant possède une copie (une image) identique du processus parent, mais ils ont des espaces mémoire séparés et distincts"
+        ],
+        "choices": [
+          "Le nouveau processus enfant possède une copie (une image) identique du processus parent, mais ils ont des espaces mémoire séparés et distincts",
+          "Le processus enfant partage exactement la même mémoire (variables) que le parent (ils peuvent s'écraser l'un l'autre)",
+          "Le processus enfant est complètement vide et attend qu'on lui charge un programme",
+          "Le processus parent est immédiatement effacé et remplacé par l'enfant",
+          "Le processus enfant ne reçoit que le code (texte), mais aucune des données (variables) du parent"
+        ],
+        "hint": "Ils sont des clones parfaits à l'instant T, mais s'ils modifient une variable par la suite, chacun modifie sa propre copie privée.",
+        "score": 0,
+        "dueTurn": 0,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q26Chapter2",
+        "question": "Comment le processus sait-il, juste après le retour de l'appel 'fork()', s'il est le parent ou l'enfant ?",
+        "correctAnswers": [
+          "L'appel 'fork()' renvoie la valeur 0 au processus enfant, et renvoie le numéro PID (Process ID) du nouvel enfant au processus parent"
+        ],
+        "choices": [
+          "L'appel 'fork()' renvoie la valeur 0 au processus enfant, et renvoie le numéro PID (Process ID) du nouvel enfant au processus parent",
+          "Le processus enfant reçoit un message 'CHILD' et le parent un message 'PARENT'",
+          "Seul le processus parent reprend son exécution ; l'enfant est mis en attente",
+          "Le système définit une variable globale 'isChild' à True ou False",
+          "L'enfant commence l'exécution au tout début du code source, le parent continue là où il était"
+        ],
+        "hint": "C'est grâce à la valeur de retour (souvent testée dans un `if (pid == 0)`) qu'ils savent quel rôle jouer.",
+        "score": 0,
+        "dueTurn": 0,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q27Chapter2",
+        "question": "Que fait l'appel système 'exec()' (ou execlp) souvent utilisé juste après un fork() ?",
+        "correctAnswers": [
+          "Il remplace complètement l'espace mémoire (code et données) du processus enfant actuel par un tout nouveau programme chargé depuis le disque"
+        ],
+        "choices": [
+          "Il remplace complètement l'espace mémoire (code et données) du processus enfant actuel par un tout nouveau programme chargé depuis le disque",
+          "Il exécute une fonction spécifique du processus parent à distance",
+          "Il ordonne à l'enfant de terminer et de s'effacer de la mémoire",
+          "Il synchronise le processus enfant avec le processus parent",
+          "Il copie le code du processus enfant pour créer un petit-enfant"
+        ],
+        "hint": "C'est ce qui transforme le 'clone' (enfant) en une application totalement différente (ex: 'ls' ou un navigateur web).",
+        "score": 0,
+        "dueTurn": 0,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q28Chapter2",
+        "question": "Que fait l'appel système 'wait()' utilisé par un processus parent ?",
+        "correctAnswers": [
+          "Il met le processus parent en attente (suspendu) jusqu'à ce que l'un de ses processus enfants se termine et lui renvoie un code de statut"
+        ],
+        "choices": [
+          "Il met le processus parent en attente (suspendu) jusqu'à ce que l'un de ses processus enfants se termine et lui renvoie un code de statut",
+          "Il ordonne à l'ordonnanceur de mettre le processus actuel dans la file d'attente des périphériques",
+          "Il empêche l'enfant de modifier la mémoire partagée avec le parent",
+          "Il met l'enfant en pause temporairement pour que le parent puisse s'exécuter",
+          "Il attend que l'utilisateur entre une donnée au clavier"
+        ],
+        "hint": "Le parent patiente pour voir si son enfant a fini son travail correctement.",
+        "score": 0,
+        "dueTurn": 0,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q29Chapter2",
+        "question": "Dans l'exemple de code : 'int a=2, b=4; pid=fork(); if (pid==0) { a=3; print(a+b); } else { wait(); b=1; print(a+b); }', qu'imprimera le processus enfant (pid==0) ?",
+        "correctAnswers": [
+          "7"
+        ],
+        "choices": [
+          "7",
+          "5",
+          "6",
+          "4",
+          "Erreur"
+        ],
+        "hint": "L'enfant a sa propre copie de a et b (initialement 2 et 4). Il change 'a' pour 3. Il imprime 3+4.",
+        "score": 0,
+        "dueTurn": 0,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q30Chapter2",
+        "question": "Dans l'exemple précédent : 'int a=2, b=4; pid=fork(); if (pid==0) { a=3; print(a+b); } else { wait(); b=1; print(a+b); }', qu'imprimera le processus parent (le else) ?",
+        "correctAnswers": [
+          "3"
+        ],
+        "choices": [
+          "3",
+          "7",
+          "6",
+          "5",
+          "Erreur"
+        ],
+        "hint": "Le parent attend la fin de l'enfant (wait). Il a sa propre copie (a=2, b=4, le 'a' n'a pas été changé pour lui). Il change 'b' pour 1. Il imprime 2+1.",
+        "score": 0,
+        "dueTurn": 0,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q31Chapter2",
+        "question": "Comment appelle-t-on un processus qui a terminé son exécution (appel à exit()) mais dont le parent n'a pas encore fait appel à 'wait()' pour lire son code de retour ?",
+        "correctAnswers": [
+          "Un processus Zombie"
+        ],
+        "choices": [
+          "Un processus Zombie",
+          "Un processus Orphelin",
+          "Un processus Démon (Daemon)",
+          "Un thread mort",
+          "Un processus Suspendu"
+        ],
+        "hint": "Il est 'mort' mais son cadavre (son statut) hante encore la table des processus du système d'exploitation.",
+        "score": 0,
+        "dueTurn": 0,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q32Chapter2",
+        "question": "Qu'est-ce qu'une terminaison en cascade (cascading termination) ?",
+        "correctAnswers": [
+          "Une politique où la terminaison d'un processus parent force automatiquement la terminaison (mort) de tous ses processus enfants"
+        ],
+        "choices": [
+          "Une politique où la terminaison d'un processus parent force automatiquement la terminaison (mort) de tous ses processus enfants",
+          "Une erreur fatale qui détruit tous les processus du système un par un",
+          "Le processus par lequel le système d'exploitation s'éteint",
+          "Une série d'appels 'exit()' effectuée par un programme",
+          "La terminaison d'un processus due à un interblocage avec d'autres processus"
+        ],
+        "hint": "Si le parent meurt, toute sa descendance est anéantie.",
+        "score": 0,
+        "dueTurn": 0,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q33Chapter2",
+        "question": "Que se passe-t-il dans les systèmes UNIX si un processus parent meurt sans appeler 'wait()', laissant derrière lui des enfants vivants (des orphelins) ?",
+        "correctAnswers": [
+          "Le système d'exploitation assigne un nouveau parent (généralement le processus 'init' avec PID 1) pour adopter ces processus orphelins"
+        ],
+        "choices": [
+          "Le système d'exploitation assigne un nouveau parent (généralement le processus 'init' avec PID 1) pour adopter ces processus orphelins",
+          "Les processus enfants sont immédiatement et violemment tués",
+          "Les processus enfants restent dans la table des processus pour l'éternité sous forme de zombies",
+          "Le système crashe à cause d'une violation de mémoire",
+          "Les processus enfants deviennent les parents d'eux-mêmes"
+        ],
+        "hint": "Le système a une garderie par défaut pour ramasser ceux qui n'ont plus de tuteur.",
+        "score": 0,
+        "dueTurn": 0,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q34Chapter2",
+        "question": "Si l'on exécute une boucle 'for(i=0; i<3; i++) { fork(); }', combien de NOUVEAUX processus seront créés (sans compter le processus initial) ?",
+        "correctAnswers": [
+          "7"
+        ],
+        "choices": [
+          "7",
+          "3",
+          "4",
+          "8",
+          "6"
+        ],
+        "hint": "À chaque itération, TOUS les processus existants font un fork. (Total final = 2^3 = 8 processus, donc 7 nouveaux).",
+        "score": 0,
+        "dueTurn": 0,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q35Chapter2",
+        "question": "Dans le contexte de la communication entre processus (IPC), pourquoi dit-on que certains processus sont 'coopérants' ?",
+        "correctAnswers": [
+          "Parce qu'ils partagent de l'information, des ressources, ou communiquent pour affecter mutuellement leur exécution et accomplir une tâche commune"
+        ],
+        "choices": [
+          "Parce qu'ils partagent de l'information, des ressources, ou communiquent pour affecter mutuellement leur exécution et accomplir une tâche commune",
+          "Parce qu'ils s'exécutent strictement un par un pour ne pas surcharger l'UCT",
+          "Parce qu'ils ont été programmés dans le même langage de programmation",
+          "Parce qu'ils appartiennent tous au noyau du système d'exploitation",
+          "Parce qu'ils refusent d'utiliser les mêmes périphériques d'E/S"
+        ],
+        "hint": "Contrairement aux processus indépendants qui s'ignorent totalement, eux travaillent ensemble en équipe.",
+        "score": 0,
+        "dueTurn": 1,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q36Chapter2",
+        "question": "Quelles sont les deux principales méthodes ou modèles de base utilisés par le système d'exploitation pour permettre la communication entre processus (IPC) ?",
+        "correctAnswers": [
+          "La mémoire partagée (Shared Memory) et l'échange de messages (Message Passing)"
+        ],
+        "choices": [
+          "La mémoire partagée (Shared Memory) et l'échange de messages (Message Passing)",
+          "La compilation croisée et l'édition de liens statique",
+          "La préemption de contexte et l'attente active",
+          "L'ordonnancement à court terme et le va-et-vient (swapping)",
+          "Les interruptions matérielles et les trappes logicielles"
+        ],
+        "hint": "Soit ils ont accès à une même 'table' pour écrire/lire, soit ils s'envoient des 'lettres' via le système.",
+        "score": 0,
+        "dueTurn": 1,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q37Chapter2",
+        "question": "Comment fonctionne le mécanisme de communication par 'Mémoire partagée' ?",
+        "correctAnswers": [
+          "Le SE retire la protection d'une région mémoire spécifique pour permettre à deux processus ou plus d'y accéder directement comme s'il s'agissait de leur propre mémoire"
+        ],
+        "choices": [
+          "Le SE retire la protection d'une région mémoire spécifique pour permettre à deux processus ou plus d'y accéder directement comme s'il s'agissait de leur propre mémoire",
+          "Le SE envoie des données de la RAM du processus A vers le disque dur, puis le processus B les lit du disque",
+          "Un processus copie toutes ses variables locales dans les registres de l'UCT pour que l'autre processus les lise",
+          "Les deux processus fusionnent temporairement en un seul grand processus",
+          "Le SE copie les données du PCB de l'émetteur vers le PCB du récepteur"
+        ],
+        "hint": "Normalement les processus sont isolés (murs), mais ici le SE ouvre une 'fenêtre' commune.",
+        "score": 0,
+        "dueTurn": 0,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q38Chapter2",
+        "question": "Quel est le défi majeur (la difficulté) associé à l'utilisation de la mémoire partagée par les programmeurs ?",
+        "correctAnswers": [
+          "Il nécessite une synchronisation rigoureuse codée par le programmeur (ex: sémaphores) pour éviter que les processus ne lisent/écrivent des données simultanément et ne se corrompent mutuellement"
+        ],
+        "choices": [
+          "Il nécessite une synchronisation rigoureuse codée par le programmeur (ex: sémaphores) pour éviter que les processus ne lisent/écrivent des données simultanément et ne se corrompent mutuellement",
+          "La vitesse de transfert est extrêmement lente, comparable à un accès au disque dur",
+          "La quantité de mémoire partageable est strictement limitée à 1 octet à la fois",
+          "Il ne fonctionne que si les deux processus sont sur des ordinateurs physiquement différents",
+          "Il provoque obligatoirement la famine d'un des deux processus"
+        ],
+        "hint": "Si deux personnes écrivent avec un stylo sur la même feuille en même temps, le texte sera illisible.",
+        "score": 0,
+        "dueTurn": 0,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q39Chapter2",
+        "question": "Quelles sont les deux opérations (primitives) de base fournies par le système d'exploitation pour le modèle d''Échange de messages' ?",
+        "correctAnswers": [
+          "send(destination, message) et receive(source, message)"
+        ],
+        "choices": [
+          "send(destination, message) et receive(source, message)",
+          "read(memory) et write(memory)",
+          "fork() et exec()",
+          "wait(semaphore) et signal(semaphore)",
+          "open(pipe) et close(pipe)"
+        ],
+        "hint": "C'est l'équivalent de 'Envoyer' et 'Recevoir'.",
+        "score": 0,
+        "dueTurn": 1,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q40Chapter2",
+        "question": "Dans le modèle d'échange de messages, quelle est la différence entre une communication 'directe' et 'indirecte' ?",
+        "correctAnswers": [
+          "Directe : on nomme explicitement le processus cible (ex: send(P1, msg)). Indirecte : on envoie à une structure intermédiaire comme une 'Boîte aux lettres' ou un 'Port' (ex: send(BoîteA, msg))"
+        ],
+        "choices": [
+          "Directe : on nomme explicitement le processus cible (ex: send(P1, msg)). Indirecte : on envoie à une structure intermédiaire comme une 'Boîte aux lettres' ou un 'Port' (ex: send(BoîteA, msg))",
+          "Directe : les messages sont écrits en RAM. Indirecte : les messages passent par le disque dur.",
+          "Directe : l'émetteur est bloqué (synchrone). Indirecte : l'émetteur n'est pas bloqué (asynchrone).",
+          "Directe : communication entre le CPU et la RAM. Indirecte : communication réseau via internet.",
+          "Directe : utilise des variables locales. Indirecte : utilise des pointeurs de pointeurs."
+        ],
+        "hint": "Savoir si j'envoie une lettre 'À Bob', ou si je dépose la lettre dans 'Le casier X'.",
+        "score": 0,
+        "dueTurn": 0,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q41Chapter2",
+        "question": "Dans la communication de messages, que signifie un comportement 'synchrone' (ou avec blocage / blocking) ?",
+        "correctAnswers": [
+          "L'émetteur s'arrête (se bloque) jusqu'à ce que le récepteur ait reçu le message ; et le récepteur s'arrête jusqu'à ce qu'un message soit disponible"
+        ],
+        "choices": [
+          "L'émetteur s'arrête (se bloque) jusqu'à ce que le récepteur ait reçu le message ; et le récepteur s'arrête jusqu'à ce qu'un message soit disponible",
+          "L'émetteur envoie son message et continue immédiatement son travail sans se soucier du récepteur",
+          "L'émetteur et le récepteur doivent obligatoirement utiliser la même fréquence d'horloge du processeur",
+          "Le système d'exploitation crypte le message avec une clé symétrique (synchrone) avant l'envoi",
+          "La communication se fait uniquement via des signaux matériels de bas niveau"
+        ],
+        "hint": "Comme un coup de téléphone : je ne parle pas tant que tu n'as pas décroché (rendez-vous strict).",
+        "score": 0,
+        "dueTurn": 32,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q42Chapter2",
+        "question": "Dans la communication de messages, que signifie un comportement 'asynchrone' (sans blocage / non-blocking) pour l'émetteur ?",
+        "correctAnswers": [
+          "L'émetteur envoie le message au système d'exploitation et continue immédiatement son exécution, sans attendre que le récepteur le lise"
+        ],
+        "choices": [
+          "L'émetteur envoie le message au système d'exploitation et continue immédiatement son exécution, sans attendre que le récepteur le lise",
+          "L'émetteur est bloqué indéfiniment car le récepteur ne répondra jamais",
+          "Le processus émetteur est mis en attente-suspendu (sur disque) après l'envoi",
+          "L'émetteur doit lire une boîte aux lettres avant de pouvoir envoyer",
+          "Le message est immédiatement effacé si le récepteur n'est pas prêt"
+        ],
+        "hint": "Comme envoyer un email : j'envoie et je passe à autre chose, tu le liras quand tu voudras.",
+        "score": 0,
+        "dueTurn": 1,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q43Chapter2",
+        "question": "Quel est l'inconvénient (risque) principal de l'échange synchrone de messages ?",
+        "correctAnswers": [
+          "Il y a un risque d'impasse (interblocage / deadlock) si deux processus s'attendent mutuellement"
+        ],
+        "choices": [
+          "Il y a un risque d'impasse (interblocage / deadlock) si deux processus s'attendent mutuellement",
+          "La sécurité est très faible, n'importe qui peut lire le message",
+          "Il nécessite une énorme quantité de mémoire tampon (buffer) dans le SE",
+          "Il crée systématiquement des processus zombies",
+          "Il ne peut pas fonctionner sur un système multiprocesseur"
+        ],
+        "hint": "Si je t'attends pour parler, et que tu m'attends pour parler, aucun de nous ne parlera jamais.",
+        "score": 0,
+        "dueTurn": 1,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q44Chapter2",
+        "question": "Pourquoi le système d'exploitation utilise-t-il des tampons (buffering) pour la communication asynchrone ?",
+        "correctAnswers": [
+          "Parce que le message doit être stocké quelque part (dans le noyau) pendant que l'émetteur continue son travail, en attendant que le récepteur vienne le chercher"
+        ],
+        "choices": [
+          "Parce que le message doit être stocké quelque part (dans le noyau) pendant que l'émetteur continue son travail, en attendant que le récepteur vienne le chercher",
+          "Pour empêcher que le message ne soit lu par un virus (sécurité)",
+          "Pour convertir les données du mode 'Little Endian' au mode 'Big Endian'",
+          "Pour vérifier si le processus récepteur existe vraiment",
+          "Il n'utilise aucun tampon en mode asynchrone, les messages sont envoyés en l'air"
+        ],
+        "hint": "L'email que j'ai envoyé doit être gardé sur le serveur en attendant que tu l'ouvres.",
+        "score": 0,
+        "dueTurn": 32,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q45Chapter2",
+        "question": "Que sont les descripteurs de fichiers standard 0, 1 et 2 sous UNIX/Linux ?",
+        "correctAnswers": [
+          "0: entrée standard (stdin), 1: sortie standard (stdout), 2: sortie d'erreur (stderr)"
+        ],
+        "choices": [
+          "0: entrée standard (stdin), 1: sortie standard (stdout), 2: sortie d'erreur (stderr)",
+          "0: root, 1: administrateur, 2: usager normal",
+          "0: processus parent, 1: premier enfant, 2: deuxième enfant",
+          "0: mémoire RAM, 1: disque dur, 2: réseau",
+          "0: clavier, 1: souris, 2: moniteur"
+        ],
+        "hint": "Ce sont les canaux par défaut pour lire du texte ou afficher du texte à l'écran.",
+        "score": 0,
+        "dueTurn": 0,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q46Chapter2",
+        "question": "Qu'est-ce qu'un tuyau (pipe) dans un système UNIX/Linux ?",
+        "correctAnswers": [
+          "Un canal de communication unidirectionnel géré par le noyau, ayant un bout pour l'écriture et un bout pour la lecture, permettant de relier deux processus"
+        ],
+        "choices": [
+          "Un canal de communication unidirectionnel géré par le noyau, ayant un bout pour l'écriture et un bout pour la lecture, permettant de relier deux processus",
+          "Un câble physique reliant le processeur au disque dur",
+          "Une zone de mémoire partagée que les processus peuvent modifier librement et simultanément",
+          "Un type spécial de sémaphore pour prévenir les interblocages",
+          "Une commande permettant d'effacer les fichiers temporaires"
+        ],
+        "hint": "C'est l'équivalent logiciel d'un vrai tube : l'eau coule d'un côté vers l'autre.",
+        "score": 0,
+        "dueTurn": 0,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q47Chapter2",
+        "question": "Comment crée-t-on un tuyau classique en C sous UNIX ?",
+        "correctAnswers": [
+          "En utilisant l'appel système 'pipe(int df[2])' qui retourne deux descripteurs de fichier (lecture et écriture)"
+        ],
+        "choices": [
+          "En utilisant l'appel système 'pipe(int df[2])' qui retourne deux descripteurs de fichier (lecture et écriture)",
+          "En utilisant l'appel système 'open()'",
+          "En utilisant l'appel système 'fork()'",
+          "En créant une variable globale partagée",
+          "En utilisant la commande clavier '>'"
+        ],
+        "hint": "Cet appel remplit un tableau de 2 entiers représentant les deux extrémités du tube.",
+        "score": 0,
+        "dueTurn": 0,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q48Chapter2",
+        "question": "Dans le code classique de communication par tuyau entre un parent et un enfant (après pipe() et fork()), que doit faire chaque processus avec les descripteurs ?",
+        "correctAnswers": [
+          "Fermer (close) le bout du tuyau qu'il n'utilise pas (ex: l'enfant ferme le bout d'écriture s'il veut seulement lire, le parent ferme le bout de lecture s'il veut écrire)"
+        ],
+        "choices": [
+          "Fermer (close) le bout du tuyau qu'il n'utilise pas (ex: l'enfant ferme le bout d'écriture s'il veut seulement lire, le parent ferme le bout de lecture s'il veut écrire)",
+          "Laisser les deux bouts ouverts pour permettre une communication bidirectionnelle dans le même tuyau",
+          "Transférer les descripteurs sur le réseau via un socket",
+          "Effacer le contenu du tuyau avant de commencer à écrire",
+          "Remplacer les descripteurs par des variables conditionnelles"
+        ],
+        "hint": "Un tuyau est unidirectionnel ; si on laisse tous les robinets ouverts partout, on risque des impasses ou des problèmes de terminaison.",
+        "score": 0,
+        "dueTurn": 0,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q49Chapter2",
+        "question": "Que se passe-t-il si un processus essaie de lire dans un tuyau (pipe) qui est vide (pas de données) ?",
+        "correctAnswers": [
+          "Le processus lecteur est bloqué (suspendu) en attente que l'autre processus écrive des données dans le tuyau"
+        ],
+        "choices": [
+          "Le processus lecteur est bloqué (suspendu) en attente que l'autre processus écrive des données dans le tuyau",
+          "L'appel système de lecture retourne immédiatement un message d'erreur",
+          "Le processus lecteur plante (segfault)",
+          "Le processus lecteur lit des données résiduelles (ordures) du tuyau",
+          "Le système d'exploitation ferme automatiquement le tuyau"
+        ],
+        "hint": "On ne peut pas boire à une paille s'il n'y a plus de liquide ; on attend.",
+        "score": 0,
+        "dueTurn": 0,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q50Chapter2",
+        "question": "Que se passe-t-il si un processus essaie d'écrire dans un tuyau (pipe) dont le tampon (buffer de grandeur fixe dans le noyau) est plein ?",
+        "correctAnswers": [
+          "Le processus écrivain est bloqué (suspendu) en attente que le processus lecteur lise des données pour faire de la place"
+        ],
+        "choices": [
+          "Le processus écrivain est bloqué (suspendu) en attente que le processus lecteur lise des données pour faire de la place",
+          "Les données les plus anciennes du tuyau sont écrasées par les nouvelles",
+          "L'appel système d'écriture retourne immédiatement une erreur 'Buffer Full'",
+          "Le tuyau s'agrandit automatiquement pour s'adapter aux données",
+          "Le processus lecteur est forcé de s'exécuter pour vider le tuyau"
+        ],
+        "hint": "On ne peut pas verser d'eau dans un seau plein ; on attend qu'il se vide un peu.",
+        "score": 0,
+        "dueTurn": 0,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q51Chapter2",
+        "question": "Quelle est la particularité limitante des tuyaux classiques (anonymes) créés avec pipe() ?",
+        "correctAnswers": [
+          "Ils ne peuvent être utilisés que par des processus apparentés (ayant un ancêtre commun qui a créé le tuyau, typiquement via fork())"
+        ],
+        "choices": [
+          "Ils ne peuvent être utilisés que par des processus apparentés (ayant un ancêtre commun qui a créé le tuyau, typiquement via fork())",
+          "Ils ne peuvent transférer que des nombres entiers, pas de caractères",
+          "Ils ne fonctionnent que si les processus sont sur des serveurs distants séparés",
+          "Ils ne permettent la communication que du parent vers l'enfant, jamais l'inverse",
+          "Ils sont extrêmement lents comparés au réseau internet"
+        ],
+        "hint": "Comme ils n'ont pas de nom, on ne peut pas les trouver ; il faut en hériter.",
+        "score": 0,
+        "dueTurn": 0,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q52Chapter2",
+        "question": "Comment résoudre le fait que les processus non apparentés ne peuvent pas utiliser de tuyaux anonymes ?",
+        "correctAnswers": [
+          "En utilisant des tuyaux nommés (named pipes), créés comme des fichiers spéciaux sur le disque avec mkfifo()"
+        ],
+        "choices": [
+          "En utilisant des tuyaux nommés (named pipes), créés comme des fichiers spéciaux sur le disque avec mkfifo()",
+          "En forçant tous les processus à fusionner en un seul",
+          "En désactivant le système de sécurité du noyau",
+          "En utilisant exclusivement la mémoire partagée avec sémaphores",
+          "C'est impossible, les processus non apparentés ne peuvent pas communiquer sous UNIX"
+        ],
+        "hint": "Si on lui donne un nom (un chemin de fichier), n'importe qui peut l'ouvrir en lecture ou écriture.",
+        "score": 0,
+        "dueTurn": 0,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q53Chapter2",
+        "question": "À quoi sert l'appel système dup2(dfSrc, dfDst) ?",
+        "correctAnswers": [
+          "À dupliquer (copier) le descripteur source vers le descripteur destination, redirigeant ainsi le canal. Très utilisé pour attacher un tuyau à la sortie standard (1) ou l'entrée standard (0)"
+        ],
+        "choices": [
+          "À dupliquer (copier) le descripteur source vers le descripteur destination, redirigeant ainsi le canal. Très utilisé pour attacher un tuyau à la sortie standard (1) ou l'entrée standard (0)",
+          "À dupliquer un processus complet, similaire à un fork() mais plus rapide",
+          "À créer deux tuyaux simultanément pour une communication bidirectionnelle",
+          "À doubler la taille du tampon (buffer) alloué à un tuyau dans le noyau",
+          "À vérifier si un descripteur de fichier est ouvert ou fermé"
+        ],
+        "hint": "C'est l'opération magique derrière le symbole '|' (pipe) dans les terminaux shell (ex: 'ls | grep').",
+        "score": 0,
+        "dueTurn": 0,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q54Chapter2",
+        "question": "Qu'est-ce qu'un Socket (point de communication) dans un contexte réseau ?",
+        "correctAnswers": [
+          "Un point d'extrémité de communication défini par la concaténation d'une adresse IP d'hôte et d'un numéro de port TCP/UDP (ex: 161.25.19.8:80)"
+        ],
+        "choices": [
+          "Un point d'extrémité de communication défini par la concaténation d'une adresse IP d'hôte et d'un numéro de port TCP/UDP (ex: 161.25.19.8:80)",
+          "Un connecteur physique sur la carte mère pour ajouter de la mémoire",
+          "Un tuyau nommé sécurisé utilisé uniquement pour la communication locale",
+          "Une zone de mémoire partagée entre le navigateur web et le noyau",
+          "Le descripteur de fichier numéro 0 dans les systèmes UNIX"
+        ],
+        "hint": "C'est l'adresse précise pour qu'une machine parle à un programme spécifique sur une autre machine à travers Internet.",
+        "score": 0,
+        "dueTurn": 0,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q55Chapter2",
+        "question": "Que signifie l'acronyme RPC ?",
+        "correctAnswers": [
+          "Remote Procedure Call (Appel de procédure à distance)"
+        ],
+        "choices": [
+          "Remote Procedure Call (Appel de procédure à distance)",
+          "Random Process Control (Contrôle aléatoire de processus)",
+          "Request for Pipe Communication (Requête pour communication par tuyau)",
+          "Register Protocol Command (Commande de protocole de registre)",
+          "Run Process Continuously (Exécuter le processus en continu)"
+        ],
+        "hint": "C'est appeler une fonction comme si elle était locale, mais elle s'exécute sur un autre ordinateur.",
+        "score": 0,
+        "dueTurn": 0,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q56Chapter2",
+        "question": "Quel est un des grands défis techniques résolu par le système RPC lorsqu'il communique entre deux ordinateurs matériels différents ?",
+        "correctAnswers": [
+          "Gérer les différences de représentation des données (ex: format Big Endian vs Little Endian pour les entiers) en effectuant une conversion via une représentation externe standardisée"
+        ],
+        "choices": [
+          "Gérer les différences de représentation des données (ex: format Big Endian vs Little Endian pour les entiers) en effectuant une conversion via une représentation externe standardisée",
+          "Maintenir la vitesse de la lumière constante dans les câbles réseau",
+          "S'assurer que les deux ordinateurs utilisent la même marque de processeur",
+          "Forcer les deux ordinateurs à utiliser la même adresse IP",
+          "Ignorer les temps de réponse du réseau (latence) pour accélérer le processus"
+        ],
+        "hint": "Si un ordinateur lit de gauche à droite et l'autre de droite à gauche, le RPC (via le stub) traduit pour qu'ils se comprennent.",
+        "score": 0,
+        "dueTurn": 1,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q57Chapter2",
+        "question": "Quel est le rôle du 'Stub' (élément de remplacement) côté client dans une architecture RPC ?",
+        "correctAnswers": [
+          "Cacher la complexité du réseau au programmeur : il découvre le serveur, convertit les paramètres (marshalling) en message réseau, l'envoie, et attend la réponse"
+        ],
+        "choices": [
+          "Cacher la complexité du réseau au programmeur : il découvre le serveur, convertit les paramètres (marshalling) en message réseau, l'envoie, et attend la réponse",
+          "C'est la procédure distante elle-même qui exécute le vrai code sur le serveur",
+          "C'est le module de sécurité qui refuse les connexions réseau non autorisées",
+          "Il crée des tuyaux nommés (named pipes) entre le client et le serveur",
+          "Il gère exclusivement l'interface graphique de l'utilisateur"
+        ],
+        "hint": "Il agit comme un faux représentant local : l'application croit appeler une fonction normale, mais lui, il fait le sale boulot d'envoyer les paquets sur le réseau.",
+        "score": 0,
+        "dueTurn": 0,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q58Chapter2",
+        "question": "Dans le mécanisme RPC, quel est le rôle du 'Démon rendez-vous' (ou matchmaker / service de nommage) ?",
+        "correctAnswers": [
+          "Il écoute sur un port connu par défaut et informe le client sur quel port réseau dynamique précis écoute le service RPC désiré"
+        ],
+        "choices": [
+          "Il écoute sur un port connu par défaut et informe le client sur quel port réseau dynamique précis écoute le service RPC désiré",
+          "Il exécute toutes les procédures distantes pour alléger la charge du serveur principal",
+          "Il intercepte les virus avant qu'ils n'atteignent l'application",
+          "Il établit une communication par mémoire partagée avec l'ordinateur distant",
+          "Il convertit le code source Java en code exécutable UNIX"
+        ],
+        "hint": "C'est l'annuaire de l'immeuble : on lui demande 'À quel étage est l'entreprise X ?' et il nous donne le numéro de la porte (le port).",
+        "score": 0,
+        "dueTurn": 0,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q59Chapter2",
+        "question": "Quelle est la principale différence entre RPC et RMI (Remote Method Invocation de Java) ?",
+        "correctAnswers": [
+          "RPC est procédural (appelle des fonctions C avec des paramètres de base), RMI est orienté-objet (appelle des méthodes d'objets Java distants et peut passer des objets complexes en paramètres)"
+        ],
+        "choices": [
+          "RPC est procédural (appelle des fonctions C avec des paramètres de base), RMI est orienté-objet (appelle des méthodes d'objets Java distants et peut passer des objets complexes en paramètres)",
+          "RMI est beaucoup plus ancien et rudimentaire que RPC",
+          "RPC utilise des sockets réseau, tandis que RMI utilise exclusivement des tuyaux locaux (pipes)",
+          "RPC est spécifique à Java, RMI est utilisé par tous les langages C/C++",
+          "Il n'y a aucune différence, ce sont deux termes pour désigner exactement la même technologie"
+        ],
+        "hint": "L'un est l'évolution orientée objet de l'autre, adaptée au monde de Java.",
+        "score": 0,
+        "dueTurn": 0,
+        "attempts": 0,
+        "isMastered": false
+      },
+      {
+        "id": "q60Chapter2",
+        "question": "Dans RMI Java, comment les objets locaux sont-ils transférés sur le réseau pour être passés en paramètres à l'objet distant ?",
+        "correctAnswers": [
+          "Par copie, en utilisant la technique de 'sérialisation d'objet' (object serialization) qui transforme l'état de l'objet en un flux d'octets"
+        ],
+        "choices": [
+          "Par copie, en utilisant la technique de 'sérialisation d'objet' (object serialization) qui transforme l'état de l'objet en un flux d'octets",
+          "Par passage de pointeurs mémoire directs (l'objet distant accède directement à la RAM du client)",
+          "En utilisant une mémoire partagée virtuelle intercontinentale",
+          "Les objets locaux ne peuvent jamais être passés en paramètres en RMI",
+          "Le serveur télécharge le code source de l'objet et le recompile"
+        ],
+        "hint": "Puisque les adresses mémoire du client ne signifient rien pour le serveur, il faut 'emballer' (aplatir) l'objet complètement avant de l'envoyer.",
+        "score": 0,
+        "dueTurn": 0,
+        "attempts": 0,
+        "isMastered": false
+      }
+    ],
+    "completed": false,
+    "parentId": "1784586017261"
+  }
+]

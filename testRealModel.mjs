@@ -69,8 +69,8 @@ async function runRealTests() {
     console.log("\n=== REAL MODEL AI EVALUATION TEST SUITE ===");
     for (const test of testsToRun) {
         console.log(`\nEvaluating: ${test.name}`);
-        const questionObj = test.questionId ? questionMap[test.questionId] : { choices: test.choices || [], correctAnswer: "" };
-        const correctAnswersArray = test.customTruths || [questionObj.correctAnswer];
+        const questionObj = test.questionId ? questionMap[test.questionId] : { choices: test.choices || [], correctAnswers: [], correctAnswer: "" };
+        const correctAnswersArray = test.customTruths || questionObj.correctAnswers || (questionObj.correctAnswer ? [questionObj.correctAnswer] : []);
         
         try {
             const res = await evaluateInput(test.userInput, questionObj, correctAnswersArray, realModel, realGetEmbs);

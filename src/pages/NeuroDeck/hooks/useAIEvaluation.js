@@ -371,6 +371,12 @@ export const evaluateInputCore = async (userInput, question, correctAnswersArray
          if (isSameStance && distStance === inputStance) {
             avgEnt = avgEnt * 0.3;
          }
+         // Also discount the composite distractor when isSameStance is true:
+         // The composite joins all wrong answers (mixed stances) into one string,
+         // which can produce spuriously high NLI scores against terse stance inputs like "Non"
+         if (isSameStance && dist === compositeDistractor) {
+            avgEnt = avgEnt * 0.3;
+         }
 
          if (avgEnt > maxDistractorScore) {
              maxDistractorScore = avgEnt;
@@ -431,19 +437,25 @@ export const evaluateInputCore = async (userInput, question, correctAnswersArray
 
     const hasHighSemanticEquivalence = maxEmbeddingSim >= 0.85 || (detectedLang === 'FR' && maxEmbeddingSim >= 0.82) || maxTokenOverlap >= 0.55 || isSameStance;
 
+    // Semantic rescue: boost truth score when semantic equivalence is high and no strong contradiction
+    // When isSameStance is true, bypass isStrongContradiction — for yes/no questions, matching stance
+    // is a stronger signal than NLI contradiction (a terse "Non" vs long "Non, ..." confuses the NLI model)
+    const allowRescue = isSameStance || !isStrongContradiction;
+
+    if (hasHighSemanticEquivalence && (effectiveSim >= baseRescueThreshold || isSameStance) && allowRescue) {
+       effectiveTruthScore = Math.max(avgEntailment, effectiveSim, isSameStance ? 0.88 : 0);
+       if (hits === 0 && effectiveTruthScore > maxDistractorScore) {
+           hits = 1;
+       }
+    }
+
+    // isSameStance is the final authority: if the user's binary stance matches the truth's stance,
+    // guarantee a minimum score floor regardless of NLI model confusion
     if (isSameStance) {
       effectiveTruthScore = Math.max(effectiveTruthScore, 0.88);
       if (hits === 0) {
         hits = 1;
       }
-    }
-
-
-    if (hasHighSemanticEquivalence && (effectiveSim >= baseRescueThreshold || isSameStance) && !isStrongContradiction) {
-       effectiveTruthScore = Math.max(avgEntailment, effectiveSim, isSameStance ? 0.88 : 0);
-       if (hits === 0 && effectiveTruthScore > maxDistractorScore) {
-           hits = 1;
-       }
     }
 
 
