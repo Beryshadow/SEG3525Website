@@ -950,7 +950,7 @@ export const SettingsView = ({
                 <div className="flex justify-between items-center text-xs font-bold text-[var(--text-main)]">
                   <span className="flex items-center gap-1.5">
                     <i className="fas fa-brain text-purple-400"></i>
-                    NLI Inference Engine
+                    {t.nliInferenceEngineLabel || "NLI Inference Engine"}
                   </span>
                   <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold uppercase ${nliStatus === 'ready' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/10 text-amber-400 border border-amber-500/30'}`}>
                     {nliStatus || 'unloaded'}
@@ -965,7 +965,7 @@ export const SettingsView = ({
 
               <button
                 onClick={async () => {
-                  setNliTestResult({ status: 'testing', message: 'Running NLI micro-test (Premise: HTML structure vs Hypothesis: Web layout)...', latency: null });
+                  setNliTestResult({ status: 'testing', message: t.nliTestingMsg || 'Running NLI micro-test...', latency: null });
                   const t0 = performance.now();
                   try {
                     if (evaluateNLI) {
@@ -981,24 +981,24 @@ export const SettingsView = ({
                         const contra = items.find(i => i.label?.toLowerCase().includes('contra') || i.label === 'LABEL_2')?.score || 0;
                         setNliTestResult({
                           status: 'success',
-                          message: `✅ NLI Functional — Entailment: ${(ent * 100).toFixed(1)}%, Contradiction: ${(contra * 100).toFixed(1)}% (${lat}ms)`,
+                          message: `${t.nliFunctional || '✅ NLI Functional'} — ${t.entailmentLabel || 'Entailment'}: ${(ent * 100).toFixed(1)}%, ${t.contradictionLabel || 'Contradiction'}: ${(contra * 100).toFixed(1)}% (${lat}ms)`,
                           latency: lat
                         });
-                        if (showToast) showToast(`NLI Test Passed (${lat}ms)`);
+                        if (showToast) showToast(`${t.nliTestPassedToast || 'NLI Test Passed'} (${lat}ms)`);
                       } else {
                         throw new Error("No output returned from NLI worker");
                       }
                     } else {
                       setNliTestResult({
                         status: 'error',
-                        message: '⚠️ NLI Model worker not loaded yet. Select an NLI model above and wait for initialization.',
+                        message: t.nliNotReady || '⚠️ NLI Model worker not loaded yet. Select an NLI model above and wait for initialization.',
                         latency: null
                       });
                     }
                   } catch(err) {
                     setNliTestResult({
                       status: 'error',
-                      message: `❌ NLI Test Failed: ${err.message}`,
+                      message: `${t.nliTestFailed || '❌ NLI Test Failed'}: ${err.message}`,
                       latency: null
                     });
                   }
@@ -1007,7 +1007,7 @@ export const SettingsView = ({
                 className="neu-btn px-4 py-2 text-[10px] sm:text-xs font-bold uppercase tracking-wider rounded-lg text-purple-400 hover:text-purple-300 transition-colors flex items-center justify-center gap-2 self-stretch"
               >
                 <i className={`fas fa-${nliTestResult.status === 'testing' ? 'spinner fa-spin' : 'play'}`}></i>
-                <span>Test NLI Model</span>
+                <span>{t.testNliBtn || "Test NLI Model"}</span>
               </button>
             </div>
 
@@ -1017,7 +1017,7 @@ export const SettingsView = ({
                 <div className="flex justify-between items-center text-xs font-bold text-[var(--text-main)]">
                   <span className="flex items-center gap-1.5">
                     <i className="fas fa-vector-square text-cyan-400"></i>
-                    Embedding Vector Engine
+                    {t.embeddingVectorEngineLabel || "Embedding Vector Engine"}
                   </span>
                   <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold uppercase ${embeddingStatus === 'ready' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/10 text-amber-400 border border-amber-500/30'}`}>
                     {embeddingStatus || 'unloaded'}
@@ -1032,7 +1032,7 @@ export const SettingsView = ({
 
               <button
                 onClick={async () => {
-                  setEmbTestResult({ status: 'testing', message: 'Running Embedding micro-test (Vectorizing & computing cosine similarity)...', latency: null });
+                  setEmbTestResult({ status: 'testing', message: t.embTestingMsg || 'Running Embedding micro-test...', latency: null });
                   const t0 = performance.now();
                   try {
                     if (getEmbeddings) {
@@ -1051,24 +1051,24 @@ export const SettingsView = ({
                         const sim = (normA > 0 && normB > 0) ? (dot / (Math.sqrt(normA) * Math.sqrt(normB))) : 0;
                         setEmbTestResult({
                           status: 'success',
-                          message: `✅ Embedding Functional — Cosine Sim: ${sim.toFixed(4)}, Dim: ${vecA.length} (${lat}ms)`,
+                          message: `${t.embFunctional || '✅ Embedding Functional'} — ${t.cosineSimLabel || 'Cosine Sim'}: ${sim.toFixed(4)}, ${t.dimLabel || 'Dim'}: ${vecA.length} (${lat}ms)`,
                           latency: lat
                         });
-                        if (showToast) showToast(`Embedding Test Passed (${lat}ms)`);
+                        if (showToast) showToast(`${t.embTestPassedToast || 'Embedding Test Passed'} (${lat}ms)`);
                       } else {
                         throw new Error("No vectors returned from embedding worker");
                       }
                     } else {
                       setEmbTestResult({
                         status: 'error',
-                        message: '⚠️ Embedding Model worker not loaded yet. Select an embedding model above and wait for initialization.',
+                        message: t.embNotReady || '⚠️ Embedding Model worker not loaded yet. Select an embedding model above and wait for initialization.',
                         latency: null
                       });
                     }
                   } catch(err) {
                     setEmbTestResult({
                       status: 'error',
-                      message: `❌ Embedding Test Failed: ${err.message}`,
+                      message: `${t.embTestFailed || '❌ Embedding Test Failed'}: ${err.message}`,
                       latency: null
                     });
                   }
@@ -1077,7 +1077,7 @@ export const SettingsView = ({
                 className="neu-btn px-4 py-2 text-[10px] sm:text-xs font-bold uppercase tracking-wider rounded-lg text-cyan-400 hover:text-cyan-300 transition-colors flex items-center justify-center gap-2 self-stretch"
               >
                 <i className={`fas fa-${embTestResult.status === 'testing' ? 'spinner fa-spin' : 'play'}`}></i>
-                <span>Test Embedding Model</span>
+                <span>{t.testEmbeddingBtn || "Test Embedding Model"}</span>
               </button>
             </div>
           </div>
@@ -1123,13 +1123,13 @@ export const SettingsView = ({
               } catch(e) {}
               if (onClearAICache) onClearAICache();
               if (showToast) {
-                showToast(nextVal ? "AI Debug Telemetry Enabled" : "AI Debug Telemetry Disabled");
+                showToast(nextVal ? (t.debugEnabledToast || "AI Debug Telemetry Enabled") : (t.debugDisabledToast || "AI Debug Telemetry Disabled"));
               }
             }}
             className={`neu-btn px-4 sm:px-6 py-2.5 sm:py-3 text-[10px] sm:text-xs font-bold uppercase tracking-widest rounded-xl transition-colors flex items-center gap-2 ${isDebugEnabled ? 'text-amber-500 border border-amber-500/30 bg-amber-500/10' : 'text-[var(--text-muted)]'}`}
           >
             <i className={`fas fa-${isDebugEnabled ? 'check-circle' : 'toggle-off'}`}></i>
-            <span>{isDebugEnabled ? "Debug Active" : "Enable Debug"}</span>
+            <span>{isDebugEnabled ? (t.debugActive || "Debug Active") : (t.enableDebug || "Enable Debug")}</span>
           </button>
         </div>
 
@@ -1152,19 +1152,25 @@ export const SettingsView = ({
                   localStorage.removeItem('neurodeck-ai-config');
                 } catch(e) {}
                 if (onClearAICache) onClearAICache();
-                if (showToast) showToast("AI Calibration Reset to Defaults");
+                if (showToast) showToast(t.resetDefaultsToast || "AI Calibration Reset to Defaults");
               }}
               className="neu-btn px-3 py-1.5 text-[9px] sm:text-xs font-bold uppercase tracking-wider rounded-lg text-cyan-400 hover:text-cyan-300 transition-colors"
             >
-              <i className="fas fa-undo mr-1"></i> Reset
+              <i className="fas fa-undo mr-1"></i> {t.resetDefaultsBtn || "Reset"}
             </button>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
             {/* Base Rescue Threshold */}
-            <div className="p-3 neu-inset rounded-xl flex flex-col gap-1.5">
+            <div 
+              className="p-3 neu-inset rounded-xl flex flex-col gap-1.5 transition-all group"
+              title={t.baseRescueThresholdTooltip || "Minimum NLI entailment score (0.40–0.95) required to grant semantic rescue credit for differently phrased answers."}
+            >
               <div className="flex justify-between items-center text-[10px] sm:text-xs font-bold text-[var(--text-main)]">
-                <span>Base Rescue Threshold</span>
+                <span className="flex items-center gap-1">
+                  <span>{t.baseRescueThresholdTitle || "Base Rescue Threshold"}</span>
+                  <i className="fas fa-info-circle text-[9px] text-[var(--text-muted)] group-hover:text-cyan-400 transition-colors"></i>
+                </span>
                 <span className="text-cyan-400 font-mono">{aiConfigState.baseRescueThreshold}</span>
               </div>
               <input
@@ -1173,6 +1179,7 @@ export const SettingsView = ({
                 max="0.95"
                 step="0.01"
                 value={aiConfigState.baseRescueThreshold}
+                title={t.baseRescueThresholdTooltip || "Minimum NLI entailment score (0.40–0.95) required to grant semantic rescue credit for differently phrased answers."}
                 onChange={(e) => {
                   const val = parseFloat(e.target.value);
                   const updated = { ...aiConfigState, baseRescueThreshold: val };
@@ -1182,12 +1189,21 @@ export const SettingsView = ({
                 }}
                 className="w-full accent-cyan-400 cursor-pointer"
               />
+              <p className="text-[9px] text-[var(--text-muted)] font-medium leading-tight mt-0.5">
+                {t.baseRescueThresholdTooltip || "Minimum NLI entailment score (0.40–0.95) required to grant semantic rescue credit."}
+              </p>
             </div>
 
             {/* High Semantic Equivalence Threshold */}
-            <div className="p-3 neu-inset rounded-xl flex flex-col gap-1.5">
+            <div 
+              className="p-3 neu-inset rounded-xl flex flex-col gap-1.5 transition-all group"
+              title={t.equivalenceThresholdTooltip || "Threshold (0.50–0.95) above which two answers are treated as functionally identical paraphrases."}
+            >
               <div className="flex justify-between items-center text-[10px] sm:text-xs font-bold text-[var(--text-main)]">
-                <span>Semantic Equivalence</span>
+                <span className="flex items-center gap-1">
+                  <span>{t.equivalenceThresholdTitle || "Semantic Equivalence"}</span>
+                  <i className="fas fa-info-circle text-[9px] text-[var(--text-muted)] group-hover:text-cyan-400 transition-colors"></i>
+                </span>
                 <span className="text-cyan-400 font-mono">{aiConfigState.highSemanticEquivalenceThreshold}</span>
               </div>
               <input
@@ -1196,6 +1212,7 @@ export const SettingsView = ({
                 max="0.95"
                 step="0.01"
                 value={aiConfigState.highSemanticEquivalenceThreshold}
+                title={t.equivalenceThresholdTooltip || "Threshold (0.50–0.95) above which two answers are treated as functionally identical paraphrases."}
                 onChange={(e) => {
                   const val = parseFloat(e.target.value);
                   const updated = { ...aiConfigState, highSemanticEquivalenceThreshold: val };
@@ -1205,12 +1222,21 @@ export const SettingsView = ({
                 }}
                 className="w-full accent-cyan-400 cursor-pointer"
               />
+              <p className="text-[9px] text-[var(--text-muted)] font-medium leading-tight mt-0.5">
+                {t.equivalenceThresholdTooltip || "Threshold (0.50–0.95) above which answers are treated as identical paraphrases."}
+              </p>
             </div>
 
             {/* Distractor Discrimination Margin */}
-            <div className="p-3 neu-inset rounded-xl flex flex-col gap-1.5">
+            <div 
+              className="p-3 neu-inset rounded-xl flex flex-col gap-1.5 transition-all group"
+              title={t.distractorMarginTooltip || "Required ratio (1.5x–6.0x) by which the correct answer's score must exceed incorrect distractor choice scores."}
+            >
               <div className="flex justify-between items-center text-[10px] sm:text-xs font-bold text-[var(--text-main)]">
-                <span>Distractor Margin</span>
+                <span className="flex items-center gap-1">
+                  <span>{t.distractorMarginTitle || "Distractor Margin"}</span>
+                  <i className="fas fa-info-circle text-[9px] text-[var(--text-muted)] group-hover:text-cyan-400 transition-colors"></i>
+                </span>
                 <span className="text-cyan-400 font-mono">{aiConfigState.distractorDiscriminationMargin}x</span>
               </div>
               <input
@@ -1219,6 +1245,7 @@ export const SettingsView = ({
                 max="6.0"
                 step="0.1"
                 value={aiConfigState.distractorDiscriminationMargin}
+                title={t.distractorMarginTooltip || "Required ratio (1.5x–6.0x) by which the correct answer's score must exceed incorrect distractor choice scores."}
                 onChange={(e) => {
                   const val = parseFloat(e.target.value);
                   const updated = { ...aiConfigState, distractorDiscriminationMargin: val };
@@ -1228,12 +1255,21 @@ export const SettingsView = ({
                 }}
                 className="w-full accent-cyan-400 cursor-pointer"
               />
+              <p className="text-[9px] text-[var(--text-muted)] font-medium leading-tight mt-0.5">
+                {t.distractorMarginTooltip || "Required ratio (1.5x–6.0x) by which correct answer must exceed distractor choices."}
+              </p>
             </div>
 
             {/* Embedding Scaling Exponent */}
-            <div className="p-3 neu-inset rounded-xl flex flex-col gap-1.5">
+            <div 
+              className="p-3 neu-inset rounded-xl flex flex-col gap-1.5 transition-all group"
+              title={t.embeddingScalingTooltip || "Non-linear scaling exponent (0.50–1.00) applied to vector cosine similarity to adjust scoring sensitivity."}
+            >
               <div className="flex justify-between items-center text-[10px] sm:text-xs font-bold text-[var(--text-main)]">
-                <span>Embedding Exponent</span>
+                <span className="flex items-center gap-1">
+                  <span>{t.embeddingScalingTitle || "Embedding Exponent"}</span>
+                  <i className="fas fa-info-circle text-[9px] text-[var(--text-muted)] group-hover:text-cyan-400 transition-colors"></i>
+                </span>
                 <span className="text-cyan-400 font-mono">{aiConfigState.truthEmbeddingScalingExponent}</span>
               </div>
               <input
@@ -1242,6 +1278,7 @@ export const SettingsView = ({
                 max="1.00"
                 step="0.05"
                 value={aiConfigState.truthEmbeddingScalingExponent}
+                title={t.embeddingScalingTooltip || "Non-linear scaling exponent (0.50–1.00) applied to vector cosine similarity to adjust scoring sensitivity."}
                 onChange={(e) => {
                   const val = parseFloat(e.target.value);
                   const updated = { ...aiConfigState, truthEmbeddingScalingExponent: val };
@@ -1251,6 +1288,9 @@ export const SettingsView = ({
                 }}
                 className="w-full accent-cyan-400 cursor-pointer"
               />
+              <p className="text-[9px] text-[var(--text-muted)] font-medium leading-tight mt-0.5">
+                {t.embeddingScalingTooltip || "Non-linear scaling exponent (0.50–1.00) applied to vector cosine similarity."}
+              </p>
             </div>
           </div>
         </div>
