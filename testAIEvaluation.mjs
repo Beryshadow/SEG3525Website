@@ -284,6 +284,39 @@ async function runTests() {
     }
   }
 
+  // Add long context (> 128 tokens) test case
+  const longPromptQuestion = {
+    id: "q_long_context",
+    question: "Explain the architecture of modern web browser rendering engines, focusing on HTML parsing, DOM tree construction, CSSOM creation, render tree layout, compositing layers, and GPU accelerated drawing pipeline in extensive technical detail.",
+    choices: ["Option A", "Option B"],
+    correctAnswer: "The browser parses HTML tokens into DOM nodes, constructs CSSOM from stylesheets, merges them into a render tree, computes layout geometries, creates compositing layers, and dispatches draw calls to the GPU rasterizer."
+  };
+  const longInput = "Browser rendering starts with HTML tokenization to build the DOM tree and CSS parsing to build the CSSOM. These trees are combined into the layout tree to determine coordinates, after which paint operations are grouped into compositing layers and executed on the GPU.";
+  const mockModelLong = createMockModel([longPromptQuestion.correctAnswer], [{ label: "entailment", score: 0.95 }]);
+  const mockEmbsLong = createMockGetEmbs(0.92);
+
+  total++;
+  const resLong = await evaluateInput(longInput, longPromptQuestion, [longPromptQuestion.correctAnswer], mockModelLong, mockEmbsLong);
+  if (resLong && resLong.score >= 8.5) {
+    console.log(`✅ [PASS] Long Context Prompt (> 128 Tokens) -> Score: ${resLong.score.toFixed(2)}`);
+    passed++;
+  } else {
+    console.error(`❌ [FAIL] Long Context Prompt (> 128 Tokens) -> Score: ${resLong?.score?.toFixed(2)}`);
+  }
+
+  // Add graph pre-computed embedding reuse test case
+  total++;
+  const mockCardEmbeddings = {
+    [longPromptQuestion.id]: [0.92, 0.39]
+  };
+  const resGraphEmb = await evaluateInput(longInput, longPromptQuestion, [longPromptQuestion.correctAnswer], mockModelLong, mockEmbsLong, mockCardEmbeddings);
+  if (resGraphEmb && resGraphEmb.score >= 8.5) {
+    console.log(`✅ [PASS] Graph Pre-Computed Embedding Reuse -> Score: ${resGraphEmb.score.toFixed(2)}`);
+    passed++;
+  } else {
+    console.error(`❌ [FAIL] Graph Pre-Computed Embedding Reuse -> Score: ${resGraphEmb?.score?.toFixed(2)}`);
+  }
+
   console.log(`\n=== TEST SUMMARY: ${passed}/${total} PASSED ===\n`);
 }
 
