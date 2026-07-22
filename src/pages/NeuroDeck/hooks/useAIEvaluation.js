@@ -226,6 +226,12 @@ export const evaluateInputCore = async (userInput, question, correctAnswersArray
     return evalResultCache.get(cacheKey);
   }
 
+  const truthTexts = safeCorrectAnswers;
+  const validTruths = truthTexts.filter(t => t && typeof t === 'string' && t.trim());
+  const inputStance = getBinaryStance(userInput);
+  const truthStance = validTruths[0] ? getBinaryStance(validTruths[0]) : null;
+  const isSameStance = inputStance && truthStance && inputStance === truthStance;
+
   // Exact or Normalized Match (e.g. "fork" vs "Fork()", or matching articles)
   const isNormalizedExactMatch = safeCorrectAnswers.some(ans => {
     const cleanAns = ans.trim().toLowerCase();
@@ -234,17 +240,27 @@ export const evaluateInputCore = async (userInput, question, correctAnswersArray
   });
   
   if (isNormalizedExactMatch) {
-      return { status: "success", score: 10.0 };
+      const debugData = {
+        scoringBranch: 'EXACT_MATCH',
+        inputStance,
+        truthStance,
+        isSameStance,
+        score: 10.0,
+        correctAnswersReceived: safeCorrectAnswers,
+        choicesReceived: Array.isArray(question?.choices) ? question.choices : [],
+        detectedLang: detectLanguageFRorEN(question?.question || userInput)
+      };
+      const result = { status: "success", score: 10.0, _debug: debugData };
+      evalResultCache.set(cacheKey, result);
+      return result;
   }
 
   if (!model) {
     return { status: "loading" };
   }
 
-  const truthTexts = safeCorrectAnswers;
   const choicesArray = Array.isArray(question?.choices) ? question.choices : [];
   const incorrectTexts = choicesArray.filter(c => !safeCorrectAnswers.includes(c));
-  const validTruths = truthTexts.filter(t => t && typeof t === 'string' && t.trim());
   const compositeDistractor = incorrectTexts.join(". ");
   const distractorField = [...incorrectTexts, compositeDistractor].filter(d => d && typeof d === 'string' && d.trim());
 
@@ -288,11 +304,6 @@ export const evaluateInputCore = async (userInput, question, correctAnswersArray
   if (inputEmb && questionEmb) {
     maxEmbeddingSim = cosineSimilarity(inputEmb, questionEmb);
   }
-
-  // Detect universal binary stances (Yes/No, Oui/Non, True/False, Vrai/Faux)
-  const inputStance = getBinaryStance(userInput);
-  const truthStance = validTruths[0] ? getBinaryStance(validTruths[0]) : null;
-  const isSameStance = inputStance && truthStance && inputStance === truthStance;
 
   // --- 2. MULTI-DIRECTIONAL DUAL-PASS DIRECT NLI CROSS-ENCODER EVALUATION ---
   try {
@@ -474,35 +485,30 @@ export const evaluateInputCore = async (userInput, question, correctAnswersArray
 
     mappedScore10 = Math.max(0, Math.min(10, mappedScore10)); 
 
-    // Attach debug telemetry when debug mode is active
-    let debugData = null;
-    try {
-      if (typeof localStorage !== 'undefined' && localStorage.getItem('neurodeck-debug') === 'true') {
-        debugData = {
-          inputStance,
-          truthStance,
-          isSameStance,
-          isStrongContradiction,
-          avgEntailment: +avgEntailment.toFixed(4),
-          effectiveTruthScore: +effectiveTruthScore.toFixed(4),
-          maxDistractorScore: +maxDistractorScore.toFixed(4),
-          closestIncorrectText,
-          maxEmbeddingSim: +maxEmbeddingSim.toFixed(4),
-          effectiveSim: +effectiveSim.toFixed(4),
-          maxTokenOverlap: +maxTokenOverlap.toFixed(4),
-          hasHighSemanticEquivalence,
-          allowRescue,
-          detectedLang,
-          leniencyBias: +leniencyBias.toFixed(4),
-          hits,
-          validTruthsLength: validTruths.length,
-          scoringBranch: hits === validTruths.length && validTruths.length > 0 ? 'HIT_ALL' : hits > 0 ? 'PARTIAL' : 'NO_HITS',
-          correctAnswersReceived: safeCorrectAnswers,
-          choicesReceived: choicesArray,
-          incorrectTextsCount: incorrectTexts.length,
-        };
-      }
-    } catch(e) {}
+    // Attach debug telemetry
+    const debugData = {
+      inputStance,
+      truthStance,
+      isSameStance,
+      isStrongContradiction,
+      avgEntailment: +avgEntailment.toFixed(4),
+      effectiveTruthScore: +effectiveTruthScore.toFixed(4),
+      maxDistractorScore: +maxDistractorScore.toFixed(4),
+      closestIncorrectText,
+      maxEmbeddingSim: +maxEmbeddingSim.toFixed(4),
+      effectiveSim: +effectiveSim.toFixed(4),
+      maxTokenOverlap: +maxTokenOverlap.toFixed(4),
+      hasHighSemanticEquivalence,
+      allowRescue,
+      detectedLang,
+      leniencyBias: +leniencyBias.toFixed(4),
+      hits,
+      validTruthsLength: validTruths.length,
+      scoringBranch: hits === validTruths.length && validTruths.length > 0 ? 'HIT_ALL' : hits > 0 ? 'PARTIAL' : 'NO_HITS',
+      correctAnswersReceived: safeCorrectAnswers,
+      choicesReceived: choicesArray,
+      incorrectTextsCount: incorrectTexts.length,
+    };
 
     let finalResult = { status: "wrong", score: mappedScore10, hotColdScore: maxEmbeddingSim };
     if (hits === validTruths.length && validTruths.length > 0) {
@@ -524,9 +530,7 @@ export const evaluateInputCore = async (userInput, question, correctAnswersArray
       };
     }
 
-    if (debugData) {
-      finalResult._debug = debugData;
-    }
+    finalResult._debug = debugData;
 
     if (evalResultCache.size > 200) {
       const firstKey = evalResultCache.keys().next().value;

@@ -963,6 +963,7 @@ export const SettingsView = ({
               try {
                 localStorage.setItem('neurodeck-debug', String(nextVal));
               } catch(e) {}
+              if (onClearAICache) onClearAICache();
               if (showToast) {
                 showToast(nextVal ? "AI Debug Telemetry Enabled" : "AI Debug Telemetry Disabled");
               }
