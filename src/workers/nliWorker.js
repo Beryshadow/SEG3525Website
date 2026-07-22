@@ -98,7 +98,22 @@ self.addEventListener('message', async (event) => {
     try {
       const { batchedInputs, text, textPair, options } = payload;
       let output;
-      const opt = options || { top_k: 5 };
+      let maxLen = 128;
+      if (batchedInputs && Array.isArray(batchedInputs) && batchedInputs.length > 0) {
+        const maxChars = Math.max(...batchedInputs.map(str => (typeof str === 'string' ? str.length : 0)));
+        const approxTokens = Math.ceil(maxChars / 3);
+        if (approxTokens > 128) {
+          maxLen = Math.min(512, Math.ceil(approxTokens / 64) * 64);
+        }
+      } else if (text) {
+        const totalLen = (typeof text === 'string' ? text.length : 0) + (typeof textPair === 'string' ? textPair.length : 0);
+        const approxTokens = Math.ceil(totalLen / 3);
+        if (approxTokens > 128) {
+          maxLen = Math.min(512, Math.ceil(approxTokens / 64) * 64);
+        }
+      }
+
+      const opt = { top_k: 5, padding: true, truncation: true, max_length: maxLen, ...options };
 
       if (batchedInputs) {
         output = await classifier(batchedInputs, opt);

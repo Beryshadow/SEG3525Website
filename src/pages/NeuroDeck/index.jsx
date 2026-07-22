@@ -440,6 +440,7 @@ export default function NeuroDeck() {
             showToast={showToast}
             currentLangKey={currentLangKey}
             getEmbeddings={getEmbeddings}
+            cardEmbeddings={cardEmbeddings}
             focusMode={focusMode}
             setFocusMode={setFocusMode}
           />

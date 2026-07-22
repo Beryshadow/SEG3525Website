@@ -9,7 +9,7 @@ import { SuccessPhase } from './study/SuccessPhase';
 
 export const StudyView = ({
   question, currentIndex, totalCards, model, modelStatus, modelError, progressPercent, onComplete,
-  onNavigate, t, showToast, currentLangKey, getEmbeddings, focusMode, setFocusMode, servingMode
+  onNavigate, t, showToast, currentLangKey, getEmbeddings, cardEmbeddings, focusMode, setFocusMode, servingMode
 }) => {
   const [phase, setPhase] = useState("input");
   const [userInput, setUserInput] = useState("");
@@ -154,7 +154,7 @@ export const StudyView = ({
     onComplete(question.id, newScore, true, true);
   };
 
-  const { evaluateInput } = useAIEvaluation({ model, getEmbeddings, t, currentLangKey });
+  const { evaluateInput } = useAIEvaluation({ model, getEmbeddings, cardEmbeddings, t, currentLangKey });
 
   const handleEvaluateInput = async () => {
     if (!userInput.trim()) return;
