@@ -32,7 +32,8 @@ export function useNLIModel(selectedModel = "Xenova/nli-deberta-v3-small") {
 
     worker.onmessage = (e) => {
       if (!isMounted) return;
-      const { type, data, backendUsed, error, id, outputs } = e.data;
+      const { type, data, backendUsed, error, id, outputs, output } = e.data;
+      const resultData = output !== undefined ? output : outputs;
 
       if (type === 'progress') {
         if (["progress", "download", "done"].includes(data.status)) {
@@ -64,9 +65,9 @@ export function useNLIModel(selectedModel = "Xenova/nli-deberta-v3-small") {
            setModelStatus("error");
            setModelError(error);
         }
-      } else if (type === 'evaluate_result') {
+      } else if (type === 'evaluate_result' || type === 'classify_result') {
         if (id !== undefined && callbacksRef.current[id]) {
-           callbacksRef.current[id].resolve(outputs);
+           callbacksRef.current[id].resolve(resultData);
            delete callbacksRef.current[id];
         }
       }

@@ -116,7 +116,13 @@ self.addEventListener('message', async (event) => {
       const opt = { top_k: 5, padding: true, truncation: true, max_length: maxLen, ...options };
 
       if (batchedInputs) {
-        output = await classifier(batchedInputs, opt);
+        const formattedInputs = batchedInputs.map(item => {
+          if (typeof item === 'string') return item;
+          if (item && (item.text || item.text_pair)) return { text: item.text || '', text_pair: item.text_pair || '' };
+          if (item && (item.premise || item.hypothesis)) return { text: item.premise || '', text_pair: item.hypothesis || '' };
+          return item;
+        });
+        output = await classifier(formattedInputs, opt);
       } else if (textPair) {
         output = await classifier({ text, text_pair: textPair }, opt);
       } else {
@@ -124,7 +130,7 @@ self.addEventListener('message', async (event) => {
       }
 
       const responseType = type === 'evaluate' ? 'evaluate_result' : 'classify_result';
-      self.postMessage({ type: responseType, id, output });
+      self.postMessage({ type: responseType, id, output, outputs: output });
     } catch (error) {
       self.postMessage({ type: 'error', id, error: error.message || String(error) });
     }

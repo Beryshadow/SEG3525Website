@@ -975,10 +975,10 @@ export const SettingsView = ({
                       }]);
                       const t1 = performance.now();
                       const lat = Math.round(t1 - t0);
-                      if (res && res[0]) {
-                        const items = res[0];
-                        const ent = items.find(i => i.label?.toLowerCase().includes('entail'))?.score || 0;
-                        const contra = items.find(i => i.label?.toLowerCase().includes('contra'))?.score || 0;
+                      const items = res ? (Array.isArray(res[0]) ? res[0] : (Array.isArray(res) ? res : [])) : [];
+                      if (items.length > 0) {
+                        const ent = items.find(i => i.label?.toLowerCase().includes('entail') || i.label === 'LABEL_0')?.score || 0;
+                        const contra = items.find(i => i.label?.toLowerCase().includes('contra') || i.label === 'LABEL_2')?.score || 0;
                         setNliTestResult({
                           status: 'success',
                           message: `✅ NLI Functional — Entailment: ${(ent * 100).toFixed(1)}%, Contradiction: ${(contra * 100).toFixed(1)}% (${lat}ms)`,
