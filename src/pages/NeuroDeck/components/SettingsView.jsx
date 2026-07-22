@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { SaveIcon, ClockIcon, RandomIcon, SeqIcon, DownloadIcon, UploadIcon, SparklesIcon, CpuIcon, CheckIcon, EditIcon, CopyIcon, BrainIcon } from './Icons';
 import { QRCodeSVG } from 'qrcode.react';
 
+import { DEFAULT_AI_CONFIG, getStoredAIConfig } from '../hooks/useAIEvaluation';
+
 export const SettingsView = ({
   currentDeck, onImport, selectedModel, onModelChange,
   selectedEmbeddingModel, onEmbeddingModelChange,
@@ -11,7 +13,8 @@ export const SettingsView = ({
   myDecks, loadedDeckId, onSaveDeckToCache, onOverwriteDeck, onLoadDeckFromCache, 
   onDeleteDeckFromCache, onToggleDeckCompleted, onRenameDeck, onDirectDropSave,
   onMoveDeck, onBatchDeleteDecks, onBatchMoveDecks, syncCode, syncHash, pairingCode, isGeneratingCode, setSyncCode, onGenerateSyncCode, onConnectSyncCode, onDisconnectSyncCode, onClearCloudData,
-  onExportWithoutProgress, onShareToCode, onImportFromCode, t, showToast, servingMode, onServingModeChange, onJumpToPriorityCard, onClearAICache
+  onExportWithoutProgress, onShareToCode, onImportFromCode, t, showToast, servingMode, onServingModeChange, onJumpToPriorityCard, onClearAICache,
+  nliStatus, evaluateNLI, embeddingStatus, getEmbeddings
 }) => {
 
   const [jsonInput, setJsonInput] = useState("");
@@ -24,6 +27,9 @@ export const SettingsView = ({
   const [selectedDeckIds, setSelectedDeckIds] = useState(new Set());
   const [lastSelectedId, setLastSelectedId] = useState(null);
   const [targetMoveFolderId, setTargetMoveFolderId] = useState("");
+  const [aiConfigState, setAiConfigState] = useState(() => getStoredAIConfig());
+  const [nliTestResult, setNliTestResult] = useState({ status: 'idle', message: '', latency: null });
+  const [embTestResult, setEmbTestResult] = useState({ status: 'idle', message: '', latency: null });
   const [isDebugEnabled, setIsDebugEnabled] = useState(() => {
     try {
       return typeof localStorage !== 'undefined' && localStorage.getItem('neurodeck-debug') === 'true';
@@ -925,6 +931,158 @@ export const SettingsView = ({
           </div>
         </div>
 
+        {/* Model Health & Micro-Diagnostics (NLI & Embedding Functionality Verification) */}
+        <div className="pt-6 sm:pt-8 border-t border-white/10 flex flex-col gap-4">
+          <div>
+            <h3 className="text-xs sm:text-sm font-black text-[var(--accent)] mb-1 uppercase tracking-widest flex items-center gap-2">
+              <i className="fas fa-stethoscope text-emerald-400"></i>
+              {t.modelDiagnosticsTitle || "Model Health & Micro-Diagnostics"}
+            </h3>
+            <p className="text-[9px] sm:text-xs text-[var(--text-muted)] font-medium leading-relaxed">
+              {t.modelDiagnosticsDesc || "Run a real-time predetermined micro test on the active NLI and Embedding models to verify browser execution and measure inference latency."}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-1">
+            {/* Test NLI Model Button & Indicator */}
+            <div className="p-4 neu-inset rounded-xl flex flex-col justify-between gap-3">
+              <div>
+                <div className="flex justify-between items-center text-xs font-bold text-[var(--text-main)]">
+                  <span className="flex items-center gap-1.5">
+                    <i className="fas fa-brain text-purple-400"></i>
+                    NLI Inference Engine
+                  </span>
+                  <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold uppercase ${nliStatus === 'ready' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/10 text-amber-400 border border-amber-500/30'}`}>
+                    {nliStatus || 'unloaded'}
+                  </span>
+                </div>
+                {nliTestResult.message && (
+                  <div className={`mt-2 p-2.5 rounded-lg text-[10px] sm:text-xs font-mono leading-relaxed border ${nliTestResult.status === 'success' ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30' : (nliTestResult.status === 'error' ? 'bg-red-500/10 text-red-300 border-red-500/30' : 'bg-blue-500/10 text-blue-300 border-blue-500/30')}`}>
+                    {nliTestResult.message}
+                  </div>
+                )}
+              </div>
+
+              <button
+                onClick={async () => {
+                  setNliTestResult({ status: 'testing', message: 'Running NLI micro-test (Premise: HTML structure vs Hypothesis: Web layout)...', latency: null });
+                  const t0 = performance.now();
+                  try {
+                    if (evaluateNLI) {
+                      const res = await evaluateNLI([{
+                        premise: "HTML defines the structure and content of a web page",
+                        hypothesis: "HTML is used to build web page layouts and structure"
+                      }]);
+                      const t1 = performance.now();
+                      const lat = Math.round(t1 - t0);
+                      if (res && res[0]) {
+                        const items = res[0];
+                        const ent = items.find(i => i.label?.toLowerCase().includes('entail'))?.score || 0;
+                        const contra = items.find(i => i.label?.toLowerCase().includes('contra'))?.score || 0;
+                        setNliTestResult({
+                          status: 'success',
+                          message: `✅ NLI Functional — Entailment: ${(ent * 100).toFixed(1)}%, Contradiction: ${(contra * 100).toFixed(1)}% (${lat}ms)`,
+                          latency: lat
+                        });
+                        if (showToast) showToast(`NLI Test Passed (${lat}ms)`);
+                      } else {
+                        throw new Error("No output returned from NLI worker");
+                      }
+                    } else {
+                      setNliTestResult({
+                        status: 'error',
+                        message: '⚠️ NLI Model worker not loaded yet. Select an NLI model above and wait for initialization.',
+                        latency: null
+                      });
+                    }
+                  } catch(err) {
+                    setNliTestResult({
+                      status: 'error',
+                      message: `❌ NLI Test Failed: ${err.message}`,
+                      latency: null
+                    });
+                  }
+                }}
+                disabled={nliTestResult.status === 'testing'}
+                className="neu-btn px-4 py-2 text-[10px] sm:text-xs font-bold uppercase tracking-wider rounded-lg text-purple-400 hover:text-purple-300 transition-colors flex items-center justify-center gap-2 self-stretch"
+              >
+                <i className={`fas fa-${nliTestResult.status === 'testing' ? 'spinner fa-spin' : 'play'}`}></i>
+                <span>Test NLI Model</span>
+              </button>
+            </div>
+
+            {/* Test Embedding Model Button & Indicator */}
+            <div className="p-4 neu-inset rounded-xl flex flex-col justify-between gap-3">
+              <div>
+                <div className="flex justify-between items-center text-xs font-bold text-[var(--text-main)]">
+                  <span className="flex items-center gap-1.5">
+                    <i className="fas fa-vector-square text-cyan-400"></i>
+                    Embedding Vector Engine
+                  </span>
+                  <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold uppercase ${embeddingStatus === 'ready' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/10 text-amber-400 border border-amber-500/30'}`}>
+                    {embeddingStatus || 'unloaded'}
+                  </span>
+                </div>
+                {embTestResult.message && (
+                  <div className={`mt-2 p-2.5 rounded-lg text-[10px] sm:text-xs font-mono leading-relaxed border ${embTestResult.status === 'success' ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30' : (embTestResult.status === 'error' ? 'bg-red-500/10 text-red-300 border-red-500/30' : 'bg-blue-500/10 text-blue-300 border-blue-500/30')}`}>
+                    {embTestResult.message}
+                  </div>
+                )}
+              </div>
+
+              <button
+                onClick={async () => {
+                  setEmbTestResult({ status: 'testing', message: 'Running Embedding micro-test (Vectorizing & computing cosine similarity)...', latency: null });
+                  const t0 = performance.now();
+                  try {
+                    if (getEmbeddings) {
+                      const res = await getEmbeddings(["Process execution state in memory", "CPU process running status"]);
+                      const t1 = performance.now();
+                      const lat = Math.round(t1 - t0);
+                      if (res && res.length >= 2 && res[0] && res[1]) {
+                        const vecA = res[0];
+                        const vecB = res[1];
+                        let dot = 0, normA = 0, normB = 0;
+                        for (let i = 0; i < vecA.length; i++) {
+                          dot += vecA[i] * vecB[i];
+                          normA += vecA[i] * vecA[i];
+                          normB += vecB[i] * vecB[i];
+                        }
+                        const sim = (normA > 0 && normB > 0) ? (dot / (Math.sqrt(normA) * Math.sqrt(normB))) : 0;
+                        setEmbTestResult({
+                          status: 'success',
+                          message: `✅ Embedding Functional — Cosine Sim: ${sim.toFixed(4)}, Dim: ${vecA.length} (${lat}ms)`,
+                          latency: lat
+                        });
+                        if (showToast) showToast(`Embedding Test Passed (${lat}ms)`);
+                      } else {
+                        throw new Error("No vectors returned from embedding worker");
+                      }
+                    } else {
+                      setEmbTestResult({
+                        status: 'error',
+                        message: '⚠️ Embedding Model worker not loaded yet. Select an embedding model above and wait for initialization.',
+                        latency: null
+                      });
+                    }
+                  } catch(err) {
+                    setEmbTestResult({
+                      status: 'error',
+                      message: `❌ Embedding Test Failed: ${err.message}`,
+                      latency: null
+                    });
+                  }
+                }}
+                disabled={embTestResult.status === 'testing'}
+                className="neu-btn px-4 py-2 text-[10px] sm:text-xs font-bold uppercase tracking-wider rounded-lg text-cyan-400 hover:text-cyan-300 transition-colors flex items-center justify-center gap-2 self-stretch"
+              >
+                <i className={`fas fa-${embTestResult.status === 'testing' ? 'spinner fa-spin' : 'play'}`}></i>
+                <span>Test Embedding Model</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* Clear AI Cache & Loaded Models */}
         <div className="mt-8 sm:mt-10 pt-6 sm:pt-8 border-t border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
@@ -973,6 +1131,128 @@ export const SettingsView = ({
             <i className={`fas fa-${isDebugEnabled ? 'check-circle' : 'toggle-off'}`}></i>
             <span>{isDebugEnabled ? "Debug Active" : "Enable Debug"}</span>
           </button>
+        </div>
+
+        {/* Advanced AI Calibration Controls (No Magic Numbers) */}
+        <div className="mt-6 pt-6 border-t border-white/10 flex flex-col gap-4">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h4 className="text-xs sm:text-sm font-black uppercase tracking-widest text-[var(--text-main)] flex items-center gap-2">
+                <i className="fas fa-sliders-h text-cyan-400"></i>
+                {t.aiCalibrationTitle || "Advanced AI Threshold Calibration"}
+              </h4>
+              <p className="text-[9px] sm:text-xs text-[var(--text-muted)] font-medium mt-1 leading-relaxed">
+                {t.aiCalibrationDesc || "Tune NLI rescue thresholds, embedding scaling exponents, and distractor margins dynamically."}
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                setAiConfigState(DEFAULT_AI_CONFIG);
+                try {
+                  localStorage.removeItem('neurodeck-ai-config');
+                } catch(e) {}
+                if (onClearAICache) onClearAICache();
+                if (showToast) showToast("AI Calibration Reset to Defaults");
+              }}
+              className="neu-btn px-3 py-1.5 text-[9px] sm:text-xs font-bold uppercase tracking-wider rounded-lg text-cyan-400 hover:text-cyan-300 transition-colors"
+            >
+              <i className="fas fa-undo mr-1"></i> Reset
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
+            {/* Base Rescue Threshold */}
+            <div className="p-3 neu-inset rounded-xl flex flex-col gap-1.5">
+              <div className="flex justify-between items-center text-[10px] sm:text-xs font-bold text-[var(--text-main)]">
+                <span>Base Rescue Threshold</span>
+                <span className="text-cyan-400 font-mono">{aiConfigState.baseRescueThreshold}</span>
+              </div>
+              <input
+                type="range"
+                min="0.40"
+                max="0.95"
+                step="0.01"
+                value={aiConfigState.baseRescueThreshold}
+                onChange={(e) => {
+                  const val = parseFloat(e.target.value);
+                  const updated = { ...aiConfigState, baseRescueThreshold: val };
+                  setAiConfigState(updated);
+                  try { localStorage.setItem('neurodeck-ai-config', JSON.stringify(updated)); } catch(err) {}
+                  if (onClearAICache) onClearAICache();
+                }}
+                className="w-full accent-cyan-400 cursor-pointer"
+              />
+            </div>
+
+            {/* High Semantic Equivalence Threshold */}
+            <div className="p-3 neu-inset rounded-xl flex flex-col gap-1.5">
+              <div className="flex justify-between items-center text-[10px] sm:text-xs font-bold text-[var(--text-main)]">
+                <span>Semantic Equivalence</span>
+                <span className="text-cyan-400 font-mono">{aiConfigState.highSemanticEquivalenceThreshold}</span>
+              </div>
+              <input
+                type="range"
+                min="0.50"
+                max="0.95"
+                step="0.01"
+                value={aiConfigState.highSemanticEquivalenceThreshold}
+                onChange={(e) => {
+                  const val = parseFloat(e.target.value);
+                  const updated = { ...aiConfigState, highSemanticEquivalenceThreshold: val };
+                  setAiConfigState(updated);
+                  try { localStorage.setItem('neurodeck-ai-config', JSON.stringify(updated)); } catch(err) {}
+                  if (onClearAICache) onClearAICache();
+                }}
+                className="w-full accent-cyan-400 cursor-pointer"
+              />
+            </div>
+
+            {/* Distractor Discrimination Margin */}
+            <div className="p-3 neu-inset rounded-xl flex flex-col gap-1.5">
+              <div className="flex justify-between items-center text-[10px] sm:text-xs font-bold text-[var(--text-main)]">
+                <span>Distractor Margin</span>
+                <span className="text-cyan-400 font-mono">{aiConfigState.distractorDiscriminationMargin}x</span>
+              </div>
+              <input
+                type="range"
+                min="1.5"
+                max="6.0"
+                step="0.1"
+                value={aiConfigState.distractorDiscriminationMargin}
+                onChange={(e) => {
+                  const val = parseFloat(e.target.value);
+                  const updated = { ...aiConfigState, distractorDiscriminationMargin: val };
+                  setAiConfigState(updated);
+                  try { localStorage.setItem('neurodeck-ai-config', JSON.stringify(updated)); } catch(err) {}
+                  if (onClearAICache) onClearAICache();
+                }}
+                className="w-full accent-cyan-400 cursor-pointer"
+              />
+            </div>
+
+            {/* Embedding Scaling Exponent */}
+            <div className="p-3 neu-inset rounded-xl flex flex-col gap-1.5">
+              <div className="flex justify-between items-center text-[10px] sm:text-xs font-bold text-[var(--text-main)]">
+                <span>Embedding Exponent</span>
+                <span className="text-cyan-400 font-mono">{aiConfigState.truthEmbeddingScalingExponent}</span>
+              </div>
+              <input
+                type="range"
+                min="0.50"
+                max="1.00"
+                step="0.05"
+                value={aiConfigState.truthEmbeddingScalingExponent}
+                onChange={(e) => {
+                  const val = parseFloat(e.target.value);
+                  const updated = { ...aiConfigState, truthEmbeddingScalingExponent: val };
+                  setAiConfigState(updated);
+                  try { localStorage.setItem('neurodeck-ai-config', JSON.stringify(updated)); } catch(err) {}
+                  if (onClearAICache) onClearAICache();
+                }}
+                className="w-full accent-cyan-400 cursor-pointer"
+              />
+            </div>
+          </div>
         </div>
       </div>
 
