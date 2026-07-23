@@ -15,6 +15,7 @@ export function useNeuroSync({
   focusMode, setFocusMode,
   questionTypeSettings, setQuestionTypeSettings,
   deckThemeEnabled, setDeckThemeEnabled,
+  theme, setTheme,
   showToast, confirm, currentIndex, t
 }) {
   const [syncCode, setSyncCode] = useState(() => {
@@ -217,6 +218,7 @@ export function useNeuroSync({
          if (data.data?.focusMode) setFocusMode(data.data.focusMode);
          if (data.data?.questionTypeSettings) setQuestionTypeSettings(data.data.questionTypeSettings);
          if (data.data?.deckThemeEnabled !== undefined && setDeckThemeEnabled) setDeckThemeEnabled(data.data.deckThemeEnabled);
+         if (data.data?.appTheme && setTheme) setTheme(data.data.appTheme);
 
          const newVer = Math.max(data.version || 0, Date.now());
          setSyncVersion(newVer);
@@ -237,7 +239,8 @@ export function useNeuroSync({
                selectedEmbeddingModel: data.data?.selectedEmbeddingModel || selectedEmbeddingModel,
                focusMode: data.data?.focusMode || focusMode,
                questionTypeSettings: data.data?.questionTypeSettings || questionTypeSettings,
-               deckThemeEnabled: data.data?.deckThemeEnabled !== undefined ? data.data.deckThemeEnabled : deckThemeEnabled
+               deckThemeEnabled: data.data?.deckThemeEnabled !== undefined ? data.data.deckThemeEnabled : deckThemeEnabled,
+               appTheme: data.data?.appTheme || theme
             };
             fetch(`${SYNC_API_BASE}/${code}`, {
                method: 'POST',
@@ -262,7 +265,7 @@ export function useNeuroSync({
   const forcePushToCloud = useCallback(async (codeToUse, manual = false) => {
       const code = codeToUse || syncCode;
       if (!code) return;
-      const payload = { myDecks, currentDeck, loadedDeckId, streak, selectedModel, cardOrderMode, servingMode, selectedEmbeddingModel, focusMode, questionTypeSettings, deckThemeEnabled };
+      const payload = { myDecks, currentDeck, loadedDeckId, streak, selectedModel, cardOrderMode, servingMode, selectedEmbeddingModel, focusMode, questionTypeSettings, deckThemeEnabled, appTheme: theme };
       const newVersion = Date.now();
       try {
          const res = await fetch(`${SYNC_API_BASE}/${code}`, {

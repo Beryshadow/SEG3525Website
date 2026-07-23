@@ -26,7 +26,7 @@ export default function NeuroDeck() {
   const [view, setView] = useState("study");
   const navigate = useNavigate();
   const location = useLocation();
-  const { appTheme, theme, toggleTheme, lang, toggleLang } = useSharedLogic([]);
+  const { appTheme, theme, setTheme, toggleTheme, lang, toggleLang } = useSharedLogic([]);
 
   const [dialogState, setDialogState] = useState(null);
 
@@ -295,7 +295,7 @@ export default function NeuroDeck() {
     streak, setStreak, selectedModel, setSelectedModel, cardOrderMode, setCardOrderMode,
     servingMode, setServingMode, selectedEmbeddingModel, setSelectedEmbeddingModel,
     focusMode, setFocusMode, questionTypeSettings, setQuestionTypeSettings,
-    deckThemeEnabled, setDeckThemeEnabled, showToast, confirm, currentIndex, t
+    deckThemeEnabled, setDeckThemeEnabled, theme, setTheme, showToast, confirm, currentIndex, t
   });
 
   const handleClearAICache = useCallback(async () => {
