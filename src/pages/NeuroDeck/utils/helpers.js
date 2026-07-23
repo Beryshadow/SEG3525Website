@@ -42,6 +42,7 @@ export const getDeckHue = (str) => {
 
 /**
  * Returns custom CSS variables for `--bg-main`, `--accent`, etc. tailored to light/dark mode and deck hue.
+ * Defines both `--*` and `--color-*` variables so `.neu-panel`, `.neu-pressed`, and Tailwind utilities adapt dynamically.
  */
 export const getDeckThemeStyles = (deckIdentifier, appTheme = 'dark') => {
   if (!deckIdentifier) return {};
@@ -49,30 +50,76 @@ export const getDeckThemeStyles = (deckIdentifier, appTheme = 'dark') => {
   const isDark = appTheme !== 'light';
 
   if (isDark) {
+    const bgMain = `hsl(${H}, 24%, 12%)`;
+    const accent = `hsl(${H}, 75%, 62%)`;
+    const textMain = `hsl(${H}, 15%, 88%)`;
+    const textMuted = `hsl(${H}, 12%, 62%)`;
+    const shadowD = `rgba(0, 0, 0, 0.55)`;
+    const shadowDStrong = `rgba(0, 0, 0, 0.75)`;
+    const shadowL = `hsl(${H}, 24%, 17%)`;
+    const borderD = `rgba(0, 0, 0, 0.4)`;
+    const gradL = `rgba(255, 255, 255, 0.03)`;
+    const gradD = `rgba(0, 0, 0, 0.12)`;
+
     return {
-      '--bg-main': `hsl(${H}, 24%, 12%)`,
-      '--accent': `hsl(${H}, 75%, 62%)`,
-      '--text-main': `hsl(${H}, 15%, 88%)`,
-      '--text-muted': `hsl(${H}, 12%, 62%)`,
-      '--shadow-d': `rgba(0, 0, 0, 0.55)`,
-      '--shadow-d-strong': `rgba(0, 0, 0, 0.75)`,
-      '--shadow-l': `hsl(${H}, 24%, 17%)`,
-      '--border-d': `rgba(0, 0, 0, 0.4)`,
-      '--grad-l': `rgba(255, 255, 255, 0.03)`,
-      '--grad-d': `rgba(0, 0, 0, 0.12)`
+      '--bg-main': bgMain,
+      '--accent': accent,
+      '--text-main': textMain,
+      '--text-muted': textMuted,
+      '--shadow-d': shadowD,
+      '--shadow-d-strong': shadowDStrong,
+      '--shadow-l': shadowL,
+      '--border-d': borderD,
+      '--grad-l': gradL,
+      '--grad-d': gradD,
+
+      '--color-bgMain': bgMain,
+      '--color-accent': accent,
+      '--color-textMain': textMain,
+      '--color-textMuted': textMuted,
+      '--color-surface': bgMain,
+      '--color-shadowD': shadowD,
+      '--color-shadowDStrong': shadowDStrong,
+      '--color-shadowL': shadowL,
+      '--color-borderD': borderD,
+      '--color-gradL': gradL,
+      '--color-gradD': gradD
     };
   } else {
+    const bgMain = `hsl(${H}, 22%, 91%)`;
+    const accent = `hsl(${H}, 70%, 35%)`;
+    const textMain = `hsl(${H}, 25%, 25%)`;
+    const textMuted = `hsl(${H}, 15%, 45%)`;
+    const shadowD = `hsl(${H}, 20%, 75%)`;
+    const shadowDStrong = `hsl(${H}, 20%, 65%)`;
+    const shadowL = `rgba(255, 255, 255, 0.85)`;
+    const borderD = `hsl(${H}, 20%, 80%)`;
+    const gradL = `rgba(255, 255, 255, 0.45)`;
+    const gradD = `hsl(${H}, 20%, 84%)`;
+
     return {
-      '--bg-main': `hsl(${H}, 22%, 91%)`,
-      '--accent': `hsl(${H}, 70%, 35%)`,
-      '--text-main': `hsl(${H}, 25%, 25%)`,
-      '--text-muted': `hsl(${H}, 15%, 45%)`,
-      '--shadow-d': `hsl(${H}, 20%, 75%)`,
-      '--shadow-d-strong': `hsl(${H}, 20%, 65%)`,
-      '--shadow-l': `rgba(255, 255, 255, 0.85)`,
-      '--border-d': `hsl(${H}, 20%, 80%)`,
-      '--grad-l': `rgba(255, 255, 255, 0.45)`,
-      '--grad-d': `hsl(${H}, 20%, 84%)`
+      '--bg-main': bgMain,
+      '--accent': accent,
+      '--text-main': textMain,
+      '--text-muted': textMuted,
+      '--shadow-d': shadowD,
+      '--shadow-d-strong': shadowDStrong,
+      '--shadow-l': shadowL,
+      '--border-d': borderD,
+      '--grad-l': gradL,
+      '--grad-d': gradD,
+
+      '--color-bgMain': bgMain,
+      '--color-accent': accent,
+      '--color-textMain': textMain,
+      '--color-textMuted': textMuted,
+      '--color-surface': bgMain,
+      '--color-shadowD': shadowD,
+      '--color-shadowDStrong': shadowDStrong,
+      '--color-shadowL': shadowL,
+      '--color-borderD': borderD,
+      '--color-gradL': gradL,
+      '--color-gradD': gradD
     };
   }
 };
