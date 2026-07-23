@@ -14,6 +14,7 @@ import { SettingsView } from './components/SettingsView';
 import { DashboardView } from './components/DashboardView';
 import { StudyView } from './components/StudyView';
 import { KnowledgeGraphView } from './components/KnowledgeGraphView';
+import ConfirmModal from './components/ConfirmModal';
 import { clearAIEvaluationCaches } from './hooks/useAIEvaluation';
 import { getDeckThemeStyles } from './utils/helpers';
 import { BrainIcon, SettingsIcon, ActivityIcon, CpuIcon, FireIcon, NetworkIcon } from './components/Icons';
