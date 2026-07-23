@@ -374,7 +374,7 @@ export const SettingsView = ({
   const navItems = [
     { id: 'decks', icon: <SaveIcon />, label: t.deckManagementTitle || t.myDecksTitle || "Deck Management" },
     { id: 'algorithm', icon: <ClockIcon />, label: "Algorithm Selection" },
-    { id: 'backup', icon: <DownloadIcon />, label: t.dataBackup || "Data Backup" },
+    { id: 'backup', icon: <DownloadIcon />, label: t.dataBackup || "Data Management" },
     { id: 'nli', icon: <CpuIcon />, label: t.aiModelTitle || "AI Models" },
     { id: 'generator', icon: <SparklesIcon />, label: t.llmGeneratorTitle || "AI Generator" },
     { id: 'sync', icon: <UploadIcon />, label: t.cloudSyncTitle || "Cloud Sync" }
@@ -724,118 +724,6 @@ export const SettingsView = ({
              {t.noSavedDecks || "No saved decks yet. Drag and drop a .json file here to import!"}
           </p>
         )}
-
-        <div className="mt-8 pt-8 border-t border-white/10">
-          <h3 className="text-sm sm:text-lg font-black text-[var(--text-main)] mb-2 sm:mb-4 flex items-center uppercase tracking-widest">
-            <UploadIcon className="mr-2 sm:mr-3 text-[var(--accent)] text-base sm:text-xl" /> {t.rawDeckImport || "Raw Deck Import"}
-          </h3>
-          <p className="text-[var(--text-muted)] font-medium mb-3 sm:mb-4 text-[10px] sm:text-xs">
-            {t.rawDeckImportDesc || "Provide an array of JSON objects containing `question`, `correctAnswer`, and `choices` array."}
-          </p>
-          <textarea
-            className="neu-pressed w-full h-36 sm:h-52 p-3 sm:p-5 font-mono text-[9px] sm:text-xs rounded-xl sm:rounded-2xl border-0 text-[var(--text-main)] outline-none bg-transparent focus-within:ring-2 focus:ring-[var(--accent)] transition-all"
-            value={jsonInput}
-            onChange={(e) => setJsonInput(e.target.value)}
-            placeholder='[ { "question": "Sample Question", "correctAnswer": "Answer A", "choices": ["Answer A", "Answer B"] } ]'
-          />
-          <div className="mt-3 flex justify-end">
-            <button
-              onClick={() => onImport(jsonInput)}
-              disabled={!jsonInput.trim()}
-              className="neu-btn w-full sm:w-auto px-4 sm:px-8 py-2 sm:py-3 font-black uppercase tracking-widest text-[var(--accent)] text-[10px] sm:text-xs rounded-lg sm:rounded-xl disabled:opacity-50"
-            >
-              {t.importResetDeck || "Import & Reset"}
-            </button>
-          </div>
-        </div>
-
-        <div className="mt-8 pt-8 border-t border-white/10">
-          <div className="flex items-center justify-between gap-4 mb-3">
-            <div>
-              <h3 className="text-sm sm:text-lg font-black text-[var(--text-main)] mb-1 flex items-center uppercase tracking-widest">
-                <SaveIcon className="mr-2 sm:mr-3 text-[var(--accent)] text-base sm:text-xl" /> {t.lsManagerTitle || "Local Storage Inspector"}
-              </h3>
-              <p className="text-[var(--text-muted)] font-medium text-[10px] sm:text-xs mb-0">
-                {t.lsManagerDesc || "Selectively view and delete individual stored data items in localStorage."}
-              </p>
-            </div>
-            <button
-              onClick={() => {
-                setShowLsManager(!showLsManager);
-                refreshLsItems();
-              }}
-              className="neu-btn px-3 py-1.5 sm:px-4 sm:py-2 text-[10px] sm:text-xs font-bold uppercase tracking-widest text-[var(--accent)] rounded-lg flex-shrink-0"
-            >
-              {showLsManager ? (t.hide || "Hide") : `${t.show || "View Keys"} (${lsItems.length})`}
-            </button>
-          </div>
-
-          {showLsManager && (
-            <div className="mt-4 space-y-3 animate-fade-in">
-              <div className="flex items-center justify-between gap-2 p-3 neu-flat rounded-xl">
-                <span className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-[var(--text-muted)]">
-                  {lsItems.length} {t.items || "keys found"} ({selectedLsKeys.size} selected)
-                </span>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={refreshLsItems}
-                    className="neu-btn px-3 py-1 text-[10px] sm:text-xs font-bold uppercase tracking-widest text-[var(--text-main)] rounded-lg"
-                  >
-                    Refresh
-                  </button>
-                  {selectedLsKeys.size > 0 && (
-                    <button
-                      onClick={handleDeleteSelectedLsKeys}
-                      className="neu-btn px-3 py-1 text-[10px] sm:text-xs font-bold uppercase tracking-widest text-[color:var(--color-danger)] rounded-lg"
-                    >
-                      Delete Selected ({selectedLsKeys.size})
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {lsItems.length > 0 ? (
-                <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
-                  {lsItems.map(item => {
-                    const isSelected = selectedLsKeys.has(item.key);
-                    return (
-                      <div key={item.key} className="p-3 neu-pressed rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs">
-                        <div className="flex items-center gap-3 overflow-hidden w-full sm:w-auto flex-1">
-                          <input
-                            type="checkbox"
-                            checked={isSelected}
-                            onChange={() => {
-                              const next = new Set(selectedLsKeys);
-                              if (next.has(item.key)) next.delete(item.key);
-                              else next.add(item.key);
-                              setSelectedLsKeys(next);
-                            }}
-                            className="cursor-pointer"
-                          />
-                          <div className="overflow-hidden flex-1">
-                            <div className="flex items-center gap-2">
-                              <span className="font-mono font-bold text-[var(--accent)] truncate text-[11px] sm:text-xs" title={item.key}>{item.key}</span>
-                              <span className="px-2 py-0.5 text-[9px] font-mono rounded bg-white/5 text-[var(--text-muted)] font-bold">{item.formattedSize}</span>
-                            </div>
-                            <p className="font-mono text-[10px] text-[var(--text-muted)] truncate mb-0 mt-0.5 opacity-80" title={item.value}>{item.preview}</p>
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => handleDeleteLsKey(item.key)}
-                          className="neu-btn px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-[color:var(--color-danger)] rounded-lg self-end sm:self-auto"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <p className="text-[var(--text-muted)] text-xs text-center py-4 font-mono">No local storage keys found.</p>
-              )}
-            </div>
-          )}
-        </div>
       </div>
 
       <div id="settings-algorithm" className={`neu-panel p-4 sm:p-8 md:p-12 ${activeTab === 'algorithm' ? 'block' : 'hidden lg:block'}`}>
@@ -1021,6 +909,119 @@ export const SettingsView = ({
             </button>
           </div>
         </div>
+
+        <div className="mt-8 pt-8 border-t border-white/10">
+          <h3 className="text-sm sm:text-lg font-black text-[var(--text-main)] mb-2 sm:mb-4 flex items-center uppercase tracking-widest">
+            <UploadIcon className="mr-2 sm:mr-3 text-[var(--accent)] text-base sm:text-xl" /> {t.rawDeckImport || "Raw Deck Import"}
+          </h3>
+          <p className="text-[var(--text-muted)] font-medium mb-3 sm:mb-4 text-[10px] sm:text-xs">
+            {t.rawDeckImportDesc || "Provide an array of JSON objects containing `question`, `correctAnswer`, and `choices` array."}
+          </p>
+          <textarea
+            className="neu-pressed w-full h-36 sm:h-52 p-3 sm:p-5 font-mono text-[9px] sm:text-xs rounded-xl sm:rounded-2xl border-0 text-[var(--text-main)] outline-none bg-transparent focus-within:ring-2 focus:ring-[var(--accent)] transition-all"
+            value={jsonInput}
+            onChange={(e) => setJsonInput(e.target.value)}
+            placeholder='[ { "question": "Sample Question", "correctAnswer": "Answer A", "choices": ["Answer A", "Answer B"] } ]'
+          />
+          <div className="mt-3 flex justify-end">
+            <button
+              onClick={() => onImport(jsonInput)}
+              disabled={!jsonInput.trim()}
+              className="neu-btn w-full sm:w-auto px-4 sm:px-8 py-2 sm:py-3 font-black uppercase tracking-widest text-[var(--accent)] text-[10px] sm:text-xs rounded-lg sm:rounded-xl disabled:opacity-50"
+            >
+              {t.importResetDeck || "Import & Reset"}
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-8 pt-8 border-t border-white/10">
+          <div className="flex items-center justify-between gap-4 mb-3">
+            <div>
+              <h3 className="text-sm sm:text-lg font-black text-[var(--text-main)] mb-1 flex items-center uppercase tracking-widest">
+                <SaveIcon className="mr-2 sm:mr-3 text-[var(--accent)] text-base sm:text-xl" /> {t.lsManagerTitle || "Local Storage Inspector"}
+              </h3>
+              <p className="text-[var(--text-muted)] font-medium text-[10px] sm:text-xs mb-0">
+                {t.lsManagerDesc || "Selectively view and delete individual stored data items in localStorage."}
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                setShowLsManager(!showLsManager);
+                refreshLsItems();
+              }}
+              className="neu-btn px-3 py-1.5 sm:px-4 sm:py-2 text-[10px] sm:text-xs font-bold uppercase tracking-widest text-[var(--accent)] rounded-lg flex-shrink-0"
+            >
+              {showLsManager ? (t.hide || "Hide") : `${t.show || "View Keys"} (${lsItems.length})`}
+            </button>
+          </div>
+
+          {showLsManager && (
+            <div className="mt-4 space-y-3 animate-fade-in">
+              <div className="flex items-center justify-between gap-2 p-3 neu-flat rounded-xl">
+                <span className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-[var(--text-muted)]">
+                  {lsItems.length} {t.items || "keys found"} ({selectedLsKeys.size} selected)
+                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={refreshLsItems}
+                    className="neu-btn px-3 py-1 text-[10px] sm:text-xs font-bold uppercase tracking-widest text-[var(--text-main)] rounded-lg"
+                  >
+                    Refresh
+                  </button>
+                  {selectedLsKeys.size > 0 && (
+                    <button
+                      onClick={handleDeleteSelectedLsKeys}
+                      className="neu-btn px-3 py-1 text-[10px] sm:text-xs font-bold uppercase tracking-widest text-[color:var(--color-danger)] rounded-lg"
+                    >
+                      Delete Selected ({selectedLsKeys.size})
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {lsItems.length > 0 ? (
+                <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+                  {lsItems.map(item => {
+                    const isSelected = selectedLsKeys.has(item.key);
+                    return (
+                      <div key={item.key} className="p-3 neu-pressed rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs">
+                        <div className="flex items-center gap-3 overflow-hidden w-full sm:w-auto flex-1">
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => {
+                              const next = new Set(selectedLsKeys);
+                              if (next.has(item.key)) next.delete(item.key);
+                              else next.add(item.key);
+                              setSelectedLsKeys(next);
+                            }}
+                            className="cursor-pointer"
+                          />
+                          <div className="overflow-hidden flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-mono font-bold text-[var(--accent)] truncate text-[11px] sm:text-xs" title={item.key}>{item.key}</span>
+                              <span className="px-2 py-0.5 text-[9px] font-mono rounded bg-white/5 text-[var(--text-muted)] font-bold">{item.formattedSize}</span>
+                            </div>
+                            <p className="font-mono text-[10px] text-[var(--text-muted)] truncate mb-0 mt-0.5 opacity-80" title={item.value}>{item.preview}</p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => handleDeleteLsKey(item.key)}
+                          className="neu-btn px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-[color:var(--color-danger)] rounded-lg self-end sm:self-auto"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-[var(--text-muted)] text-xs text-center py-4 font-mono">No local storage keys found.</p>
+              )}
+            </div>
+          )}
+        </div>
+
         <input
             type="file"
             ref={fileInputRef}
@@ -1051,7 +1052,7 @@ export const SettingsView = ({
                                   isMastered: false
                                 };
                              });
-                             onDirectDropSave({
+                             handleDirectDropSave({
                                id: Date.now().toString() + Math.random().toString(),
                                name: filename,
                                deck: formattedDeck,
