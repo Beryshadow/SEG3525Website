@@ -14,8 +14,8 @@ import { SettingsView } from './components/SettingsView';
 import { DashboardView } from './components/DashboardView';
 import { StudyView } from './components/StudyView';
 import { KnowledgeGraphView } from './components/KnowledgeGraphView';
-import ConfirmModal from './components/ConfirmModal';
 import { clearAIEvaluationCaches } from './hooks/useAIEvaluation';
+import { getDeckThemeStyles } from './utils/helpers';
 import { BrainIcon, SettingsIcon, ActivityIcon, CpuIcon, FireIcon, NetworkIcon } from './components/Icons';
 
 
@@ -147,6 +147,18 @@ export default function NeuroDeck() {
   useEffect(() => {
     localStorage.setItem('neurodeck-question-type-settings', JSON.stringify(questionTypeSettings));
   }, [questionTypeSettings]);
+
+  const [deckThemeEnabled, setDeckThemeEnabled] = useState(() => {
+    try {
+      const saved = localStorage.getItem('neurodeck-deck-theme-enabled');
+      return saved !== null ? JSON.parse(saved) : true;
+    } catch (e) {
+      return true;
+    }
+  });
+  useEffect(() => {
+    localStorage.setItem('neurodeck-deck-theme-enabled', JSON.stringify(deckThemeEnabled));
+  }, [deckThemeEnabled]);
 
   const { getEmbeddings, modelStatus: embeddingStatus, backendUsed: embeddingBackend, modelError: embeddingError, lastLogMessage: embeddingLogMessage, progressPercent: embeddingProgress } = useEmbeddingModel(selectedEmbeddingModel);
   const [cardEmbeddings, setCardEmbeddings] = useState({});
@@ -281,7 +293,8 @@ export default function NeuroDeck() {
     myDecks, setMyDecks, currentDeck, setCurrentDeck, loadedDeckId, setLoadedDeckId,
     streak, setStreak, selectedModel, setSelectedModel, cardOrderMode, setCardOrderMode,
     servingMode, setServingMode, selectedEmbeddingModel, setSelectedEmbeddingModel,
-    focusMode, setFocusMode, questionTypeSettings, setQuestionTypeSettings, showToast, confirm, currentIndex, t
+    focusMode, setFocusMode, questionTypeSettings, setQuestionTypeSettings,
+    deckThemeEnabled, setDeckThemeEnabled, showToast, confirm, currentIndex, t
   });
 
   const handleClearAICache = useCallback(async () => {
@@ -370,8 +383,28 @@ export default function NeuroDeck() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const loadedDeck = useMemo(() => {
+    if (loadedDeckId) {
+      return myDecks.find(d => d.id === loadedDeckId);
+    }
+    return null;
+  }, [loadedDeckId, myDecks]);
+
+  const activeDeckName = useMemo(() => {
+    if (loadedDeck && loadedDeck.name) return loadedDeck.name;
+    if (currentDeck && currentDeck.length > 0) return 'Active Deck';
+    return null;
+  }, [loadedDeck, currentDeck]);
+
+  const deckThemeStyles = useMemo(() => {
+    if (deckThemeEnabled && activeDeckName) {
+      return getDeckThemeStyles(activeDeckName, theme);
+    }
+    return {};
+  }, [deckThemeEnabled, activeDeckName, theme]);
+
   return (
-    <div className={`min-h-screen relative font-sans transition-colors duration-300 ${themeClass} neurodeck-route`} style={{ backgroundColor: 'var(--bg-main)', color: 'var(--text-main)' }}>
+    <div className={`min-h-screen relative font-sans transition-colors duration-500 ${themeClass} neurodeck-route`} style={{ ...deckThemeStyles, backgroundColor: 'var(--bg-main)', color: 'var(--text-main)' }}>
       
       <nav className={`sticky top-0 z-50 w-full px-2 sm:px-4 pt-1 sm:pt-4 mb-2 sm:mb-8 flex flex-col items-center transition-all duration-300 ${view === "study" && !showMobileNav ? "-translate-y-full opacity-0 pointer-events-none sm:translate-y-0 sm:opacity-100 sm:pointer-events-auto" : "translate-y-0 opacity-100"}`}>
         <div className="neu-panel w-full max-w-6xl px-4 py-3 sm:px-6 sm:py-4 flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-0">
@@ -511,6 +544,8 @@ export default function NeuroDeck() {
             onServingModeChange={setServingMode}
             questionTypeSettings={questionTypeSettings}
             setQuestionTypeSettings={setQuestionTypeSettings}
+            deckThemeEnabled={deckThemeEnabled}
+            setDeckThemeEnabled={setDeckThemeEnabled}
             onExportProgress={handleExportProgress}
             onImportProgress={handleImportProgress}
             onSaveDeckToCache={saveDeckToCache}

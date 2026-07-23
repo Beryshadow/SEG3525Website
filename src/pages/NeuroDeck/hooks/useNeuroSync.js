@@ -14,6 +14,7 @@ export function useNeuroSync({
   selectedEmbeddingModel, setSelectedEmbeddingModel,
   focusMode, setFocusMode,
   questionTypeSettings, setQuestionTypeSettings,
+  deckThemeEnabled, setDeckThemeEnabled,
   showToast, confirm, currentIndex, t
 }) {
   const [syncCode, setSyncCode] = useState(() => {
@@ -215,6 +216,7 @@ export function useNeuroSync({
          if (data.data?.selectedEmbeddingModel) setSelectedEmbeddingModel(data.data.selectedEmbeddingModel);
          if (data.data?.focusMode) setFocusMode(data.data.focusMode);
          if (data.data?.questionTypeSettings) setQuestionTypeSettings(data.data.questionTypeSettings);
+         if (data.data?.deckThemeEnabled !== undefined && setDeckThemeEnabled) setDeckThemeEnabled(data.data.deckThemeEnabled);
 
          const newVer = Math.max(data.version || 0, Date.now());
          setSyncVersion(newVer);
@@ -234,7 +236,8 @@ export function useNeuroSync({
                servingMode: data.data?.servingMode || servingMode,
                selectedEmbeddingModel: data.data?.selectedEmbeddingModel || selectedEmbeddingModel,
                focusMode: data.data?.focusMode || focusMode,
-               questionTypeSettings: data.data?.questionTypeSettings || questionTypeSettings
+               questionTypeSettings: data.data?.questionTypeSettings || questionTypeSettings,
+               deckThemeEnabled: data.data?.deckThemeEnabled !== undefined ? data.data.deckThemeEnabled : deckThemeEnabled
             };
             fetch(`${SYNC_API_BASE}/${code}`, {
                method: 'POST',
@@ -259,7 +262,7 @@ export function useNeuroSync({
   const forcePushToCloud = useCallback(async (codeToUse, manual = false) => {
       const code = codeToUse || syncCode;
       if (!code) return;
-      const payload = { myDecks, currentDeck, loadedDeckId, streak, selectedModel, cardOrderMode, servingMode, selectedEmbeddingModel, focusMode, questionTypeSettings };
+      const payload = { myDecks, currentDeck, loadedDeckId, streak, selectedModel, cardOrderMode, servingMode, selectedEmbeddingModel, focusMode, questionTypeSettings, deckThemeEnabled };
       const newVersion = Date.now();
       try {
          const res = await fetch(`${SYNC_API_BASE}/${code}`, {

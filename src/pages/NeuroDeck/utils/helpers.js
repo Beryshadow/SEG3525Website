@@ -28,6 +28,57 @@ export const getTokenHash = (token) => {
 };
 
 /**
+ * Deterministically computes a hue angle (0-359) from a deck string (name or id).
+ */
+export const getDeckHue = (str) => {
+  if (!str) return 210;
+  const s = String(str);
+  let hash = 0;
+  for (let i = 0; i < s.length; i++) {
+     hash = s.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return Math.abs(hash) % 360;
+};
+
+/**
+ * Returns custom CSS variables for `--bg-main`, `--accent`, etc. tailored to light/dark mode and deck hue.
+ */
+export const getDeckThemeStyles = (deckIdentifier, appTheme = 'dark') => {
+  if (!deckIdentifier) return {};
+  const H = getDeckHue(deckIdentifier);
+  const isDark = appTheme !== 'light';
+
+  if (isDark) {
+    return {
+      '--bg-main': `hsl(${H}, 24%, 12%)`,
+      '--accent': `hsl(${H}, 75%, 62%)`,
+      '--text-main': `hsl(${H}, 15%, 88%)`,
+      '--text-muted': `hsl(${H}, 12%, 62%)`,
+      '--shadow-d': `rgba(0, 0, 0, 0.55)`,
+      '--shadow-d-strong': `rgba(0, 0, 0, 0.75)`,
+      '--shadow-l': `hsl(${H}, 24%, 17%)`,
+      '--border-d': `rgba(0, 0, 0, 0.4)`,
+      '--grad-l': `rgba(255, 255, 255, 0.03)`,
+      '--grad-d': `rgba(0, 0, 0, 0.12)`
+    };
+  } else {
+    return {
+      '--bg-main': `hsl(${H}, 22%, 91%)`,
+      '--accent': `hsl(${H}, 70%, 35%)`,
+      '--text-main': `hsl(${H}, 25%, 25%)`,
+      '--text-muted': `hsl(${H}, 15%, 45%)`,
+      '--shadow-d': `hsl(${H}, 20%, 75%)`,
+      '--shadow-d-strong': `hsl(${H}, 20%, 65%)`,
+      '--shadow-l': `rgba(255, 255, 255, 0.85)`,
+      '--border-d': `hsl(${H}, 20%, 80%)`,
+      '--grad-l': `rgba(255, 255, 255, 0.45)`,
+      '--grad-d': `hsl(${H}, 20%, 84%)`
+    };
+  }
+};
+
+
+/**
  * Smart Progress Reconciliator: Merges local and cloud state without data loss.
  * Prioritizes higher study progress for cards/decks and merges deck collections.
  */

@@ -3,12 +3,14 @@ import { SaveIcon, ClockIcon, RandomIcon, SeqIcon, DownloadIcon, UploadIcon, Spa
 import { QRCodeSVG } from 'qrcode.react';
 
 import { DEFAULT_AI_CONFIG, getStoredAIConfig } from '../hooks/useAIEvaluation';
+import { getDeckHue } from '../utils/helpers';
 
 export const SettingsView = ({
   currentDeck, onImport, selectedModel, onModelChange,
   selectedEmbeddingModel, onEmbeddingModelChange,
   cardOrderMode, onCardOrderChange,
   questionTypeSettings, setQuestionTypeSettings,
+  deckThemeEnabled, setDeckThemeEnabled,
   onExportProgress, onImportProgress,
   myDecks, loadedDeckId, onSaveDeckToCache, onOverwriteDeck, onLoadDeckFromCache, 
   onDeleteDeckFromCache, onToggleDeckCompleted, onRenameDeck, onDirectDropSave,
@@ -314,13 +316,12 @@ export const SettingsView = ({
   };
 
   const navItems = [
-    { id: 'decks', icon: <SaveIcon />, label: t.myDecksTitle || "My Decks" },
+    { id: 'decks', icon: <SaveIcon />, label: t.deckManagementTitle || t.myDecksTitle || "Deck Management" },
     { id: 'algorithm', icon: <ClockIcon />, label: "Algorithm Selection" },
     { id: 'backup', icon: <DownloadIcon />, label: t.dataBackup || "Data Backup" },
     { id: 'nli', icon: <CpuIcon />, label: t.aiModelTitle || "AI Models" },
     { id: 'generator', icon: <SparklesIcon />, label: t.llmGeneratorTitle || "AI Generator" },
-    { id: 'sync', icon: <UploadIcon />, label: t.cloudSyncTitle || "Cloud Sync" },
-    { id: 'raw', icon: <EditIcon />, label: t.rawDeckImport || "Raw Import" }
+    { id: 'sync', icon: <UploadIcon />, label: t.cloudSyncTitle || "Cloud Sync" }
   ];
 
   const handleShare = async (withProgress, shareHierarchy) => {
@@ -364,15 +365,35 @@ export const SettingsView = ({
            setLastSelectedId(null);
         }}
       >
-        <div className="flex justify-between items-center mb-4 sm:mb-8">
+        <div className="flex justify-between items-center mb-4 sm:mb-6">
           <h2 className="text-lg sm:text-2xl font-black text-[var(--text-main)] flex items-center uppercase tracking-widest">
-            <SaveIcon className="mr-2 sm:mr-4 text-[var(--accent)] text-lg sm:text-2xl" /> {t.myDecksTitle || "My Decks"}
+            <SaveIcon className="mr-2 sm:mr-4 text-[var(--accent)] text-lg sm:text-2xl" /> {t.deckManagementTitle || t.myDecksTitle || "Deck Management"}
           </h2>
           {isDraggingOver && (
             <span className="text-[var(--accent)] font-bold text-xs sm:text-sm animate-pulse">
               Drop JSON here to add...
             </span>
           )}
+        </div>
+
+        <div className="neu-pressed p-4 rounded-2xl mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 border border-white/5">
+          <div className="flex items-center gap-3">
+            <div className="w-4 h-4 rounded-full flex-shrink-0 shadow-sm transition-all" style={{ backgroundColor: deckThemeEnabled ? 'var(--accent)' : 'var(--text-muted)' }} />
+            <div>
+              <h4 className="text-xs sm:text-sm font-bold text-[var(--text-main)] uppercase tracking-wider mb-0.5">
+                {t.proceduralTheme || "Procedural Deck Theme"}
+              </h4>
+              <p className="text-[10px] sm:text-xs text-[var(--text-muted)] mb-0 leading-normal">
+                {t.proceduralThemeDesc || "Dynamically change app background and accent colors based on active deck."}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => setDeckThemeEnabled && setDeckThemeEnabled(!deckThemeEnabled)}
+            className={`neu-btn px-4 py-2 text-xs font-black uppercase tracking-widest rounded-xl transition-all self-end sm:self-auto ${deckThemeEnabled ? 'text-[var(--accent)] neu-pressed' : 'text-[var(--text-muted)]'}`}
+          >
+            {deckThemeEnabled ? (t.enabled || "ON") : (t.disabled || "OFF")}
+          </button>
         </div>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
@@ -549,6 +570,7 @@ export const SettingsView = ({
                              style={{ marginLeft: `${level * 1.5}rem` }}
                           >
                               <div className="flex items-center gap-3 w-full sm:flex-1 overflow-hidden">
+                                <span className="w-3.5 h-3.5 rounded-full flex-shrink-0 inline-block shadow-md border border-white/20" style={{ backgroundColor: `hsl(${getDeckHue(d.name)}, 80%, 60%)` }} title={`Procedural Deck Hue: ${getDeckHue(d.name)}°`} />
                                 <div className="flex-shrink-0 flex flex-col items-center gap-1 w-12">
                                    <span className="text-[10px] font-black text-[var(--accent)]">{d.progress}%</span>
                                    <div className="w-8 h-1 bg-[var(--text-muted)] opacity-20 rounded-full overflow-hidden">
@@ -646,6 +668,30 @@ export const SettingsView = ({
              {t.noSavedDecks || "No saved decks yet. Drag and drop a .json file here to import!"}
           </p>
         )}
+
+        <div className="mt-8 pt-8 border-t border-white/10">
+          <h3 className="text-sm sm:text-lg font-black text-[var(--text-main)] mb-2 sm:mb-4 flex items-center uppercase tracking-widest">
+            <UploadIcon className="mr-2 sm:mr-3 text-[var(--accent)] text-base sm:text-xl" /> {t.rawDeckImport || "Raw Deck Import"}
+          </h3>
+          <p className="text-[var(--text-muted)] font-medium mb-3 sm:mb-4 text-[10px] sm:text-xs">
+            {t.rawDeckImportDesc || "Provide an array of JSON objects containing `question`, `correctAnswer`, and `choices` array."}
+          </p>
+          <textarea
+            className="neu-pressed w-full h-36 sm:h-52 p-3 sm:p-5 font-mono text-[9px] sm:text-xs rounded-xl sm:rounded-2xl border-0 text-[var(--text-main)] outline-none bg-transparent focus-within:ring-2 focus:ring-[var(--accent)] transition-all"
+            value={jsonInput}
+            onChange={(e) => setJsonInput(e.target.value)}
+            placeholder='[ { "question": "Sample Question", "correctAnswer": "Answer A", "choices": ["Answer A", "Answer B"] } ]'
+          />
+          <div className="mt-3 flex justify-end">
+            <button
+              onClick={() => onImport(jsonInput)}
+              disabled={!jsonInput.trim()}
+              className="neu-btn w-full sm:w-auto px-4 sm:px-8 py-2 sm:py-3 font-black uppercase tracking-widest text-[var(--accent)] text-[10px] sm:text-xs rounded-lg sm:rounded-xl disabled:opacity-50"
+            >
+              {t.importResetDeck || "Import & Reset"}
+            </button>
+          </div>
+        </div>
       </div>
 
       <div id="settings-algorithm" className={`neu-panel p-4 sm:p-8 md:p-12 ${activeTab === 'algorithm' ? 'block' : 'hidden lg:block'}`}>
@@ -1404,24 +1450,6 @@ export const SettingsView = ({
         </div>
       </div>
 
-      <div id="settings-raw" className={`neu-panel p-4 sm:p-8 md:p-12 ${activeTab === 'raw' ? 'block' : 'hidden lg:block'}`}>
-        <h2 className="text-lg sm:text-2xl font-black text-[var(--text-main)] mb-3 sm:mb-6 flex items-center uppercase tracking-widest">
-          <UploadIcon className="mr-2 sm:mr-4 text-[var(--accent)] text-lg sm:text-2xl" /> {t.rawDeckImport || "Raw Deck Import"}
-        </h2>
-        <p className="text-[var(--text-muted)] font-medium mb-3 sm:mb-6 text-[10px] sm:text-sm">
-          {t.rawDeckImportDesc || "Paste JSON to import."}
-        </p>
-        <textarea
-          className="neu-pressed w-full h-48 sm:h-80 p-3 sm:p-6 font-mono text-[9px] sm:text-xs rounded-xl sm:rounded-2xl border-0 text-[var(--text-main)] outline-none bg-transparent focus-within:ring-2 focus:ring-[color:var(--color-danger)] transition-all"
-          value={jsonInput}
-          onChange={(e) => setJsonInput(e.target.value)}
-        />
-        <div className="mt-4 sm:mt-8 flex justify-end">
-          <button onClick={() => onImport(jsonInput)} className="neu-btn w-full sm:w-auto px-4 sm:px-10 py-2 sm:py-4 font-black uppercase tracking-widest text-[color:var(--color-danger)] text-[10px] sm:text-sm rounded-lg sm:rounded-2xl">
-            {t.importResetDeck || "Import & Reset"}
-          </button>
-        </div>
-      </div>
     </div>
     </div>
   );
