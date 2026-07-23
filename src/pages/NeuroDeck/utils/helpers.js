@@ -50,16 +50,16 @@ export const getDeckThemeStyles = (deckIdentifier, appTheme = 'dark') => {
   const isDark = appTheme !== 'light';
 
   if (isDark) {
-    const bgMain = `hsl(${H}, 24%, 12%)`;
-    const accent = `hsl(${H}, 75%, 62%)`;
-    const textMain = `hsl(${H}, 15%, 88%)`;
-    const textMuted = `hsl(${H}, 12%, 62%)`;
-    const shadowD = `rgba(0, 0, 0, 0.55)`;
-    const shadowDStrong = `rgba(0, 0, 0, 0.75)`;
-    const shadowL = `hsl(${H}, 24%, 17%)`;
+    const bgMain = `hsl(${H}, 40%, 14%)`;
+    const accent = `hsl(${H}, 85%, 66%)`;
+    const textMain = `hsl(${H}, 20%, 90%)`;
+    const textMuted = `hsl(${H}, 15%, 65%)`;
+    const shadowD = `rgba(0, 0, 0, 0.65)`;
+    const shadowDStrong = `rgba(0, 0, 0, 0.85)`;
+    const shadowL = `hsl(${H}, 35%, 20%)`;
     const borderD = `rgba(0, 0, 0, 0.4)`;
-    const gradL = `rgba(255, 255, 255, 0.03)`;
-    const gradD = `rgba(0, 0, 0, 0.12)`;
+    const gradL = `rgba(255, 255, 255, 0.04)`;
+    const gradD = `rgba(0, 0, 0, 0.16)`;
 
     return {
       '--bg-main': bgMain,
@@ -86,16 +86,16 @@ export const getDeckThemeStyles = (deckIdentifier, appTheme = 'dark') => {
       '--color-gradD': gradD
     };
   } else {
-    const bgMain = `hsl(${H}, 22%, 91%)`;
-    const accent = `hsl(${H}, 70%, 35%)`;
-    const textMain = `hsl(${H}, 25%, 25%)`;
-    const textMuted = `hsl(${H}, 15%, 45%)`;
-    const shadowD = `hsl(${H}, 20%, 75%)`;
-    const shadowDStrong = `hsl(${H}, 20%, 65%)`;
-    const shadowL = `rgba(255, 255, 255, 0.85)`;
-    const borderD = `hsl(${H}, 20%, 80%)`;
-    const gradL = `rgba(255, 255, 255, 0.45)`;
-    const gradD = `hsl(${H}, 20%, 84%)`;
+    const bgMain = `hsl(${H}, 55%, 85%)`;
+    const accent = `hsl(${H}, 85%, 28%)`;
+    const textMain = `hsl(${H}, 45%, 15%)`;
+    const textMuted = `hsl(${H}, 30%, 35%)`;
+    const shadowD = `hsl(${H}, 40%, 70%)`;
+    const shadowDStrong = `hsl(${H}, 40%, 60%)`;
+    const shadowL = `rgba(255, 255, 255, 0.9)`;
+    const borderD = `hsl(${H}, 35%, 75%)`;
+    const gradL = `rgba(255, 255, 255, 0.5)`;
+    const gradD = `hsl(${H}, 45%, 78%)`;
 
     return {
       '--bg-main': bgMain,
