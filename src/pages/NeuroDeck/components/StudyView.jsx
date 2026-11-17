@@ -306,14 +306,19 @@ export const StudyView = ({
   };
 
   if (!question) {
+    const isEmpty = totalCards === 0;
     return (
       <div className="flex flex-col items-center justify-center p-12 text-center mt-12 animate-fade-in">
-        <div className="w-24 h-24 sm:w-32 sm:h-32 mb-6 rounded-full bg-purple-500/10 flex items-center justify-center border-4 border-purple-500 shadow-[0_0_30px_rgba(168,85,247,0.3)]">
-          <i className="fas fa-medal text-4xl sm:text-6xl text-purple-500"></i>
+        <div className={`w-24 h-24 sm:w-32 sm:h-32 mb-6 rounded-full flex items-center justify-center border-4 ${isEmpty ? "bg-[var(--accent)]/10 border-[var(--accent)] shadow-[0_0_30px_rgba(0,0,0,0.15)]" : "bg-purple-500/10 border-purple-500 shadow-[0_0_30px_rgba(168,85,247,0.3)]"}`}>
+          <i className={`fas ${isEmpty ? "fa-inbox" : "fa-medal"} text-4xl sm:text-6xl ${isEmpty ? "text-[var(--accent)]" : "text-purple-500"}`}></i>
         </div>
-        <h2 className="text-2xl sm:text-4xl font-black text-purple-500 mb-4 uppercase tracking-widest">Deck Mastered!</h2>
+        <h2 className={`text-2xl sm:text-4xl font-black mb-4 uppercase tracking-widest ${isEmpty ? "text-[var(--text-main)]" : "text-purple-500"}`}>
+          {isEmpty ? (t.emptyDeckTitle || "Empty Deck") : (t.deckMasteredTitle || "Deck Mastered!")}
+        </h2>
         <p className="text-[var(--text-muted)] font-medium mb-8 max-w-md">
-          You have successfully mastered every card in this deck. Add new cards or reset your dashboard scores to keep studying.
+          {isEmpty
+            ? (t.emptyDeckMsg || "This deck has no cards yet. Add cards or load another deck.")
+            : (t.deckMasteredMsg || "You have successfully mastered every card in this deck. Add new cards or reset your dashboard scores to keep studying.")}
         </p>
       </div>
     );

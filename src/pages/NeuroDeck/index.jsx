@@ -61,7 +61,10 @@ export default function NeuroDeck() {
     try {
       const savedDeck = localStorage.getItem('neurodeck-progress');
       const parsed = savedDeck ? JSON.parse(savedDeck) : null;
-      return Array.isArray(parsed) && parsed.length > 0 ? parsed : DEFAULT_DECK;
+      // An EMPTY array is a valid state (an empty deck was loaded) — keep it,
+      // otherwise loading an empty deck silently swaps in the 196-card
+      // default deck. Only a missing/corrupt value falls back to the default.
+      return Array.isArray(parsed) ? parsed : DEFAULT_DECK;
     } catch (e) {
       return DEFAULT_DECK;
     }
@@ -441,12 +444,12 @@ export default function NeuroDeck() {
               )}
             </div>
 
-            <div className="hidden sm:flex items-center space-x-2 neu-pressed px-4 py-2 rounded-full text-sm font-black" title="Current Streak">
+            <div className="hidden sm:flex items-center space-x-2 neu-pressed px-4 py-2 rounded-full text-sm font-black" title={t.streakLabel || "Current Streak"}>
               <FireIcon className={streak > 0 ? "text-orange-500" : "text-[var(--text-muted)]"} />
               <span className={streak > 0 ? "text-[var(--text-main)]" : "text-[var(--text-muted)]"}>{streak}</span>
             </div>
 
-            <button onClick={toggleLang} className="neu-btn w-10 h-10 flex items-center justify-center rounded-full font-black text-xs text-[var(--text-main)] uppercase" title="Toggle Language">
+            <button onClick={toggleLang} className="neu-btn w-10 h-10 flex items-center justify-center rounded-full font-black text-xs text-[var(--text-main)] uppercase" title={t.toggleLanguageLabel || "Toggle Language"} aria-label={t.toggleLanguageLabel || "Toggle Language"}>
               {lang === 'en' ? 'fr' : 'en'}
             </button>
             <button onClick={toggleTheme} className="neu-btn w-10 h-10 flex items-center justify-center rounded-full text-[var(--text-main)]">
@@ -616,7 +619,7 @@ export default function NeuroDeck() {
               </span>
             )}
             <span className="hidden md:inline text-[11px] text-[var(--text-muted)] font-medium">
-              {myDecks.length} {t.items || "decks"} • {currentDeck?.length || 0} {t.cards || "cards"}
+              {myDecks.length} {myDecks.length === 1 ? (t.deckOne || "deck") : (t.decks || "decks")} • {currentDeck?.length || 0} {currentDeck?.length === 1 ? (t.cardOne || "card") : (t.cards || "cards")}
             </span>
           </div>
 
