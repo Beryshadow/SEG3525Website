@@ -244,7 +244,45 @@ export const reconcileProgressData = (localData = {}, cloudData = {}) => {
   }
 
   // 2. Reconcile `currentDeck`
-  const mergedCurrentDeck = reconcileCardArray(localData.currentDeck || [], cloudData.currentDeck || []);
+  // The current deck is a workbench that may hold DIFFERENT decks on different
+  // devices. Union-merging two different decks corrupts both (a 3-card custom
+  // deck unioned into the 196-card default produced a 199-card hybrid).
+  // Rules:
+  //  - Same deck on both sides (same loadedDeckId, or both unloaded with high
+  //    card overlap, e.g. the default deck studied on two devices): union —
+  //    per-card progress merges.
+  //  - Different decks: a LOADED workbench is never overwritten by an
+  //    UNLOADED one (a freshly mounted device broadcasting a fallback default
+  //    state must not yank a device that is actively studying a chosen deck).
+  //    Otherwise the cloud state wins as a coherent snapshot — an idle
+  //    default-deck device mirrors the deck another device actually loaded.
+  const sameLoadedDeck =
+    !!localData.loadedDeckId &&
+    localData.loadedDeckId === cloudData.loadedDeckId;
+  const overlapOf = (a = [], b = []) => {
+    if (a.length === 0 || b.length === 0) return 0;
+    const keysB = new Set(b.map(c => c.id || c.question).filter(Boolean));
+    const shared = a.filter(c => keysB.has(c.id || c.question)).length;
+    return shared / Math.min(a.length, b.length);
+  };
+  const bothUnloaded =
+    !localData.loadedDeckId && !cloudData.loadedDeckId;
+  const shouldUnion = sameLoadedDeck ||
+    (bothUnloaded &&
+      overlapOf(localData.currentDeck || [], cloudData.currentDeck || []) >= 0.5);
+  const localLoadedCloudNot =
+    !!localData.loadedDeckId && !cloudData.loadedDeckId;
+  let mergedCurrentDeck;
+  if (shouldUnion) {
+    mergedCurrentDeck = reconcileCardArray(localData.currentDeck || [], cloudData.currentDeck || []);
+  } else if (localLoadedCloudNot) {
+    mergedCurrentDeck = localData.currentDeck || [];
+  } else {
+    mergedCurrentDeck = Array.isArray(cloudData.currentDeck) ? cloudData.currentDeck : (localData.currentDeck || []);
+  }
+  const mergedLoadedDeckId = localLoadedCloudNot && !shouldUnion
+    ? localData.loadedDeckId
+    : (cloudData.loadedDeckId !== undefined ? cloudData.loadedDeckId : localData.loadedDeckId);
 
   // 3. Reconcile `streak`
   const mergedStreak = Math.max(localData.streak || 0, cloudData.streak || 0);
@@ -254,7 +292,7 @@ export const reconcileProgressData = (localData = {}, cloudData = {}) => {
     myDecks: mergedDecks,
     currentDeck: mergedCurrentDeck,
     streak: mergedStreak,
-    loadedDeckId: cloudData.loadedDeckId !== undefined ? cloudData.loadedDeckId : localData.loadedDeckId
+    loadedDeckId: mergedLoadedDeckId
   };
 };
 

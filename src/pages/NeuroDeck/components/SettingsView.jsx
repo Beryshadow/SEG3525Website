@@ -373,7 +373,7 @@ export const SettingsView = ({
 
   const navItems = [
     { id: 'decks', icon: <SaveIcon />, label: t.deckManagementTitle || t.myDecksTitle || "Deck Management" },
-    { id: 'algorithm', icon: <ClockIcon />, label: "Algorithm Selection" },
+    { id: 'algorithm', icon: <ClockIcon />, label: t.algorithmTab || "Algorithm Selection" },
     { id: 'backup', icon: <DownloadIcon />, label: t.dataBackup || "Data Management" },
     { id: 'nli', icon: <CpuIcon />, label: t.aiModelTitle || "AI Models" },
     { id: 'generator', icon: <SparklesIcon />, label: t.llmGeneratorTitle || "AI Generator" },
